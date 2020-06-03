@@ -20,6 +20,7 @@
 
 #include <smltypes.h>
 #include <config.h>
+#include <common.h>
 
 #include <vec2.h>
 

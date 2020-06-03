@@ -39,15 +39,6 @@
 #undef max
 #endif
 
-namespace constants 
-{
-    static inline constexpr f32 pi      = 3.14159265358979323846f;
-    static inline constexpr f32 two_pi  = 6.28318530717958647692f;
-    static inline constexpr f32 half_pi = 1.57079632679489661923f;
-    static inline constexpr f32 maxflt = FLT_MAX;
-    static inline constexpr f32 epsilon = FLT_EPSILON;
-}
-
 namespace sml
 {
     struct smlVersion
