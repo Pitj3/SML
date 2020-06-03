@@ -1,7 +1,7 @@
-#ifndef sml_vec2_h__
-#define sml_vec2_h__
+#ifndef sml_vec3_h__
+#define sml_vec3_h__
 
-/* sml.h -- vec2 implementation of the 'Simple Math Library'
+/* sml.h -- vec3 implementation of the 'Simple Math Library'
   Copyright (C) 2020 Roderick Griffioen
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -32,219 +32,248 @@
 namespace
 {
     template<typename T>
-    class vec2
+    class vec3
     {
         public:
-            vec2()
+            vec3()
             {
                 zero();
             }
 
-            vec2(T x, T y)
+            vec3(T x, T y, T z)
             {
-                set(x, y);
+                set(x, y, z);
             }
 
-            explicit vec2(T v)
+            explicit vec3(T v)
             {
-                set(v, v);
+                set(v, v, v);
             }
 
-            vec2(const vec2& other)
+            vec3(const vec3& other)
             {
                 set(aOther.v);
             }
 
-            vec2(vec2&& other) noexcept
+            vec3(vec3&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
+                v[1] = std::move(other.v[2]);
             }
 
             void zero()
             {
-                set(T(0), T(0));
+                set(T(0), T(0), T(0));
             }
 
-            void set(T x, T y)
+            void set(T x, T y, T z)
             {
                 this->x = x;
                 this->y = y;
+                this->z = z;
             }
 
-            void set(T v[2])
+            void set(T v[3])
             {
                 this->v[0] = v[0];
                 this->v[1] = v[1];
+                this->v[2] = v[2];
             }
 
-            inline bool operator == (const vec2& other) const
+            inline bool operator == (const vec3& other) const
             {
-                return x == other.x && y == other.y;
+                return x == other.x && y == other.y && z == other.z;
             }
 
-            inline bool operator != (const vec2& other) const
+            inline bool operator != (const vec3& other) const
             {
-                return x != other.x || y != other.y;
+                return x != other.x || y != other.y || z != other.z;
             }
 
-            vec2& operator = (const vec2& other)
+            vec3& operator = (const vec3& other)
             {
                 set(other.v);
             }
 
-            vec2& operator = (vec2&& other) noexcept
+            vec3& operator = (vec3&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
+                v[2] = std::move(other.v[2]);
             }
 
-            vec2& operator += (const vec2& other)
+            vec3& operator += (const vec3& other)
             {
                 x += other.x;
                 y += other.y;
+                z += other.z;
 
                 return *this;
             }
 
-            vec2& operator -= (const vec2& other)
+            vec3& operator -= (const vec3& other)
             {
                 x -= other.x;
                 y -= other.y;
+                z -= other.z;
 
                 return *this;
             }
 
-            vec2& operator *= (const vec2& other)
+            vec3& operator *= (const vec3& other)
             {
                 x *= other.x;
                 y *= other.y;
+                z *= other.z;
 
                 return *this;
             }
 
-            vec2& operator *= (const T other)
+            vec3& operator *= (const T other)
             {
                 x *= other;
                 y *= other;
+                z *= other;
 
                 return *this;
             }
 
-            vec2& operator /= (const vec2& other)
+            vec3& operator /= (const vec3& other)
             {
                 x /= other.x;
                 y /= other.y;
+                z /= other.z;
 
                 return *this;
             }
 
-            vec2& operator /= (const T other)
+            vec3& operator /= (const T other)
             {
                 x /= other;
                 y /= other;
+                z /= other;
 
                 return *this;
             }
 
-            inline T dot(vec2) const
+            inline T dot(vec3) const
             {
-                return (x * other.x) + (y * other.y);
+                return (x * other.x) + (y * other.y) + (z * other.z);
             }
 
             inline T length() const
             {
-                return sml::sqrt((x * x) + (y * y));
+                return sml::sqrt((x * x) + (y * y) + (z * z));
             }
 
             inline T lengthsquared() const
             {
-                return (x * x) + (y * y);
+                return (x * x) + (y * y) + (z * z);
             }
 
-            inline vec2& normalize()
+            inline vec3& normalize()
             {
                 float mag = length();
 
                 if(mag > constants::epsilon)
                     *this /= length();
                 else
-                    set(0, 0);
+                    set(0, 0, 0);
 
                 return *this;
             }
 
-            inline vec2 normalized()
+            inline vec3 normalized()
             {
-                vec2 copy(x, y);
+                vec3 copy(x, y, z);
                 return copy.normalize();
             }
 
             inline bool any() const
             {
-                return x || y;
+                return x || y || z;
             }
 
             inline bool all() const
             {
-                return x && y;
+                return x && y && z;
             } 
 
             inline bool none() const
             {
-                return !x && !y;
+                return !x && !y && !z;
             }
 
             inline std::string toString()
             {
-                return std::to_string(x) + ", " + std::to_string(y);
+                return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
             }
 
             // Statics
 
-            static inline vec2 distance(const vec2& a, const vec2& b)
+            static inline vec3 distance(const vec3& a, const vec3& b)
             {
-                vec2 delta = b - a;
+                vec3 delta = b - a;
                 return delta.length();
             }
 
-            static inline vec2 min(const vec2& a, const vec2& b)
+            static inline vec3 min(const vec3& a, const vec3& b)
             {
                 return 
                 {
                     sml::min(a.x, b.x), 
-                    sml::min(a.y, b.y)
+                    sml::min(a.y, b.y),
+                    sml::min(a.z, b.z)
                 };
             }
 
-            static inline vec2 max(const vec2& a, const vec2& b)
+            static inline vec3 max(const vec3& a, const vec3& b)
             {
                 return 
                 {
                     sml::max(a.x, b.y), 
-                    sml::max(a.y, b.y)
+                    sml::max(a.y, b.y),
+                    sml::max(a.z, b.z)
                 };
             }
 
-            static inline vec2 clamp(const vec2& v, const vec2& a, const vec2& b)
+            static inline vec3 clamp(const vec3& v, const vec3& a, const vec3& b)
             {
                 return max(a, min(x, b));
             }
 
-            static inline vec2 lerp(const vec2& a, const vec2& b, T t)
+            static inline vec3 lerp(const vec3& a, const vec3& b, T t)
             {
                 T retX = sml::lerp(a.x, b.x, t);
                 T retY = sml::lerp(a.y, b.y, t);
+                T retZ = sml::lerp(a.z, b.z, t);
 
-                return vec2(retX, retY);
+                return vec3(retX, retY, retZ);
             }
 
-            static inline vec2 lerpclamped(const vec2& a, const vec2& b, T t)
+            static inline vec3 lerpclamped(const vec3& a, const vec3& b, T t)
             {
                 T retX = sml::lerpclamped(a.x, b.x, t);
                 T retY = sml::lerpclamped(a.y, b.y, t);
+                T retZ = sml::lerpclamped(a.z, b.z, t);
 
-                return vec2(retX, retY);
+                return vec3(retX, retY, retZ);
+            }
+
+            static inline vec3 cross(const vec3& left, const vec3& right)
+            {
+                return
+                {
+                    left.y * right.z - left.z * right.y,
+                    left.z * right.x - left.x * right.z,
+                    left.x * right.y - left.y * right.x
+                };
+            }
+
+            static inline vec3 project(const vec3& a, const vec3& b)
+            {
+                return b * (dot(a, b) / dot(b, b));
             }
 
             // Data
@@ -252,60 +281,60 @@ namespace
             {
                 struct
                 {
-                    T x, y;
+                    T x, y, z;
                 };
 
-                T v[2];
+                T v[3];
             };
     };
 
     template<typename T>
-    vec2<T> operator + (vec2<T> left, vec2<T> right)
+    vec3<T> operator + (vec3<T> left, vec3<T> right)
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator - (vec2<T> left, vec2<T> right)
+    vec3<T> operator - (vec3<T> left, vec3<T> right)
     {
         left -= right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator * (vec2<T> left, vec2<T> right)
+    vec3<T> operator * (vec3<T> left, vec3<T> right)
     {
         left *= right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator * (vec2<T> left, T right)
+    vec3<T> operator * (vec3<T> left, T right)
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator / (vec2<T> left, vec2<T> right)
+    vec3<T> operator / (vec3<T> left, vec3<T> right)
     {
         left /= right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator / (vec2<T> left, T right)
+    vec3<T> operator / (vec3<T> left, T right)
     {
         left += right;
         return left;
     }
 
-    typedef vec2<bool> bvec2;
-    typedef vec2<u32> uvec2;
-    typedef vec2<s32> ivec2;
-    typedef vec2<f32> fvec2;
-    typedef vec2<f64> dvec2;
+    typedef vec3<bool> bvec3;
+    typedef vec3<u32> uvec3;
+    typedef vec3<s32> ivec3;
+    typedef vec3<f32> fvec3;
+    typedef vec3<f64> dvec3;
 }
 
-#endif // sml_vec2_h__
+#endif // sml_vec3_h__

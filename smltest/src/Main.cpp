@@ -6,7 +6,9 @@ int main()
     printf("Major: %d, Minor: %d, Revision: %d\n", sml::version.major, sml::version.minor, sml::version.revision);
     printf("%f\n", constants::pi);
 
-    vec2<float> v;
+    fvec2 v = fvec2(10.0f, 10.0f);
+
+    printf("%s\n", v.toString().c_str());
 
     return 0;
 }

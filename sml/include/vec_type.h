@@ -25,9 +25,39 @@ struct getDataType
 };
 
 template<>
-struct getDataType<float, 2>
+struct getDataType<f32, 2>
 {
     typedef __m64 Type;
+};
+
+template<>
+struct getDataType<f64, 2>
+{
+	typedef __m128d Type;
+};
+
+template<>
+struct getDataType<f32, 3>
+{
+    typedef __m128 Type;
+};
+
+template<>
+struct getDataType<f64, 3>
+{
+	typedef __m256d Type;
+};
+
+template<>
+struct getDataType<f32, 4>
+{
+    typedef __m128 Type;
+};
+
+template<>
+struct getDataType<f64, 4>
+{
+	typedef __m256d Type;
 };
 
 template<typename T, size_t Sz>

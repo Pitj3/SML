@@ -1,7 +1,7 @@
-#ifndef sml_vec2_h__
-#define sml_vec2_h__
+#ifndef sml_vec4_h__
+#define sml_vec4_h__
 
-/* sml.h -- vec2 implementation of the 'Simple Math Library'
+/* sml.h -- vec4 implementation of the 'Simple Math Library'
   Copyright (C) 2020 Roderick Griffioen
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -28,223 +28,257 @@
 
 #include "vec_type.h"
 #include "smltypes.h"
+#include "config.h"
 
 namespace
 {
     template<typename T>
-    class vec2
+    class vec4
     {
         public:
-            vec2()
+            vec4()
             {
                 zero();
             }
 
-            vec2(T x, T y)
+            vec4(T x, T y, T z, T w)
             {
-                set(x, y);
+                set(x, y, z, w);
             }
 
-            explicit vec2(T v)
+            explicit vec4(T v)
             {
-                set(v, v);
+                set(v, v, v, v);
             }
 
-            vec2(const vec2& other)
+            vec4(const vec4& other)
             {
                 set(aOther.v);
             }
 
-            vec2(vec2&& other) noexcept
+            vec4(vec4&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
+                v[1] = std::move(other.v[2]);
+                v[3] = std::move(other.v[3]);
             }
 
             void zero()
             {
-                set(T(0), T(0));
+                set(T(0), T(0), T(0), T(0));
             }
 
-            void set(T x, T y)
+            void set(T x, T y, T z, T w)
             {
                 this->x = x;
                 this->y = y;
+                this->z = z;
+                this->w = w;
             }
 
-            void set(T v[2])
+            void set(T v[4])
             {
                 this->v[0] = v[0];
                 this->v[1] = v[1];
+                this->v[2] = v[2];
+                this->v[3] = v[3];
             }
 
-            inline bool operator == (const vec2& other) const
+            inline bool operator == (const vec4& other) const
             {
-                return x == other.x && y == other.y;
+                return x == other.x && y == other.y && z == other.z && w == other.w;
             }
 
-            inline bool operator != (const vec2& other) const
+            inline bool operator != (const vec4& other) const
             {
-                return x != other.x || y != other.y;
+                return x != other.x || y != other.y || z != other.z || w != other.w;
             }
 
-            vec2& operator = (const vec2& other)
+            vec4& operator = (const vec4& other)
             {
                 set(other.v);
             }
 
-            vec2& operator = (vec2&& other) noexcept
+            vec4& operator = (vec4&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
+                v[2] = std::move(other.v[2]);
+                v[3] = std::move(other.v[3]);
             }
 
-            vec2& operator += (const vec2& other)
+            vec4& operator += (const vec4& other)
             {
                 x += other.x;
                 y += other.y;
+                z += other.z;
+                w += other.w;
 
                 return *this;
             }
 
-            vec2& operator -= (const vec2& other)
+            vec4& operator -= (const vec4& other)
             {
                 x -= other.x;
                 y -= other.y;
+                z -= other.z;
+                w -= other.w;
 
                 return *this;
             }
 
-            vec2& operator *= (const vec2& other)
+            vec4& operator *= (const vec4& other)
             {
                 x *= other.x;
                 y *= other.y;
+                z *= other.z;
+                w *= other.w;
 
                 return *this;
             }
 
-            vec2& operator *= (const T other)
+            vec4& operator *= (const T other)
             {
                 x *= other;
                 y *= other;
+                z *= other;
+                w *= other;
 
                 return *this;
             }
 
-            vec2& operator /= (const vec2& other)
+            vec4& operator /= (const vec4& other)
             {
                 x /= other.x;
                 y /= other.y;
+                z /= other.z;
+                w /= other.w;
 
                 return *this;
             }
 
-            vec2& operator /= (const T other)
+            vec4& operator /= (const T other)
             {
                 x /= other;
                 y /= other;
+                z /= other;
+                w /= other;
 
                 return *this;
             }
 
-            inline T dot(vec2) const
+            inline T dot(vec4) const
             {
-                return (x * other.x) + (y * other.y);
+                return (x * other.x) + (y * other.y) + (z * other.z) + (w * other.w);
             }
 
             inline T length() const
             {
-                return sml::sqrt((x * x) + (y * y));
+                return sml::sqrt((x * x) + (y * y) + (z * z) + (w * w));
             }
 
             inline T lengthsquared() const
             {
-                return (x * x) + (y * y);
+                return (x * x) + (y * y) + (z * z) + (w * w);
             }
 
-            inline vec2& normalize()
+            inline vec4& normalize()
             {
                 float mag = length();
 
                 if(mag > constants::epsilon)
                     *this /= length();
                 else
-                    set(0, 0);
+                    set(0, 0, 0, 0);
 
                 return *this;
             }
 
-            inline vec2 normalized()
+            inline vec4 normalized()
             {
-                vec2 copy(x, y);
+                vec4 copy(x, y, z, w);
                 return copy.normalize();
             }
 
             inline bool any() const
             {
-                return x || y;
+                return x || y || z || w;
             }
 
             inline bool all() const
             {
-                return x && y;
+                return x && y && z && w;
             } 
 
             inline bool none() const
             {
-                return !x && !y;
+                return !x && !y && !z && !w;
             }
 
             inline std::string toString()
             {
-                return std::to_string(x) + ", " + std::to_string(y);
+                return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ", " + std::to_string(w);
             }
 
             // Statics
 
-            static inline vec2 distance(const vec2& a, const vec2& b)
+            static inline vec4 distance(const vec4& a, const vec4& b)
             {
-                vec2 delta = b - a;
+                vec4 delta = b - a;
                 return delta.length();
             }
 
-            static inline vec2 min(const vec2& a, const vec2& b)
+            static inline vec4 min(const vec4& a, const vec4& b)
             {
                 return 
                 {
                     sml::min(a.x, b.x), 
-                    sml::min(a.y, b.y)
+                    sml::min(a.y, b.y),
+                    sml::min(a.z, b.z),
+                    sml::min(a.w, b.w)
                 };
             }
 
-            static inline vec2 max(const vec2& a, const vec2& b)
+            static inline vec4 max(const vec4& a, const vec4& b)
             {
                 return 
                 {
                     sml::max(a.x, b.y), 
-                    sml::max(a.y, b.y)
+                    sml::max(a.y, b.y),
+                    sml::max(a.z, b.z),
+                    sml::max(a.w, b.w)
                 };
             }
 
-            static inline vec2 clamp(const vec2& v, const vec2& a, const vec2& b)
+            static inline vec4 clamp(const vec4& v, const vec4& a, const vec4& b)
             {
                 return max(a, min(x, b));
             }
 
-            static inline vec2 lerp(const vec2& a, const vec2& b, T t)
+            static inline vec4 lerp(const vec4& a, const vec4& b, T t)
             {
                 T retX = sml::lerp(a.x, b.x, t);
                 T retY = sml::lerp(a.y, b.y, t);
+                T retZ = sml::lerp(a.z, b.z, t);
+                T retW = sml::lerp(a.w, b.w, t);
 
-                return vec2(retX, retY);
+                return vec4(retX, retY, retZ, retW);
             }
 
-            static inline vec2 lerpclamped(const vec2& a, const vec2& b, T t)
+            static inline vec4 lerpclamped(const vec4& a, const vec4& b, T t)
             {
                 T retX = sml::lerpclamped(a.x, b.x, t);
                 T retY = sml::lerpclamped(a.y, b.y, t);
+                T retZ = sml::lerpclamped(a.z, b.z, t);
+                T retW = sml::lerpclamped(a.w, b.w, t);
 
-                return vec2(retX, retY);
+                return vec4(retX, retY, retZ, retW);
+            }
+
+            static inline vec4 project(const vec4& a, const vec4& b)
+            {
+                return b * (dot(a, b) / dot(b, b));
             }
 
             // Data
@@ -252,60 +286,60 @@ namespace
             {
                 struct
                 {
-                    T x, y;
+                    T x, y, z, w;
                 };
 
-                T v[2];
+                T v[4];
             };
     };
 
     template<typename T>
-    vec2<T> operator + (vec2<T> left, vec2<T> right)
+    vec4<T> operator + (vec4<T> left, vec4<T> right)
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator - (vec2<T> left, vec2<T> right)
+    vec4<T> operator - (vec4<T> left, vec4<T> right)
     {
         left -= right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator * (vec2<T> left, vec2<T> right)
+    vec4<T> operator * (vec4<T> left, vec4<T> right)
     {
         left *= right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator * (vec2<T> left, T right)
+    vec4<T> operator * (vec4<T> left, T right)
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator / (vec2<T> left, vec2<T> right)
+    vec4<T> operator / (vec4<T> left, vec4<T> right)
     {
         left /= right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator / (vec2<T> left, T right)
+    vec4<T> operator / (vec4<T> left, T right)
     {
         left += right;
         return left;
     }
 
-    typedef vec2<bool> bvec2;
-    typedef vec2<u32> uvec2;
-    typedef vec2<s32> ivec2;
-    typedef vec2<f32> fvec2;
-    typedef vec2<f64> dvec2;
+    typedef vec4<bool> bvec4;
+    typedef vec4<u32> uvec4;
+    typedef vec4<s32> ivec4;
+    typedef vec4<f32> fvec4;
+    typedef vec4<f64> dvec4;
 }
 
-#endif // sml_vec2_h__
+#endif // sml_vec4_h__
