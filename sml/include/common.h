@@ -196,5 +196,6 @@ namespace sml
    {
       return r * constants::deg2rad;
    }
-}
+} // namespace sml
+
 #endif // sml_common_h__

@@ -23,6 +23,7 @@
 
 #include "smltypes.h"
 
+// Undefine these for matrix functions
 #ifdef near
 #undef near
 #endif
@@ -41,14 +42,16 @@
 
 namespace sml
 {
-    struct smlVersion
-    {
-        s32 major;
-        s32 minor;
-        s32 revision;
-    };
+	// Struct holding version data
+	struct smlVersion
+	{
+		s32 major;
+		s32 minor;
+		s32 revision;
+	};
 
-    /// Current version.
-    extern smlVersion version;
-}
+	/// Current version.
+	extern smlVersion version;
+} // namespace sml
+
 #endif // sml_config_h__

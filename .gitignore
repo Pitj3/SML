@@ -31,9 +31,11 @@
 *.out
 *.app
 
+# Build files
 bin/
 bin-int/
 
+# Project files
 *.make
 *.sln
 *.vcxproj

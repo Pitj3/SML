@@ -6,7 +6,7 @@ int main()
     printf("Major: %d, Minor: %d, Revision: %d\n", sml::version.major, sml::version.minor, sml::version.revision);
     printf("%f\n", constants::pi);
 
-    fvec2 v = fvec2(10.0f, 10.0f);
+    sml::fvec2 v = sml::fvec2(10.0f, 10.0f);
 
     printf("%s\n", v.toString().c_str());
 

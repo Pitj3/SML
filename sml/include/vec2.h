@@ -18,18 +18,11 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <immintrin.h>
-#include <mmintrin.h>
-
-#include <typeinfo>
-#include <type_traits>
-
 #include <string>
 
-#include "vec_type.h"
 #include "smltypes.h"
 
-namespace
+namespace sml
 {
     template<typename T>
     class vec2
@@ -78,6 +71,7 @@ namespace
                 this->v[1] = v[1];
             }
 
+            // Operators
             inline bool operator == (const vec2& other) const
             {
                 return x == other.x && y == other.y;
@@ -147,6 +141,7 @@ namespace
                 return *this;
             }
 
+            // Operations
             inline T dot(vec2) const
             {
                 return (x * other.x) + (y * other.y);
@@ -201,7 +196,6 @@ namespace
             }
 
             // Statics
-
             static inline vec2 distance(const vec2& a, const vec2& b)
             {
                 vec2 delta = b - a;
@@ -259,6 +253,7 @@ namespace
             };
     };
 
+    // Operators
     template<typename T>
     vec2<T> operator + (vec2<T> left, vec2<T> right)
     {
@@ -301,11 +296,12 @@ namespace
         return left;
     }
 
+    // Predefined types
     typedef vec2<bool> bvec2;
     typedef vec2<u32> uvec2;
     typedef vec2<s32> ivec2;
     typedef vec2<f32> fvec2;
     typedef vec2<f64> dvec2;
-}
+} // namespace sml
 
 #endif // sml_vec2_h__

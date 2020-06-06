@@ -18,19 +18,12 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <immintrin.h>
-#include <mmintrin.h>
-
-#include <typeinfo>
-#include <type_traits>
-
 #include <string>
 
-#include "vec_type.h"
 #include "smltypes.h"
 #include "config.h"
 
-namespace
+namespace sml
 {
     template<typename T>
     class vec4
@@ -85,6 +78,7 @@ namespace
                 this->v[3] = v[3];
             }
 
+            // Operators 
             inline bool operator == (const vec4& other) const
             {
                 return x == other.x && y == other.y && z == other.z && w == other.w;
@@ -168,6 +162,7 @@ namespace
                 return *this;
             }
 
+            // Operations
             inline T dot(vec4) const
             {
                 return (x * other.x) + (y * other.y) + (z * other.z) + (w * other.w);
@@ -222,7 +217,6 @@ namespace
             }
 
             // Statics
-
             static inline vec4 distance(const vec4& a, const vec4& b)
             {
                 vec4 delta = b - a;
@@ -293,6 +287,7 @@ namespace
             };
     };
 
+    // Operators
     template<typename T>
     vec4<T> operator + (vec4<T> left, vec4<T> right)
     {
@@ -335,11 +330,12 @@ namespace
         return left;
     }
 
+    // Predefined types
     typedef vec4<bool> bvec4;
     typedef vec4<u32> uvec4;
     typedef vec4<s32> ivec4;
     typedef vec4<f32> fvec4;
     typedef vec4<f64> dvec4;
-}
+} // namespace sml
 
 #endif // sml_vec4_h__
