@@ -83,8 +83,10 @@ namespace sml
 
             void set(T v[4])
             {
-                this->v[0] = v[0];
-                this->v[1] = v[1];
+                for(int i = 0; i < 4; i++)
+                {
+                    this->v[i] = v[i];
+                }
             }
 
             mat2& operator = (const mat2& other)
@@ -135,8 +137,8 @@ namespace sml
 
             vec2<T> operator *= (const vec2<T>& other)
             {
-                T x = m00 * other.x + m01 * other.y;
-                T y = m10 * other.x + m11 * other.y;
+                T x = m00 * other.x + m10 * other.y;
+                T y = m01 * other.x + m11 * other.y;
 
                 return {x, y};
             }
@@ -144,7 +146,10 @@ namespace sml
             // Operations
             inline void identity()
             {
-                m00 = 1; m10 = 0; m01 = 0; m11 = 1;
+                m00 = T(1);
+                m10 = T(0);
+                m01 = T(0);
+                m11 = T(1);
             }
 
             inline mat2& transpose()
@@ -160,7 +165,7 @@ namespace sml
 
             inline mat2 transposed() const
             {
-                mat2 c = mat2(m00, m10, m01, m11);
+                mat2 c = mat2(*this);
                 return c.transpose();
             }
 
@@ -198,7 +203,7 @@ namespace sml
 
             inline mat2 inverted() const
             {
-                mat2 c = mat(m00, m10, m01, m11);
+                mat2 c = mat(*this);
                 return c.invert();
             }
 

@@ -35,4 +35,3 @@ typedef double f64;
 
 #endif // smltypes_h__
 
-
