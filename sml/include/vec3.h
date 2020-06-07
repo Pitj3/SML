@@ -99,6 +99,28 @@ namespace sml
 
             vec3& operator += (const vec3& other)
             {
+                if constexpr(typeid(T) == typeid(f32))
+                {
+                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
+                    __m128 res = _mm_add_ps(me, him);
+
+                    _mm_store_ps(v, res);
+
+                    return *this;
+                }
+
+                if constexpr(typeid(T) == typeid(f64))
+                {
+                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
+                    __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
+                    __m256d res = _mm256_add_pd(me, him);
+
+                    _mm_store_pd(v, res);
+
+                    return *this;
+                }
+
                 x += other.x;
                 y += other.y;
                 z += other.z;
@@ -108,6 +130,28 @@ namespace sml
 
             vec3& operator -= (const vec3& other)
             {
+                if constexpr(typeid(T) == typeid(f32))
+                {
+                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
+                    __m128 res = _mm_sub_ps(me, him);
+
+                    _mm_store_ps(v, res);
+
+                    return *this;
+                }
+
+                if constexpr(typeid(T) == typeid(f64))
+                {
+                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
+                    __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
+                    __m256d res = _mm256_sub_pd(me, him);
+
+                    _mm_store_pd(v, res);
+
+                    return *this;
+                }
+
                 x -= other.x;
                 y -= other.y;
                 z -= other.z;
@@ -117,6 +161,28 @@ namespace sml
 
             vec3& operator *= (const vec3& other)
             {
+                if constexpr(typeid(T) == typeid(f32))
+                {
+                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
+                    __m128 res = _mm_mul_ps(me, him);
+
+                    _mm_store_ps(v, res);
+
+                    return *this;
+                }
+
+                if constexpr(typeid(T) == typeid(f64))
+                {
+                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
+                    __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
+                    __m256d res = _mm256_mul_pd(me, him);
+
+                    _mm_store_pd(v, res);
+
+                    return *this;
+                }
+
                 x *= other.x;
                 y *= other.y;
                 z *= other.z;
@@ -126,6 +192,28 @@ namespace sml
 
             vec3& operator *= (const T other)
             {
+                if constexpr(typeid(T) == typeid(f32))
+                {
+                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 him = _mm_set_ps1(other);
+                    __m128 res = _mm_mul_ps(me, him);
+
+                    _mm_store_ps(v, res);
+
+                    return *this;
+                }
+
+                if constexpr(typeid(T) == typeid(f64))
+                {
+                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
+                    __m256d him = _mm256_set_pd1(other);
+                    __m256d res = _mm256_mul_pd(me, him);
+
+                    _mm_store_pd(v, res);
+
+                    return *this;
+                }
+
                 x *= other;
                 y *= other;
                 z *= other;
@@ -135,6 +223,28 @@ namespace sml
 
             vec3& operator /= (const vec3& other)
             {
+                if constexpr(typeid(T) == typeid(f32))
+                {
+                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
+                    __m128 res = _mm_div_ps(me, him);
+
+                    _mm_store_ps(v, res);
+
+                    return *this;
+                }
+
+                if constexpr(typeid(T) == typeid(f64))
+                {
+                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
+                    __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
+                    __m256d res = _mm256_div_pd(me, him);
+
+                    _mm_store_pd(v, res);
+
+                    return *this;
+                }
+
                 x /= other.x;
                 y /= other.y;
                 z /= other.z;
@@ -144,6 +254,28 @@ namespace sml
 
             vec3& operator /= (const T other)
             {
+                if constexpr(typeid(T) == typeid(f32))
+                {
+                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 him = _mm_set_ps1(other);
+                    __m128 res = _mm_div_ps(me, him);
+
+                    _mm_store_ps(v, res);
+
+                    return *this;
+                }
+
+                if constexpr(typeid(T) == typeid(f64))
+                {
+                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
+                    __m256d him = _mm256_set_pd1(other);
+                    __m256d res = _mm256_div_pd(me, him);
+
+                    _mm_store_pd(v, res);
+
+                    return *this;
+                }
+
                 x /= other;
                 y /= other;
                 z /= other;
@@ -278,7 +410,7 @@ namespace sml
                     T x, y, z;
                 };
 
-                T v[3];
+                T v[4];
             };
     };
 
