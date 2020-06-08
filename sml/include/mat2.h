@@ -121,6 +121,7 @@ namespace sml
                     __m128 me = _mm_set_ps(m00, m10, m01, m11);
                     __m128 him = _mm_set_ps(other.m00, other.m10, other.m01, other.m11);
 
+                    // m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11
                     __m128 res = _mm_cmpeq_ps(me, him);
                     
                     int mask = _mm_movemask_ps(res);
@@ -129,13 +130,22 @@ namespace sml
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m256d me = _mm256_set_pd(m00, m10, m01, m11);
-                    __m256d him = _mm256_set_pd(other.m00, other.m10, other.m01, other.m11);
+                    __m128d me1 = _mm_set_pd(m00, m10);
+                    __m128d me2 = _mm_set_pd(m01, m11);
 
-                    __m256d res = _mm256_cmp_pd(me, him, _CMP_EQ_OQ);
-                    
-                    int mask = _mm256_movemask_pd(res);
-                    return mask == 0xffff;
+                    __m128d him1 = _mm_set_pd(other.m00, other.m10);
+                    __m128d him2 = _mm_set_pd(other.m01, other.m11);
+
+                    // m00 != other.m00 || m10 != other.m10
+                    __m128 res1 = _mm_cmpeq_pd(me1, him1);
+
+                    // m01 != other.m01 || m11 != other.m11
+                    __m128 res2 = _mm_cmpeq_pd(me2, him2);
+
+                    int mask1 = _mm_movemask_pd(res1);
+                    int mask2 = _mm_movemask_pd(res2);
+
+                    return mask1 == 0xffff && mask2 == 0xffff;
                 }
 
                 return m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11;
@@ -149,6 +159,7 @@ namespace sml
                     __m128 me = _mm_set_ps(m00, m10, m01, m11);
                     __m128 him = _mm_set_ps(other.m00, other.m10, other.m01, other.m11);
 
+                    // m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11
                     __m128 res = _mm_cmpneq_ps(me, him);
                     
                     int mask = _mm_movemask_ps(res);
@@ -157,13 +168,22 @@ namespace sml
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m256d me = _mm_set_pd(m00, m10, m01, m11);
-                    __m256d him = _mm_set_pd(other.m00, other.m10, other.m01, other.m11);
+                    __m128d me1 = _mm_set_pd(m00, m10);
+                    __m128d me2 = _mm_set_pd(m01, m11);
 
-                    __m256d res = _mm256_cmp_pd(me, him, _CMP_NEQ_OQ);
-                    
-                    int mask = _mm256_movemask_pd(res);
-                    return mask != 0;
+                    __m128d him1 = _mm_set_pd(other.m00, other.m10);
+                    __m128d him2 = _mm_set_pd(other.m01, other.m11);
+
+                    // m00 != other.m00 || m10 != other.m10
+                    __m128 res1 = _mm_cmpeq_pd(me1, him1);
+
+                    // m01 != other.m01 || m11 != other.m11
+                    __m128 res2 = _mm_cmpeq_pd(me2, him2);
+
+                    int mask1 = _mm_movemask_pd(res1);
+                    int mask2 = _mm_movemask_pd(res2);
+
+                    return mask1 != 0 || mask2 != 0;
                 }
 
                 return m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11;
@@ -175,12 +195,26 @@ namespace sml
                 {
                     __m128 MV0 = _mm_set_ps(m00, m01, m00, m01);
                     __m128 MV1 = _mm_set_ps(other.m00, other.m00, other.m10, other.m10);
+
+                    // m00 * other.m00
+                    // m01 * other.m00
+                    // m00 * other.m10
+                    // m01 * other.m10
                     __m128 MV01Res = _mm_mul_ps(MV0, MV1);
 
                     __m128 MV2 = _mm_set_ps(m10, m11, m10, m11);
                     __m128 MV3 = _mm_set_ps(other.m01, other.m01, other.m11, other.m11);
+
+                    // m10 * other.m01
+                    // m11 * other.m01
+                    // m10 * other.m11
+                    // m11 * other.m11
                     __m128 MV23Res = _mm_mul_ps(MV2, MV3);
 
+                    // m00 * other.m00 + m10 * other.m01
+                    // m01 * other.m00 + m11 * other.m01
+                    // m00 * other.m10 + m10 * other.m11
+                    // m01 * other.m10 + m11 * other.m11
                     __m128 MV0123Res = _mm_add_ps(MV01Res, MV23Res);
 
                     _mm_store_ps(v, MV0123Res);
@@ -190,17 +224,50 @@ namespace sml
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m256d MV0 = _mm256_set_pd(m00, m01, m00, m01);
-                    __m256d MV1 = _mm256_set_pd(other.m00, other.m00, other.m10, other.m10);
-                    __m256d MV01Res = _mm256_mul_pd(MV0, MV1);
+                    __m128d MV00 = _mm_set_pd(m00, m01);
 
-                    __m256d MV2 = _mm256_set_pd(m10, m11, m10, m11);
-                    __m256d MV3 = _mm256_set_pd(other.m01, other.m01, other.m11, other.m11);
-                    __m256d MV23Res = _mm256_mul_pd(MV2, MV3);
+                    __m128d MV10 = _mm_set1_pd(other.m00);
+                    __m128d MV11 = _mm_set1_pd(other.m10);
 
-                    __m256d MV0123Res = _mm256_add_pd(MV01Res, MV23Res);
+                    // m00 * other.m00
+                    // m01 * other.m00
+                    __m128d MV01Res = _mm_mul_pd(MV00, MV10);
 
-                    _mm256_store_pd(v, MV0123Res);
+                    // m00 * other.m10
+                    // m01 * other.m10
+                    __m128d MV02Res = _mm_mul_pd(MV00, MV11);
+
+                    __m128d MV20 = _mm_set_pd(m10, m11);
+
+                    __m128d MV30 = _mm_set_pd(other.m01, other.m01);
+                    __m128d MV31 = _mm_set_pd(other.m11, other.m11);
+
+                    // m10 * other.m01
+                    // m11 * other.m01
+                    __m128d MV03Res = _mm_mul_pd(MV20, MV30);
+
+                    // m10 * other.m11
+                    // m11 * other.m11
+                    __m128d MV04Res = mm_mul_pd(MV20, MV31);
+
+                    // m00 * other.m00 + m10 * other.m01;
+                    // m01 * other.m00 + m11 * other.m01;
+                    __m128d MV10Res = _mm_add_pd(MV01Res, MV03Res);
+
+                    // m00 * other.m10 + m10 * other.m11;
+                    // m01 * other.m10 + m11 * other.m11;
+                    __m128d MV11Res = _mm_add_pd(MV02Res, MV04Res);
+
+                    T upper[2];
+                    T lower[2];
+
+                    _mm_store_pd(upper, MV10Res);
+                    _mm_store_pd(lower, MV11Res);
+
+                    m00 = upper[0];
+                    m10 = upper[1];
+                    m01 = lower[0];
+                    m11 = lower[1];
 
                     return *this;
                 }
@@ -228,9 +295,16 @@ namespace sml
                     __m128 other1 = _mm_set_ps(other.x, other.x, 0, 0);
                     __m128 other2 = _mm_set_ps(other.y, other.y, 0, 0);
 
+                    // m00 * other.x
+                    // m01 * other.x
                     __m128 res1 = _mm_mul_ps(me1, other1);
+
+                    // m10 * other.y
+                    // m11 * other.y
                     __m128 res2 = _mm_mul_ps(me2, other2);
 
+                    // m00 * other.x + m10 * other.y
+                    // m01 * other.x + m11 * other.y
                     __m128 res = _mm_add_ps(res1, res2);
 
                     T data[4];
@@ -241,19 +315,26 @@ namespace sml
 
                 if(std::is_same<T, f64>::value)
                 {
-                    __m256d me1 = _mm256_set_pd(m00, m01, 0, 0);
-                    __m256d me2 = _mm256_set_pd(m10, m11, 0, 0);
+                    __m128d me1 = _mm_set_pd(m00, m01);
+                    __m128d me2 = _mm_set_pd(m10, m11);
 
-                    __m256d other1 = _mm256_set_pd(other.x, other.x, 0, 0);
-                    __m256d other2 = _mm256_set_pd(other.y, other.y, 0, 0);
+                    __m128d other1 = _mm_set_pd(other.x, other.x);
+                    __m128d other2 = _mm_set_pd(other.y, other.y);
 
-                    __m256d res1 = _mm256_mul_pd(me1, other1);
-                    __m256d res2 = _mm256_mul_pd(me2, other2);
+                    // m00 * other.x
+                    // m01 * other.x
+                    __m128d res1 = _mm_mul_pd(me1, other1);
 
-                    __m256d res = _mm256_add_pd(res1, res2);
+                    // m10 * other.y
+                    // m11 * other.y
+                    __m128d res2 = _mm_mul_pd(me2, other2);
 
-                    T data[4];
-                    _mm256_store_pd(data, res);
+                    // m00 * other.x + m10 * other.y
+                    // m01 * other.x + m11 * other.y
+                    __m128d res = _mm_add_pd(res1, res2);
+
+                    T data[2];
+                    _mm_store_pd(data, res);
 
                     return {data[0], data[1]};
                 }
@@ -262,7 +343,6 @@ namespace sml
                 T y = m01 * other.x + m11 * other.y;
 
                 return {x, y};
-
             }
 
             // Operations
@@ -304,6 +384,10 @@ namespace sml
                         __m128 me = _mm_set_ps(m11, -m01, m00, -m10);
                         __m128 det = _mm_set_ps1(det_inv);
 
+                        // m11 * det_inv
+                        // -m01 * det_inv
+                        // m00 * det_inv
+                        // -m10 * det_inv  
                         __m128 res = _mm_mul_ps(me, det);
 
                         _mm_store_ps(v, res);
@@ -313,12 +397,29 @@ namespace sml
 
                     if constexpr(std::is_same<T, f64>::value)
                     {
-                        __m256d me = _mm256_set_pd(m11, -m01, m00, -m10);
-                        __m256d det = _mm256_set_pd1(det_inv);
+                        __m128d me1 = _mm_set_pd(m11, -m01);
+                        __m128d me2 = _mm_set_pd(m00, -m10);
 
-                        __m256d res = _mm256_mul_pd(me, det);
+                        __m128d det = _mm_set_pd1(det_inv);
 
-                        _mm256_store_pd(v, res);
+                        // m11 * det_inv
+                        // -m01 * det_inv
+                        __m128d res1 = _mm_mul_pd(me1, det);
+
+                        // m00 * det_inv
+                        // -m10 * det_inv 
+                        __m128d res2 = _mm_mul_pd(me2, det);
+
+                        T upper[2];
+                        T lower[2];
+
+                        _mm_store_pd(upper, res1);
+                        _mm_store_pd(lower, res2);
+
+                        m00 = upper[0];
+                        m10 = upper[1];
+                        m01 = lower[0];
+                        m11 = lower[1];
 
                         return *this;
                     }
