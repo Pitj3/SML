@@ -22,7 +22,7 @@
 #include <mmintrin.h>
 #include <smmintrin.h>
 
-#include "vec2.h"
+#include "vec3.h"
 #include "smltypes.h"
 
 namespace sml
@@ -229,9 +229,43 @@ namespace sml
 
             mat3& operator *= (const mat3& other)
             {
+                if constexpr(std::is_same<T, f32>::value)
+                {
+                    __m512 MV1 = _mm512_set_ps(m00, m01, m02, m00, m01, m02, m00, m01, m02, 0, 0, 0, 0, 0, 0, 0, 0);
+                    __m512 MV2 = _mm512_set_ps(other.m00, other.m00, other.m00, other.m10, other.m10, other.m10, 
+                                                other.m20, other.m20, other.m20, 0, 0, 0, 0, 0, 0, 0);
+
+                    __m512 MV1Res = _mm512_mul_ps(MV1, MV2);
+
+                    MV1 = _mm512_set_ps(m10, m11, m12, m10, m11, m12, m10, m11, m12, 0, 0, 0, 0, 0, 0, 0);
+                    MV2 = _mm512_set_ps(other.m01, other.m01, other.m01, other.m11, other.m11, other.m11,
+                                        other.m21, other.m21, other.m21, 0, 0, 0, 0, 0, 0, 0);
+
+                    __m512 MV2Res = _mm512_mul_ps(MV1, MV2);
+
+                    MV1 = _mm512_set_ps(m20, m21, m22, m20, m21, m22, m20, m21, m22, 0, 0, 0, 0, 0, 0, 0);
+                    MV2 = _mm512_set_ps(other.m02, other.m02, other.m02, other.m12, other.m12, other.m12, 
+                                        other.m22, other.m22, other.m22, 0, 0, 0, 0, 0, 0, 0);
+
+                    __m512 MV3Res = _mm512_mul_ps(MV1, MV2);
+
+                    __m512 MV12Res = _mm512_add_ps(MV1Res, MV2Res);
+                    __m512 MV123Res = _mm512_add_ps(MV12Res, MV3Res);
+
+                    T data[16];
+                    _mm512_store_ps(data, MV123Res);
+
+                    for(u8 i = 0; i < 9; i++)
+                    {
+                        v[i] = data[i];
+                    }
+
+                    return *this;
+                }
+
                 T newM00 = m00 * other.m00 + m10 * other.m01 + m20 * other.m02;
                 T newM01 = m01 * other.m00 + m11 * other.m01 + m21 * other.m02;
-                T newM02 = m02 * other.m00 + m12 * other.m11 + m22 * other.m02;
+                T newM02 = m02 * other.m00 + m12 * other.m01 + m22 * other.m02;
 
                 T newM00 = m00 * other.m10 + m10 * other.m11 + m20 * other.m12;
                 T newM01 = m01 * other.m10 + m11 * other.m11 + m21 * other.m12;
@@ -258,6 +292,32 @@ namespace sml
 
             vec3<T> operator *= (const vec3<T>& other)
             {
+                if constexpr(std::is_same<T, f32>::value)
+                {
+                    __m128 MV1 = _mm_set_ps(m00, m01, m02, 0);
+                    __m128 MV2 = _mm_set_ps1(other.x);
+
+                    __m128 MV1Res = _mm_mul_ps(MV1, MV2);
+
+                    MV1 = _mm_set_ps(m10, m11, m12, 0);
+                    MV2 = _mm_set_ps1(other.y);
+
+                    __m128 MV2Res = _mm_mul_ps(MV1, MV2);
+
+                    MV1 = _mm_set_ps(m20, m21, m22, 0);
+                    MV2 = _mm_set_ps1(other.z);
+
+                    __m128 MV3Res = _mm_mul_ps(MV1, MV2);
+
+                    __m128 MV12Res = _mm_mul_ps(MV1Res, MV2Res);
+                    __m128 MV123Res = _mm_mul_ps(MV12Res, MV3Res);
+
+                    T data[4];
+                    _mm_store_ps(data, MV123Res);
+
+                    return {data[0], data[1], data[2]};
+                }
+
                 T x = m00 * other.x + m10 * other.y + m20 * other.z;
                 T y = m01 * other.x + m11 * other.y + m21 * other.z;
                 T z = m02 * other.x + m12 * other.y + m22 * other.z;
@@ -326,15 +386,33 @@ namespace sml
                     T t12 = -m00 * m21 + m01 * m20;
                     T t20 = m01 * m12 - m02 * m11;
                     T t21 = -m00 * m12 + m02 * m10;
-                    T t22 = m00 * m11 - m01 * m10l
+                    T t22 = m00 * m11 - m01 * m10;
+
+                    if constexpr(std::is_same<T, f32>::value)
+                    {
+                        __m512 MV1 = _mm512_set_ps(t00, t11, t22, t10, t11, t12, t20, t21, t22, 0, 0, 0, 0, 0, 0, 0);
+                        __m512 MV2 = _mm512_set1_ps(det_inv);
+
+                        __m512 res = _mm512_mul_ps(MV1, MV2);
+
+                        T data[16];
+                        _mm512_store_ps(data, res);
+
+                        for(u8 i = 0; i < 9; i++)
+                        {
+                            v[i] = data[i];
+                        }
+
+                        return *this;
+                    }
 
                     m00 = t00 * det_inv;
                     m11 = t11 * det_inv;
                     m22 = t22 * det_inv;
 
                     m01 = t10 * det_inv;
-                    m10 = t01 * det_inv;
-                    m20 = t02 * det_inv;
+                    m10 = t11 * det_inv;
+                    m20 = t12 * det_inv;
 
                     m02 = t20 * det_inv;
                     m12 = t21 * det_inv;
