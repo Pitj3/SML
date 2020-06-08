@@ -531,21 +531,101 @@ namespace sml
 
                     if constexpr(std::is_same<T, f32>::value)
                     {
-                        __m512 TV1 = _mm512_set_ps(m11, -m10, m10, -m01, m00, -m00, m01, -m00, m00, 0, 0, 0, 0, 0, 0, 0);
-                        __m512 TV2 = _mm512_set_ps(m22, m22, m21, m22, m22, m21, m12, m12, m11, 0, 0, 0, 0, 0, 0, 0);
+                        __m128 TV00 = _mm_set_ps(m11, -m10, m10, -m01);
+                        __m128 TV01 = _mm_set_ps(m00, -m00, m01, -m00);
+                        __m128 TV02 = _mm_set_ps(m00, 0, 0, 0);
 
-                        __m512 MV1 = _mm512_set_ps(t00, t11, t22, t10, t11, t12, t20, t21, t22, 0, 0, 0, 0, 0, 0, 0);
-                        __m512 MV2 = _mm512_set1_ps(det_inv);
+                        __m128 TV10 = _mm_set_ps(m22, m22, m21, m22);
+                        __m128 TV11 = _mm_set_ps(m22, m21, m12, m12);
+                        __m128 TV12 = _mm_set_ps(m11, 0, 0, 0);
 
-                        __m512 res = _mm512_mul_ps(MV1, MV2);
+                        // m11 * m22 
+                        // -m10 * m22
+                        // m10 * m21 
+                        // -m01 * m22
+                        __m128 TVRes00010 = _mm_mul_ps(TV00, TV10);
 
-                        T data[16];
-                        _mm512_store_ps(data, res);
+                        // m00 * m22 
+                        // -m00 * m21
+                        // m01 * m12 
+                        // -m00 * m12
+                        __m128 TVRes00111 = _mm_mul_ps(TV01, TV11);
 
-                        for(u8 i = 0; i < 9; i++)
-                        {
-                            v[i] = data[i];
-                        }
+                        // m00 * m11
+                        __m128 TVRes00212 = _mm_mul_ps(TV02, TV12);
+
+                        TV00 = _mm_set_ps(-m12, m12, -m11, m02);
+                        TV01 = _mm_set_ps(-m02, m01, -m02, m02);
+                        TV02 = _mm_set_ps(-m01, 0, 0, 0);
+
+                        TV10 = _mm_set_ps(m21, m20, m20, m21);
+                        TV11 = _mm_set_ps(m20, m20, m11, m10);
+                        TV12 = _mm_set_ps(m10, 0, 0, 0);
+
+                        // -m12 * m21 
+                        // m12 * m20
+                        // -m11 * m20 
+                        // m02 * m21
+                        __m128 TVRes10010 = _mm_mul_ps(TV00, TV10);
+
+                        // -m02 * m20 
+                        // m01 * m20
+                        // -m02 * m11
+                        // m02 * m10
+                        __m128 TVRes10111 = _mm_mul_ps(TV01, TV11);
+
+                        // -m01 * m10
+                        __m128 TVRes10212 = _mm_mul_ps(TV02, TV12);
+
+                        // m11 * m22 - m12 * m21
+                        // -m10 * m22 + m12 * m20
+                        // m10 * m21 - m11 * m20
+                        // -m01 * m22 + m02 * m21
+                        __m128 Res1 = _mm_mul_ps(TVRes00010, TVRes10010);
+
+                        // m00 * m22 - m02 * m20
+                        // -m00 * m21 + m01 * m20
+                        // m01 * m12 - m02 * m11
+                        // -m00 * m12 + m02 * m10
+                        __m128 Res2 = _mm_mul_ps(TVRes00111, TVRes10111);
+
+                        // m00 * m11 - m01 * m10
+                        __m128 Res3 = _mm_mul_ps(TVRes00212, TVRes10202);
+
+                        __m128 DetV = _mm_set_ps1(det_inv);
+
+                        // m00 = t00 * det_inv;
+                        // m11 = t11 * det_inv;
+                        // m22 = t22 * det_inv;
+                        // m01 = t10 * det_inv;
+                        // m10 = t11 * det_inv;
+                        // m20 = t12 * det_inv;
+                        // m02 = t20 * det_inv;
+                        // m12 = t21 * det_inv;
+                        // m21 = t12 * det_inv;
+                        Res1 = _mm_mul_ps(Res1, DetV);
+                        Res2 = _mm_mul_ps(Res2, DetV);
+                        Res3 = _mm_mul_ps(Res3, DetV);
+
+                        T upper[4];
+                        T middle[4];
+                        T lower[4];
+
+                        _mm_store_ps(upper, Res1);
+                        _mm_store_ps(middle, Res2);
+                        _mm_store_ps(lower, Res3);
+
+                        v[0] = upper[0];
+                        v[1] = upper[1];
+                        v[2] = upper[2];
+                        v[3] = upper[3];
+
+                        v[4] = middle[0];
+                        v[5] = middle[1];
+                        v[6] = middle[2];
+                        v[7] = middle[3];
+
+                        v[8] = lower[0];
 
                         return *this;
                     }
