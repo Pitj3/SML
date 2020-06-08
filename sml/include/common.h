@@ -1,7 +1,7 @@
 #ifndef sml_common_h__
 #define sml_common_h__
 
-/* sml.h -- common math implementation of the 'Simple Math Library'
+/* common.h -- common math implementation of the 'Simple Math Library'
   Copyright (C) 2020 Roderick Griffioen
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -90,7 +90,7 @@ namespace sml
 	template <typename T>
 	static inline constexpr T abs(T v)
 	{
-		if constexpr(typeid(T) == typeid(f32))
+		if constexpr(std::is_same<T, f32>::value)
 		{
 			union fi32
 			{
@@ -103,19 +103,9 @@ namespace sml
 
 			return u.f;
 		}
-
-		if constexpr(typeid(T) == typeid(f64))
+		else
 		{
-			union fi64
-			{
-				f64 d;
-				u64 i;
-			};
-
-			fi64 u = {v};
-			u.i &- ~(1UL << 63);
-
-			return u.d;
+			return std::abs(v);
 		}
 	}
 

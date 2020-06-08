@@ -1,7 +1,7 @@
 #ifndef sml_mat3_h__
 #define sml_mat3_h__
 
-/* sml.h -- row major mat3 implementation of the 'Simple Math Library'
+/* mat3.h -- row major mat3 implementation of the 'Simple Math Library'
   Copyright (C) 2020 Roderick Griffioen
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -17,6 +17,10 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+
+#include <immintrin.h>
+#include <mmintrin.h>
+#include <smmintrin.h>
 
 #include "vec2.h"
 #include "smltypes.h"
@@ -165,6 +169,29 @@ namespace sml
             // Operators
             inline bool operator == (const mat3& other) const
             {
+                if constexpr(std::is_same<T, f32>::value)
+                {
+                    __m512 me = _mm512_set_ps(m00, m10, m20, m01, m11, m21, m02, m12, m22, 0, 0, 0, 0, 0, 0, 0);
+                    __m512 him = _mm512_set_ps(other.m00, other.m10, other.m20, other.m01, other.m11, other.m21, other.m02, other.m12, other.m22, 0, 0, 0, 0, 0, 0, 0);
+
+                    u16 mask = _mm512_cmpeq_ps_mask(me, him);
+                    return mask == 0xff
+                }
+
+                if constexpr(std::is_same<T, f64>::value)
+                {
+                    __m512d me1 = _mm512_set_pd(m00, m10, m20, m01, m11, m21, 0, 0);
+                    __m512d me2 = _mm512_set_pd(m02, m12, m22, 0, 0, 0, 0, 0);
+
+                    __m512d him1 = _mm512_set_pd(other.m00, other.m10, other.m20, other.m01, other.m11, other.m21, 0, 0);
+                    __m512d him2 = _mm512_set_pd(other.m02, other.m12, other.m22, 0, 0, 0, 0, 0);
+
+                    u16 mask1 = _mm512_cmpeq_ps_mask(me1, him1);
+                    u16 mask2 = _mm512_cmpeq_ps_mask(me2, him2);
+
+                    return mask1 == 0xff && mask2 == 0xff;
+                }
+
                 return m00 == other.m00 && m10 == other.m10 && m20 == other.m20 
                     && m01 == other.m01 && m11 == other.m11 && m21 == other.m21
                     && m02 == other.m02 && m12 == other.m12 && m22 == other.m22;
@@ -172,6 +199,29 @@ namespace sml
 
             inline bool operator != (const mat3& other) const
             {
+                if constexpr(std::is_same<T, f32>::value)
+                {
+                    __m512 me = _mm512_set_ps(m00, m10, m20, m01, m11, m21, m02, m12, m22, 0, 0, 0, 0, 0, 0, 0);
+                    __m512 him = _mm512_set_ps(other.m00, other.m10, other.m20, other.m01, other.m11, other.m21, other.m02, other.m12, other.m22, 0, 0, 0, 0, 0, 0, 0);
+
+                    u16 mask = _mm512_cmpneq_ps_mask(me, him);
+                    return mask != 0;
+                }
+
+                if constexpr(std::is_same<T, f64>::value)
+                {
+                    __m512d me1 = _mm512_set_pd(m00, m10, m20, m01, m11, m21, 0, 0);
+                    __m512d me2 = _mm512_set_pd(m02, m12, m22, 0, 0, 0, 0, 0);
+
+                    __m512d him1 = _mm512_set_pd(other.m00, other.m10, other.m20, other.m01, other.m11, other.m21, 0, 0);
+                    __m512d him2 = _mm512_set_pd(other.m02, other.m12, other.m22, 0, 0, 0, 0, 0);
+
+                    u16 mask1 = _mm512_cmpneq_ps_mask(me1, him1);
+                    u16 mask2 = _mm512_cmpneq_ps_mask(me2, him2);
+
+                    return mask1 != 0 && mask2 != 0;
+                }
+
                 return m00 == other.m00 || m10 == other.m10 || m20 == other.m20 
                     || m01 == other.m01 || m11 == other.m11 || m21 == other.m21
                     || m02 == other.m02 || m12 == other.m12 || m22 == other.m22;

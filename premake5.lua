@@ -60,7 +60,8 @@ project "SMLTest"
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
     files {
-        "smltest/include/**.h", 
+        "smltest/include/**.h",
+        "smltest/include/**.hpp",
         "smltest/src/**.cpp" 
     }
 

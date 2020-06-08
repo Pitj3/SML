@@ -1,14 +1,24 @@
 #include <stdio.h>
 #include <sml.h>
 
-int main()
-{
-    printf("Major: %d, Minor: %d, Revision: %d\n", sml::version.major, sml::version.minor, sml::version.revision);
-    printf("%f\n", constants::pi);
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
 
-    sml::fvec2 v = sml::fvec2(10.0f, 10.0f);
+TEST_CASE("Sin is computed", "[sin]") {
+    REQUIRE(sml::sin(constants::pi) == std::sin(constants::pi));
+}
 
-    printf("%s\n", v.toString().c_str());
+TEST_CASE("Cos is computed", "[cos]") {
+    REQUIRE(sml::cos(constants::pi) == std::cos(constants::pi));
+}
 
-    return 0;
+TEST_CASE("Tan is computed", "[tan]") {
+    REQUIRE(sml::tan(constants::pi) == std::tan(constants::pi));
+}
+
+TEST_CASE("Abs is computed", "[abs]") {
+    REQUIRE(sml::abs(1.53f) == std::abs(1.53f));
+    REQUIRE(sml::abs(-1.6354f) == std::abs(-1.6354f));
+    REQUIRE(sml::abs(1.578643565564356) == std::abs(1.578643565564356));
+    REQUIRE(sml::abs(-156.394756394674) == std::abs(-156.394756394674));
 }

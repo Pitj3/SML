@@ -1,7 +1,7 @@
 #ifndef sml_vec2_h__
 #define sml_vec2_h__
 
-/* sml.h -- vec2 implementation of the 'Simple Math Library'
+/* vec2.h -- vec2 implementation of the 'Simple Math Library'
   Copyright (C) 2020 Roderick Griffioen
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -98,7 +98,7 @@ namespace sml
 
             vec2& operator += (const vec2& other)
             {
-                if constexpr(typeid(T) == typeid(f32))
+                if constexpr(std::is_same<T, f32>::value)
                 {
                     __m128 me = _mm_set_ps(v[0]. v[1], 0, 0);
                     __m128 him = _mm_set_ps(other.v[0], other.v[1], 0, 0);
@@ -109,7 +109,7 @@ namespace sml
                     return *this;
                 }
 
-                if constexpr(typeid(T) == typeid(f64))
+                if constexpr(std::is_same<T, f64>::value)
                 {
                     __m128d me = _mm_set_pd(v[0], v[1]);
                     __m128d him = _mm_set_pd(other.v[0], other.v[1]);
@@ -128,7 +128,7 @@ namespace sml
 
             vec2& operator -= (const vec2& other)
             {
-                if constexpr(typeid(T) == typeid(f32))
+                if constexpr(std::is_same<T, f32>::value)
                 {
                     __m128 me = _mm_set_ps(v[0]. v[1], 0, 0);
                     __m128 him = _mm_set_ps(other.v[0], other.v[1], 0, 0);
@@ -139,7 +139,7 @@ namespace sml
                     return *this;
                 }
 
-                if constexpr(typeid(T) == typeid(f64))
+                if constexpr(std::is_same<T, f64>::value)
                 {
                     __m128d me = _mm_set_pd(v[0], v[1]);
                     __m128d him = _mm_set_pd(other.v[0], other.v[1]);
@@ -158,7 +158,7 @@ namespace sml
 
             vec2& operator *= (const vec2& other)
             {
-                if constexpr(typeid(T) == typeid(f32))
+                if constexpr(std::is_same<T, f32>::value)
                 {
                     __m128 me = _mm_set_ps(v[0]. v[1], 0, 0);
                     __m128 him = _mm_set_ps(other.v[0], other.v[1], 0, 0);
@@ -169,7 +169,7 @@ namespace sml
                     return *this;
                 }
 
-                if constexpr(typeid(T) == typeid(f64))
+                if constexpr(std::is_same<T, f64>::value)
                 {
                     __m128d me = _mm_set_pd(v[0], v[1]);
                     __m128d him = _mm_set_pd(other.v[0], other.v[1]);
@@ -188,7 +188,7 @@ namespace sml
 
             vec2& operator *= (const T other)
             {
-                if constexpr(typeid(T) == typeid(f32))
+                if constexpr(std::is_same<T, f32>::value)
                 {
                     __m128 me = _mm_set_ps(v[0]. v[1], 0, 0);
                     __m128 him = _mm_set_ps1(other);
@@ -199,7 +199,7 @@ namespace sml
                     return *this;
                 }
 
-                if constexpr(typeid(T) == typeid(f64))
+                if constexpr(std::is_same<T, f64>::value)
                 {
                     __m128d me = _mm_set_pd(v[0], v[1]);
                     __m128d him = _mm_set_pd1(other);
@@ -218,7 +218,7 @@ namespace sml
 
             vec2& operator /= (const vec2& other)
             {
-                if constexpr(typeid(T) == typeid(f32))
+                if constexpr(std::is_same<T, f32>::value)
                 {
                     __m128 me = _mm_set_ps(v[0]. v[1], 0, 0);
                     __m128 him = _mm_set_ps(other.v[0], other.v[1], 0, 0);
@@ -229,7 +229,7 @@ namespace sml
                     return *this;
                 }
 
-                if constexpr(typeid(T) == typeid(f64))
+                if constexpr(std::is_same<T, f64>::value)
                 {
                     __m128d me = _mm_set_pd(v[0], v[1]);
                     __m128d him = _mm_set_pd(other.v[0], other.v[1]);
@@ -248,7 +248,7 @@ namespace sml
 
             vec2& operator /= (const T other)
             {
-                if constexpr(typeid(T) == typeid(f32))
+                if constexpr(std::is_same<T, f32>::value)
                 {
                     __m128 me = _mm_set_ps(v[0]. v[1], 0, 0);
                     __m128 him = _mm_set_ps1(other);
@@ -259,7 +259,7 @@ namespace sml
                     return *this;
                 }
 
-                if constexpr(typeid(T) == typeid(f64))
+                if constexpr(std::is_same<T, f64>::value)
                 {
                     __m128d me = _mm_set_pd(v[0], v[1]);
                     __m128d him = _mm_set_pd1(other);
