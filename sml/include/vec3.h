@@ -45,7 +45,7 @@ namespace sml
 
             vec3(const vec3& other)
             {
-                set(aOther.v);
+                set(other.v);
             }
 
             vec3(vec3&& other) noexcept
@@ -288,7 +288,7 @@ namespace sml
             }
 
             // Operations
-            inline T dot(vec3) const
+            inline T dot(vec3 other) const
             {
                 return (x * other.x) + (y * other.y) + (z * other.z);
             }

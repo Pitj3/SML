@@ -48,7 +48,7 @@ namespace sml
 
             vec2(const vec2& other)
             {
-                set(aOther.v);
+                set(other.v);
             }
 
             vec2(vec2&& other) noexcept
@@ -281,7 +281,7 @@ namespace sml
             }
 
             // Operations
-            inline T dot(vec2) const
+            inline T dot(vec2 other) const
             {
                 return (x * other.x) + (y * other.y);
             }
