@@ -88,6 +88,8 @@ namespace sml
             vec3& operator = (const vec3& other)
             {
                 set(other.v);
+
+                return *this;
             }
 
             vec3& operator = (vec3&& other) noexcept
@@ -95,17 +97,19 @@ namespace sml
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
                 v[2] = std::move(other.v[2]);
+
+                return *this;
             }
 
             vec3& operator += (const vec3& other)
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
                     __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
                     __m128 res = _mm_add_ps(me, him);
 
-                    _mm_store_ps(v, res);
+                    _mm_storer_ps(v, res);
 
                     return *this;
                 }
@@ -116,7 +120,7 @@ namespace sml
                     __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
                     __m256d res = _mm256_add_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm_storer_pd(v, res);
 
                     return *this;
                 }
@@ -132,11 +136,11 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
                     __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
                     __m128 res = _mm_sub_ps(me, him);
 
-                    _mm_store_ps(v, res);
+                    _mm_storer_ps(v, res);
 
                     return *this;
                 }
@@ -147,7 +151,7 @@ namespace sml
                     __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
                     __m256d res = _mm256_sub_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm_storer_pd(v, res);
 
                     return *this;
                 }
@@ -163,11 +167,11 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
                     __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
                     __m128 res = _mm_mul_ps(me, him);
 
-                    _mm_store_ps(v, res);
+                    _mm_storer_ps(v, res);
 
                     return *this;
                 }
@@ -178,7 +182,7 @@ namespace sml
                     __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
                     __m256d res = _mm256_mul_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm_storer_pd(v, res);
 
                     return *this;
                 }
@@ -194,11 +198,11 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
                     __m128 him = _mm_set_ps1(other);
                     __m128 res = _mm_mul_ps(me, him);
 
-                    _mm_store_ps(v, res);
+                    _mm_storer_ps(v, res);
 
                     return *this;
                 }
@@ -209,7 +213,7 @@ namespace sml
                     __m256d him = _mm256_set_pd1(other);
                     __m256d res = _mm256_mul_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm_storer_pd(v, res);
 
                     return *this;
                 }
@@ -225,11 +229,11 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
                     __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
                     __m128 res = _mm_div_ps(me, him);
 
-                    _mm_store_ps(v, res);
+                    _mm_storer_ps(v, res);
 
                     return *this;
                 }
@@ -240,7 +244,7 @@ namespace sml
                     __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
                     __m256d res = _mm256_div_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm_storer_pd(v, res);
 
                     return *this;
                 }
@@ -256,11 +260,11 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0]. v[1], v[2], 0);
+                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
                     __m128 him = _mm_set_ps1(other);
                     __m128 res = _mm_div_ps(me, him);
 
-                    _mm_store_ps(v, res);
+                    _mm_storer_ps(v, res);
 
                     return *this;
                 }
@@ -271,7 +275,7 @@ namespace sml
                     __m256d him = _mm256_set_pd1(other);
                     __m256d res = _mm256_div_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm_storer_pd(v, res);
 
                     return *this;
                 }

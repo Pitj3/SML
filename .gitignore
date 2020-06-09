@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# Visual Studio
+.vs/*
+
 # Compiled Object files
 *.slo
 *.lo

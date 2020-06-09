@@ -232,7 +232,7 @@ namespace sml
                     __m128 him2 = _mm_set_ps(other.m11, other.m21, other.m02, other.m12);
                     __m128 him3 = _mm_set_ps(other.m22, 0, 0, 0);
 
-                    //m00 == other.m00 || m10 == other.m10 || m20 == other.m20 
+                    // m00 == other.m00 || m10 == other.m10 || m20 == other.m20 
                     // || m01 == other.m01 || m11 == other.m11 || m21 == other.m21
                     // || m02 == other.m02 || m12 == other.m12 || m22 == other.m22
                     s32 mask1 = _mm_movemask_pd(_mm_cmpneq_ps(me1, him1));
@@ -256,7 +256,7 @@ namespace sml
                     __m128d him4 = _mm_set_pd(other.m02, other.m12);
                     __m128d him5 = _mm_set_pd(other.m22, 0);
 
-                    //m00 == other.m00 || m10 == other.m10 || m20 == other.m20 
+                    // m00 == other.m00 || m10 == other.m10 || m20 == other.m20 
                     // || m01 == other.m01 || m11 == other.m11 || m21 == other.m21
                     // || m02 == other.m02 || m12 == other.m12 || m22 == other.m22
                     s32 mask1 = _mm_movemask_pd(_mm_cmpeq_pd(me1, him1));
