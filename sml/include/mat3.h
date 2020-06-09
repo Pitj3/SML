@@ -109,7 +109,7 @@ namespace sml
                 m22 = std::move(other.m22);
             }
 
-            void set(T m00, T m10, T m01, T m11)
+            void set(T m00, T m10, T m20, T m01, T m11, T m21, T m02, T m12, T m22)
             {
                 this->m00 = m00;
                 this->m10 = m10;
@@ -536,12 +536,11 @@ namespace sml
                     T middle [2];
                     T middle1 [2];
                     T lower [2];
-                    _mm_storer_pd(upper0, MVRes04);
+                    _mm_storer_pd(upper, MVRes04);
                     _mm_storer_pd(upper1, MVRes041);
                     _mm_storer_pd(middle, MVRes05);
                     _mm_storer_pd(middle1, MVRes051);
                     _mm_storer_pd(lower, MVRes06);
-                    _mm_storer_pd(lower1, MVRes06);
 
                     v[0] = upper[0];
                     v[1] = upper[1];
@@ -562,13 +561,13 @@ namespace sml
                 T newM01 = m01 * other.m00 + m11 * other.m01 + m21 * other.m02;
                 T newM02 = m02 * other.m00 + m12 * other.m01 + m22 * other.m02;
 
-                T newM00 = m00 * other.m10 + m10 * other.m11 + m20 * other.m12;
-                T newM01 = m01 * other.m10 + m11 * other.m11 + m21 * other.m12;
-                T newM02 = m02 * other.m10 + m12 * other.m11 + m22 * other.m12;
+                T newM10 = m00 * other.m10 + m10 * other.m11 + m20 * other.m12;
+                T newM11 = m01 * other.m10 + m11 * other.m11 + m21 * other.m12;
+                T newM12 = m02 * other.m10 + m12 * other.m11 + m22 * other.m12;
 
-                T newM10 = m00 * other.m20 + m10 * other.m21 + m20 * other.m22;
-                T newM11 = m01 * other.m20 + m11 * other.m21 + m21 * other.m22;
-                T newM12 = m02 * other.m20 + m12 * other.m21 + m22 * other.m22;
+                T newM20 = m00 * other.m20 + m10 * other.m21 + m20 * other.m22;
+                T newM21 = m01 * other.m20 + m11 * other.m21 + m21 * other.m22;
+                T newM22 = m02 * other.m20 + m12 * other.m21 + m22 * other.m22;
 
                 m00 = newM00;
                 m10 = newM10;
@@ -808,7 +807,7 @@ namespace sml
                         __m128 Res2 = _mm_mul_ps(TVRes00111, TVRes10111);
 
                         // m00 * m11 - m01 * m10
-                        __m128 Res3 = _mm_mul_ps(TVRes00212, TVRes10202);
+                        __m128 Res3 = _mm_mul_ps(TVRes00212, TVRes10212);
 
                         __m128 DetV = _mm_set_ps1(det_inv);
 
@@ -929,7 +928,7 @@ namespace sml
                         __m128d Res21 = _mm_mul_pd(TVRes001111, TVRes101111);
 
                         // m00 * m11 - m01 * m10
-                        __m128d Res3 = _mm_mul_pd(TVRes00212, TVRes10202);
+                        __m128d Res3 = _mm_mul_pd(TVRes00212, TVRes10212);
 
                         __m128d DetV = _mm_set1_pd(det_inv);
 
@@ -1032,7 +1031,7 @@ namespace sml
             inline std::string toString() const
             {
                 return std::to_string(m00) + ", " + std::to_string(m10) + ", " + std::to_string(m20) + "\n" 
-                    + std::to_string(m01) + ", " + std::to_string(m11) + ", " + std::to_string(m21) "\n"
+                    + std::to_string(m01) + ", " + std::to_string(m11) + ", " + std::to_string(m21) + "\n"
                     + std::to_string(m02) + ", " + std::to_string(m12) + ", " + std::to_string(m22);
             }
 
