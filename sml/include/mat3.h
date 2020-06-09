@@ -379,9 +379,9 @@ namespace sml
                     T upper[4];
                     T middle [4];
                     T lower [4];
-                    _mm_store_ps(upper, MVRes04);
-                    _mm_store_ps(middle, MVRes05);
-                    _mm_store_ps(lower, MVRes06);
+                    _mm_storer_ps(upper, MVRes04);
+                    _mm_storer_ps(middle, MVRes05);
+                    _mm_storer_ps(lower, MVRes06);
 
                     v[0] = upper[0];
                     v[1] = upper[1];
@@ -392,6 +392,166 @@ namespace sml
                     v[5] = middle[1];
                     v[6] = middle[2];
                     v[7] = middle[3];
+
+                    v[8] = lower[0];
+                    
+                    return *this;
+                }
+
+                if constexpr(std::is_same<T, f64>::value)
+                {
+                    __m128d MV00 = _mm_set_pd(m00, m01);
+                    __m128d MV001 = _mm_set_pd(m02, m00);
+                    __m128d MV01 = _mm_set_pd(m01, m02);
+                    __m128d MV011 = _mm_set_pd(m00, m01);
+                    __m128d MV02 = _mm_set_pd(m02, 0);
+
+                    __m128d MV10 = _mm_set_pd(other.m00, other.m00);
+                    __m128d MV101 = _mm_set_pd(other.m00, other.m10);
+                    __m128d MV11 = _mm_set_pd(other.m10, other.m10);
+                    __m128d MV111 = _mm_set_pd(other.m20, other.m20);
+                    __m128d MV12 = _mm_set_pd(other.m20, 0);
+
+                    // m00 * other.m00
+                    // m01 * other.m00
+                    __m128d MV00010 = _mm_mul_pd(MV00, MV10);
+
+                    // m02 * other.m00
+                    // m00 * other.m10
+                    __m128d MV000101 = _mm_mul_pd(MV001, MV101);
+
+                    // m01 * other.m10
+                    // m02 * other.m10
+                    __m128d MV00111 = _mm_mul_pd(MV01, MV11);
+
+                    // m00 * other.m20
+                    // m01 * other.m20
+                    __m128d MV001111 = _mm_mul_pd(MV011, MV111);
+
+                    // m02 * other.m20
+                    __m128d MV00212 = _mm_mul_pd(MV02, MV12);
+
+                    MV00 = _mm_set_pd(m10, m11);
+                    MV001 = _mm_set_pd(m12, m10);
+                    MV01 = _mm_set_pd(m11, m12);
+                    MV011 = _mm_set_pd(m10, m11);
+                    MV02 = _mm_set_pd(m12, 0);
+
+                    MV10 = _mm_set_pd(other.m01, other.m01);
+                    MV101 = _mm_set_pd(other.m01, other.m11);
+                    MV11 = _mm_set_pd(other.m11, other.m11);
+                    MV111 = _mm_set_pd(other.m21, other.m21);
+                    MV12 = _mm_set_pd(other.m21, 0);
+
+                    // m10 * other.m01
+                    // m11 * other.m01
+                    __m128d MV10010 = _mm_mul_pd(MV00, MV10);
+
+                    // m12 * other.m01
+                    // m10 * other.m11
+                    __m128d MV100101 = _mm_mul_pd(MV001, MV101);
+
+                    // m11 * other.m11
+                    // m12 * other.m11
+                    __m128d MV10111 = _mm_mul_pd(MV01, MV11);
+
+                    // m10 * other.m21
+                    // m11 * other.m21
+                    __m128d MV101111 = _mm_mul_pd(MV011, MV111);
+
+                    // m12 * other.m21
+                    __m128d MV10212 = _mm_mul_pd(MV02, MV12);
+
+                    MV00 = _mm_set_pd(m20, m21);
+                    MV001 = _mm_set_pd(m22, m20);
+                    MV01 = _mm_set_pd(m21, m22);
+                    MV011 = _mm_set_pd(m20, m21);
+                    MV02 = _mm_set_pd(m22, 0);
+
+                    MV10 = _mm_set_pd(other.m02, other.m02);
+                    MV101 = _mm_set_pd(other.m02, other.m12);
+                    MV11 = _mm_set_pd(other.m12, other.m12);
+                    MV111 = _mm_set_pd(other.m22, other.m22);
+                    MV12 = _mm_set_pd(other.m22, 0);
+
+                    // m20 * other.m02
+                    // m21 * other.m02
+                    __m128d MV20010 = _mm_mul_pd(MV00, MV10);
+                    
+                    // m22 * other.m02
+                    // m20 * other.m12
+                    __m128d MV200101 = _mm_mul_pd(MV001, MV101);
+
+                    // m21 * other.m12
+                    // m22 * other.m12
+                    __m128d MV20111 = _mm_mul_pd(MV01, MV11);
+
+                    // m20 * other.m22
+                    // m21 * other.m22
+                    __m128d MV201111 = _mm_mul_pd(MV011, MV111);
+
+                    // m22 * other.m22
+                    __m128d MV20212 = _mm_mul_pd(MV02, MV12);
+
+                    // m00 * other.m00 + m10 * other.m01
+                    // m01 * other.m00 + m11 * other.m01
+                    __m128d MVRes01 = _mm_add_pd(MV00010, MV10010);
+
+                    // m02 * other.m00 + m12 * other.m01
+                    // m00 * other.m10 + m10 * other.m11
+                    __m128d MVRes011 = _mm_add_pd(MV000101, MV100101);
+
+                    // m01 * other.m10 + m11 * other.m11
+                    // m02 * other.m10 + m12 * other.m11
+                    __m128d MVRes02 = _mm_add_pd(MV00111, MV10111);
+
+                    // m00 * other.m20 + m10 * other.m21
+                    // m01 * other.m20 + m11 * other.m21
+                    __m128d MVRes021 = _mm_add_pd(MV001111, MV101111);
+
+                    // m02 * other.m20 + m12 * other.m21
+                    __m128d MVRes03 = _mm_add_pd(MV00212, MV20212);
+
+                    // m00 * other.m00 + m10 * other.m01 + m20 * other.m02
+                    // m01 * other.m00 + m11 * other.m01 + m21 * other.m02
+                    __m128d MVRes04 = _mm_add_pd(MVRes01, MV20010);
+
+                    // m02 * other.m00 + m12 * other.m01 + m22 * other.m02
+                    // m00 * other.m10 + m10 * other.m11 + m20 * other.m12
+                    __m128d MVRes041 = _mm_add_pd(MVRes011, MV200101);
+
+                    // m01 * other.m10 + m11 * other.m11 + m21 * other.m12
+                    // m02 * other.m10 + m12 * other.m11 + m22 * other.m12
+                    __m128d MVRes05 = _mm_add_pd(MVRes02, MV20111);
+
+                    // m00 * other.m20 + m10 * other.m21 + m20 * other.m22
+                    // m01 * other.m20 + m11 * other.m21 + m21 * other.m22
+                    __m128d MVRes051 = _mm_add_pd(MVRes021, MV201111);
+
+                    // m02 * other.m20 + m12 * other.m21 + m22 * other.m22
+                    __m128d MVRes06 = _mm_add_pd(MVRes03, MV20212);
+
+                    T upper[2];
+                    T upper1[2];
+                    T middle [2];
+                    T middle1 [2];
+                    T lower [2];
+                    _mm_storer_pd(upper0, MVRes04);
+                    _mm_storer_pd(upper1, MVRes041);
+                    _mm_storer_pd(middle, MVRes05);
+                    _mm_storer_pd(middle1, MVRes051);
+                    _mm_storer_pd(lower, MVRes06);
+                    _mm_storer_pd(lower1, MVRes06);
+
+                    v[0] = upper[0];
+                    v[1] = upper[1];
+                    v[2] = upper1[0];
+                    v[3] = upper1[1];
+
+                    v[4] = middle[0];
+                    v[5] = middle[1];
+                    v[6] = middle1[0];
+                    v[7] = middle1[1];
 
                     v[8] = lower[0];
                     
@@ -464,9 +624,67 @@ namespace sml
                     __m128 MV123Res = _mm_add_ps(MV12Res, MV3Res);
 
                     T data[4];
-                    _mm_store_ps(data, MV123Res);
+                    _mm_storer_ps(data, MV123Res);
 
                     return {data[0], data[1], data[2]};
+                }
+
+                if constexpr(std::is_same<T, f64>::value)
+                {
+                    __m128d MV1 = _mm_set_pd(m00, m01);
+                    __m128d MV11 = _mm_set_pd(m02, 0);
+                    __m128d MV2 = _mm_set1_pd1(other.x);
+
+                    // m00 * other.x
+                    // m01 * other.x
+                    __m128d MV1Res = _mm_mul_pd(MV1, MV2);
+
+                    // m02 * other.x
+                    __m128d MV11Res = _mm_mul_pd(MV11, MV2);
+
+                    MV1 = _mm_set_pd(m10, m11);
+                    MV11 = _mm_set_pd(m12, 0);
+                    MV2 = _mm_set1_pd(other.y);
+
+                    // m10 * other.y
+                    // m11 * other.y
+                    __m128d MV2Res = _mm_mul_pd(MV1, MV2);
+
+                    // m12 * other.y
+                    __m128d MV21Res = _mm_mul_pd(MV11, MV2);
+
+                    MV1 = _mm_set_pd(m20, m21);
+                    MV11 = _mm_set_pd(m22, 0);
+                    MV2 = _mm_set1_pd(other.z);
+
+                    // m20 * other.z
+                    // m21 * other.z
+                    __m128d MV3Res = _mm_mul_pd(MV1, MV2);
+
+                    // m22 * other.z
+                    __m128d MV31Res = _mm_mul_pd(MV1, MV2);
+
+                    // m00 * other.x + m10 * other.y
+                    // m01 * other.x + m11 * other.y
+                    __m128d MV12Res = _mm_add_pd(MV1Res, MV2Res);
+
+                    // m02 * other.x + m12 * other.y
+                    __m128d MV121Res = _mm_add_pd(MV11Res, MV21Res);
+
+                    // m00 * other.x + m10 * other.y + m20 * other.z
+                    // m01 * other.x + m11 * other.y + m21 * other.z
+                    __m128d MV123Res = _mm_add_pd(MV12Res, MV3Res);
+
+                    // m02 * other.x + m12 * other.y + m22 * other.z
+                    __m128d MV1231Res = _mm_add_pd(MV121Res, MV31Res);
+
+
+                    T data[2];
+                    T data1[2];
+                    _mm_storer_pd(data, MV123Res);
+                    _mm_storer_pd(data1, MV1231Res);
+
+                    return {data[0], data[1], data1[0]};
                 }
 
                 T x = m00 * other.x + m10 * other.y + m20 * other.z;
@@ -626,6 +844,133 @@ namespace sml
                         v[7] = middle[3];
 
                         v[8] = lower[0];
+
+                        return *this;
+                    }
+
+                    if constexpr(std::is_same<T, f64>::value)
+                    {
+                        __m128d TV00 = _mm_set_pd(m11, -m10);
+                        __m128d TV001 = _mm_set_pd(m10, -m01);
+                        __m128d TV01 = _mm_set_pd(m00, -m00);
+                        __m128d TV011 = _mm_set_pd(m01, -m00);
+                        __m128d TV02 = _mm_set_pd(m00, 0);
+
+                        __m128d TV10 = _mm_set_pd(m22, m22);
+                        __m128d TV101 = _mm_set_pd(m21, m22);
+                        __m128d TV11 = _mm_set_pd(m22, m21);
+                        __m128d TV111 = _mm_set_pd(m12, m12);
+                        __m128d TV12 = _mm_set_pd(m11, 0);
+
+                        // m11 * m22 
+                        // -m10 * m22
+                        __m128d TVRes00010 = _mm_mul_pd(TV00, TV10);
+
+                        // m10 * m21 
+                        // -m01 * m22
+                        __m128d TVRes000101 = _mm_mul_pd(TV001, TV101);
+
+                        // m00 * m22 
+                        // -m00 * m21
+                        __m128d TVRes00111 = _mm_mul_pd(TV01, TV11);
+
+                        // m01 * m12 
+                        // -m00 * m12
+                        __m128d TVRes001111 = _mm_mul_pd(TV011, TV111);
+
+                        // m00 * m11
+                        __m128d TVRes00212 = _mm_mul_pd(TV02, TV12);
+
+                        TV00 = _mm_set_pd(-m12, m12);
+                        TV001 = _mm_set_pd(-m11, m02);
+                        TV01 = _mm_set_pd(-m02, m01);
+                        TV011 = _mm_set_pd(-m02, m02);
+                        TV02 = _mm_set_pd(-m01, 0);
+
+                        TV10 = _mm_set_pd(m21, m20);
+                        TV101 = _mm_set_pd(m20, m21);
+                        TV11 = _mm_set_pd(m20, m20);
+                        TV111 = _mm_set_pd(m11, m10);
+                        TV12 = _mm_set_pd(m10, 0);
+
+                        // -m12 * m21 
+                        // m12 * m20
+                        __m128d TVRes10010 = _mm_mul_pd(TV00, TV10);
+
+                        // -m11 * m20 
+                        // m02 * m21
+                        __m128d TVRes100101 = _mm_mul_pd(TV001, TV101);
+
+                        // -m02 * m20 
+                        // m01 * m20
+                        __m128d TVRes10111 = _mm_mul_pd(TV01, TV11);
+
+                        // -m02 * m11
+                        // m02 * m10
+                        __m128d TVRes101111 = _mm_mul_pd(TV011, TV111);
+
+                        // -m01 * m10
+                        __m128d TVRes10212 = _mm_mul_pd(TV02, TV12);
+
+                        // m11 * m22 - m12 * m21
+                        // -m10 * m22 + m12 * m20
+                        __m128d Res1 = _mm_mul_pd(TVRes00010, TVRes10010);
+
+                        // m10 * m21 - m11 * m20
+                        // -m01 * m22 + m02 * m21
+                        __m128d Res11 = _mm_mul_pd(TVRes000101, TVRes100101);
+
+                        // m00 * m22 - m02 * m20
+                        // -m00 * m21 + m01 * m20
+                        __m128d Res2 = _mm_mul_pd(TVRes00111, TVRes10111);
+
+                        // m01 * m12 - m02 * m11
+                        // -m00 * m12 + m02 * m10
+                        __m128d Res21 = _mm_mul_pd(TVRes001111, TVRes101111);
+
+                        // m00 * m11 - m01 * m10
+                        __m128d Res3 = _mm_mul_pd(TVRes00212, TVRes10202);
+
+                        __m128d DetV = _mm_set1_pd(det_inv);
+
+                        // m00 = t00 * det_inv;
+                        // m11 = t11 * det_inv;
+                        // m22 = t22 * det_inv;
+                        // m01 = t10 * det_inv;
+                        // m10 = t11 * det_inv;
+                        // m20 = t12 * det_inv;
+                        // m02 = t20 * det_inv;
+                        // m12 = t21 * det_inv;
+                        // m21 = t12 * det_inv;
+                        Res1 = _mm_mul_ps(Res1, DetV);
+                        Res11 = _mm_mul_ps(Res11, DetV);
+                        Res2 = _mm_mul_ps(Res2, DetV);
+                        Res21 = _mm_mul_ps(Res21, DetV);
+                        Res3 = _mm_mul_ps(Res3, DetV);
+
+                        T data[2];
+                        T data1[2];
+                        T data2[2];
+                        T data3[2];
+                        T data4[2];
+
+                        _mm_storer_pd(data, Res1);
+                        _mm_storer_pd(data1, Res11);
+                        _mm_storer_pd(data2, Res2);
+                        _mm_storer_pd(data3, Res21);
+                        _mm_storer_pd(data4, Res3);
+
+                        v[0] = data[0];
+                        v[1] = data[1];
+                        v[2] = data1[0];
+                        v[3] = data1[1];
+
+                        v[4] = data2[0];
+                        v[5] = data2[1];
+                        v[6] = data3[0];
+                        v[7] = data3[1];
+
+                        v[8] = data4[0];
 
                         return *this;
                     }
