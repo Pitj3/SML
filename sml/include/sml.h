@@ -27,5 +27,6 @@
 #include <vec4.h>
 
 #include <mat2.h>
+#include <mat3.h>
 
 #endif // sml_h__
