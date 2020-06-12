@@ -28,34 +28,50 @@
 namespace sml
 {
     template<typename T>
-    class vec2
+    class vec2view;
+
+    template<typename T>
+    class alignas(16) vec2
     {
         public:
             vec2()
             {
                 zero();
+                v[2] = 0;
+                v[3] = 0;
             }
 
             vec2(T x, T y)
             {
                 set(x, y);
+                v[2] = 0;
+                v[3] = 0;
             }
 
             explicit vec2(T v)
             {
                 set(v, v);
+                v[2] = 0;
+                v[3] = 0;
             }
 
             vec2(const vec2& other)
             {
                 set(other.v);
+                v[2] = 0;
+                v[3] = 0;
             }
 
             vec2(vec2&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
+                v[2] = 0;
+                v[3] = 0;
             }
+
+            vec2& operator = (const vec2view<T>& other);
+            vec2& operator = (vec2view<T>&& other);
 
             void zero()
             {
@@ -104,22 +120,23 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], 0, 0);
-                    __m128 him = _mm_set_ps(other.v[0], other.v[1], 0, 0);
-                    __m128 res = _mm_add_ps(me, him);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
 
-                    _mm_storer_ps(v, res);
+                    __m128 res = _mm_add_ps(me, ot);
+
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m128d me = _mm_set_pd(v[0], v[1]);
-                    __m128d him = _mm_set_pd(other.v[0], other.v[1]);
-                    __m128d res = _mm_add_pd(me, him);
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
+                    __m128d res = _mm_add_pd(me, ot);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -134,22 +151,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], 0, 0);
-                    __m128 him = _mm_set_ps(other.v[0], other.v[1], 0, 0);
-                    __m128 res = _mm_sub_ps(me, him);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
+                    __m128 res = _mm_sub_ps(me, ot);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m128d me = _mm_set_pd(v[0], v[1]);
-                    __m128d him = _mm_set_pd(other.v[0], other.v[1]);
-                    __m128d res = _mm_sub_pd(me, him);
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
+                    __m128d res = _mm_sub_pd(me, ot);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -164,22 +181,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], 0, 0);
-                    __m128 him = _mm_set_ps(other.v[0], other.v[1], 0, 0);
-                    __m128 res = _mm_mul_ps(me, him);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
+                    __m128 res = _mm_mul_ps(me, ot);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m128d me = _mm_set_pd(v[0], v[1]);
-                    __m128d him = _mm_set_pd(other.v[0], other.v[1]);
-                    __m128d res = _mm_mul_pd(me, him);
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
+                    __m128d res = _mm_mul_pd(me, ot);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -194,22 +211,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], 0, 0);
-                    __m128 him = _mm_set_ps1(other);
-                    __m128 res = _mm_mul_ps(me, him);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_broadcast_ss(&other);
+                    __m128 res = _mm_mul_ps(me, ot);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m128d me = _mm_set_pd(v[0], v[1]);
-                    __m128d him = _mm_set_pd1(other);
-                    __m128d res = _mm_mul_pd(me, him);
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_broadcast_pd(&other);
+                    __m128d res = _mm_mul_pd(me, ot);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -224,22 +241,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], 0, 0);
-                    __m128 him = _mm_set_ps(other.v[0], other.v[1], 0, 0);
-                    __m128 res = _mm_div_ps(me, him);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
+                    __m128 res = _mm_div_ps(me, ot);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m128d me = _mm_set_pd(v[0], v[1]);
-                    __m128d him = _mm_set_pd(other.v[0], other.v[1]);
-                    __m128d res = _mm_div_pd(me, him);
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
+                    __m128d res = _mm_div_pd(me, ot);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -254,22 +271,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], 0, 0);
-                    __m128 him = _mm_set_ps1(other);
-                    __m128 res = _mm_div_ps(me, him);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_broadcast_ss(&other);
+                    __m128 res = _mm_div_ps(me, ot);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m128d me = _mm_set_pd(v[0], v[1]);
-                    __m128d him = _mm_set_pd1(other);
-                    __m128d res = _mm_div_pd(me, him);
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_broadcast_ss(&other);
+                    __m128d res = _mm_div_pd(me, ot);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -441,6 +458,61 @@ namespace sml
     typedef vec2<s32> ivec2;
     typedef vec2<f32> fvec2;
     typedef vec2<f64> dvec2;
+
+    template<typename T>
+    class vec2view
+    {
+        public:
+            vec2view() = default;
+
+            vec2view(const vec2<T>& other)
+            {
+                x = other.x;
+                y = other.y;
+            }
+
+            vec2view(vec2<T>&& other) noexcept
+            {
+                x = std::move(other.x);
+                y = std::move(other.y);
+            }
+
+            vec2view& operator = (const vec2<T>& other)
+            {
+                x = other.x;
+                y = other.y;
+
+                return *this;
+            }
+
+            vec2view& operator = (vec2<T>&& other) noexcept
+            {
+                x = std::move(other.x);
+                y = std::move(other.y);
+
+                return *this;
+            }
+
+            T x = static_cast<T>(0), y = static_cast<T>(0);
+    };
+
+    template<typename T>
+    vec2<T>& vec2<T>::operator = (const vec2view<T>& other)
+    {
+        x = other.x;
+        y = other.y;
+
+        return *this;
+    }
+
+    template<typename T>
+    vec2<T>& vec2<T>::operator = (vec2view<T>&& other)
+    {
+        x = std::move(other.x);
+        y = std::move(other.y);
+
+        return *this;
+    }
 } // namespace sml
 
 #endif // sml_vec2_h__

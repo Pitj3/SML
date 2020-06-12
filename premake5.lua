@@ -58,6 +58,8 @@ project "SMLTest"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	
+	vectorextensions "AVX2"
 
     files {
         "smltest/include/**.h",

@@ -25,7 +25,10 @@
 namespace sml
 {
     template<typename T>
-    class vec3
+    class vec3view;
+
+    template<typename T>
+    class alignas(16) vec3
     {
         public:
             vec3()
@@ -54,6 +57,9 @@ namespace sml
                 v[1] = std::move(other.v[1]);
                 v[1] = std::move(other.v[2]);
             }
+
+            vec3& operator = (const vec3view<T>& other);
+            vec3& operator = (vec3view<T>&& other);
 
             void zero()
             {
@@ -467,6 +473,67 @@ namespace sml
     typedef vec3<s32> ivec3;
     typedef vec3<f32> fvec3;
     typedef vec3<f64> dvec3;
+
+    template<typename T>
+    class vec3view
+    {
+    public:
+        vec3view() = default;
+
+        vec3view(const vec3<T>& other)
+        {
+            x = other.x;
+            y = other.y;
+            z = other.z;
+        }
+
+        vec3view(vec3<T>&& other) noexcept
+        {
+            x = std::move(other.x);
+            y = std::move(other.y);
+            z = std::move(other.z);
+        }
+
+        vec3view& operator = (const vec3<T>& other)
+        {
+            x = other.x;
+            y = other.y;
+            z = other.z;
+
+            return *this;
+        }
+
+        vec3view& operator = (vec3<T>&& other) noexcept
+        {
+            x = std::move(other.x);
+            y = std::move(other.y);
+            z = std::move(other.z);
+
+            return *this;
+        }
+
+        T x = static_cast<T>(0), y = static_cast<T>(0), z = static_cast<T>(0);
+    };
+
+    template<typename T>
+    vec3<T>& vec3<T>::operator = (const vec3view<T>& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+
+        return *this;
+    }
+
+    template<typename T>
+    vec3<T>& vec3<T>::operator = (vec3view<T>&& other)
+    {
+        x = std::move(other.x);
+        y = std::move(other.y);
+        z = std::move(other.z);
+
+        return *this;
+    }
 } // namespace sml
 
 #endif // sml_vec3_h__

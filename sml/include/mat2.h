@@ -1,7 +1,7 @@
 #ifndef sml_mat2_h__
 #define sml_mat2_h__
 
-/* mat2.h -- row major mat2 implementation of the 'Simple Math Library'
+/* mat2.h -- col major mat2 implementation of the 'Simple Math Library'
   Copyright (C) 2020 Roderick Griffioen
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -28,7 +28,7 @@
 namespace sml
 {
     template<typename T>
-    class mat2
+    class alignas(16) mat2
     {
         public:
             mat2()
@@ -44,16 +44,16 @@ namespace sml
                 m11 = diagonal;
             }
 
-            mat2(T r1[2], T r2[2])
+            mat2(T col1[2], T col2[2])
             {
-                m00 = r1[0];
-                m10 = r1[1];
+                m00 = col1[0];
+                m01 = col1[1];
 
-                m01 = r2[0];
-                m11 = r2[1];
+                m10 = col2[0];
+                m11 = col2[1];
             }
 
-            mat2(T m00, T m10, T m01, T m11)
+            mat2(T m00, T m01, T m10, T m11)
             {
                 this->m00 = m00;
                 this->m10 = m10;
@@ -77,7 +77,7 @@ namespace sml
                 m11 = std::move(other.m11);
             }
 
-            void set(T m00, T m10, T m01, T m11)
+            void set(T m00, T m01, T m10, T m11)
             {
                 this->m00 = m00;
                 this->m10 = m10;
@@ -118,72 +118,91 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(m00, m10, m01, m11);
-                    __m128 him = _mm_set_ps(other.m00, other.m10, other.m01, other.m11);
+                    union m128
+                    {
+                        __m128 f;
+                        __m128i i;
+                    };
 
-                    // m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11
-                    __m128 res = _mm_cmpeq_ps(me, him);
-                    
-                    int mask = _mm_movemask_ps(res);
-                    return mask == 0xffff;
+                    s32 result = 1;
+                    for(s32 i = 0; i < 2; i++)
+                    {
+                        __m128 me = _mm_load_ps(&m00 + (2 * i));
+                        __m128 ot = _mm_load_ps(&other.m00 + (2 * i));
+
+                        m128 cmp = { _mm_cmpneq_ps(me, ot) };
+                        result &= _mm_testc_si128(cmp.i, cmp.i);
+                    }                  
+
+                    return result != 0; 
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m128d me1 = _mm_set_pd(m00, m10);
-                    __m128d me2 = _mm_set_pd(m01, m11);
+                    union m128
+                    {
+                        __m128d d;
+                        __m128i i;
+                    };
 
-                    __m128d him1 = _mm_set_pd(other.m00, other.m10);
-                    __m128d him2 = _mm_set_pd(other.m01, other.m11);
+                    s32 result = 1;
+                    for(s32 i = 0; i < 2; i++)
+                    {
+                        __m128d me = _mm_load_pd(&m00 + (2 * i));
+                        __m128d ot = _mm_load_pd(&other.m00 + (2 * i));
 
-                    // m00 != other.m00 || m10 != other.m10
-                    __m128 res1 = _mm_cmpeq_pd(me1, him1);
+                        m128 cmp = { _mm_cmpneq_pd(me, ot) };
+                        result &= _mm_testc_si128(cmp.i, cmp.i);
+                    }
 
-                    // m01 != other.m01 || m11 != other.m11
-                    __m128 res2 = _mm_cmpeq_pd(me2, him2);
-
-                    int mask1 = _mm_movemask_pd(res1);
-                    int mask2 = _mm_movemask_pd(res2);
-
-                    return mask1 == 0xffff && mask2 == 0xffff;
+                    return result != 0;
                 }
 
                 return m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11;
-
             }
 
             inline constexpr bool operator != (const mat2& other) const
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(m00, m10, m01, m11);
-                    __m128 him = _mm_set_ps(other.m00, other.m10, other.m01, other.m11);
+                    union m128
+                    {
+                        __m128 f;
+                        __m128i i;
+                    };
 
-                    // m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11
-                    __m128 res = _mm_cmpneq_ps(me, him);
-                    
-                    int mask = _mm_movemask_ps(res);
-                    return mask != 0;
+                    s32 result = 1;
+                    for(s32 i = 0; i < 2; i++)
+                    {
+                        __m128 me = _mm_load_ps(col[i].v);
+                        __m128 ot = _mm_load_ps(other.col[i].v);
+
+                        m128 cmp = { _mm_cmpneq_ps(me, ot) };
+                        result &= _mm_testc_si128(cmp.i, cmp.i);
+                    }                  
+
+                    return result != 0; 
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m128d me1 = _mm_set_pd(m00, m10);
-                    __m128d me2 = _mm_set_pd(m01, m11);
+                    union m128
+                    {
+                        __m128d d;
+                        __m128i i;
+                    };
 
-                    __m128d him1 = _mm_set_pd(other.m00, other.m10);
-                    __m128d him2 = _mm_set_pd(other.m01, other.m11);
+                    s32 result = 1;
+                    for(s32 i = 0; i < 2; i++)
+                    {
+                        __m128d me = _mm_load_pd(col[i].v);
+                        __m128d ot = _mm_load_pd(other.col[i].v);
 
-                    // m00 != other.m00 || m10 != other.m10
-                    __m128 res1 = _mm_cmpeq_pd(me1, him1);
+                        m128 cmp = { _mm_cmpneq_pd(me, ot) };
+                        result &= _mm_testc_si128(cmp.i, cmp.i);
+                    }
 
-                    // m01 != other.m01 || m11 != other.m11
-                    __m128 res2 = _mm_cmpeq_pd(me2, him2);
-
-                    int mask1 = _mm_movemask_pd(res1);
-                    int mask2 = _mm_movemask_pd(res2);
-
-                    return mask1 != 0 || mask2 != 0;
+                    return result != 0;
                 }
 
                 return m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11;
@@ -193,81 +212,58 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 MV0 = _mm_set_ps(m00, m01, m00, m01);
-                    __m128 MV1 = _mm_set_ps(other.m00, other.m00, other.m10, other.m10);
+                    alignas(16) f32 mat0[4] = {
+                        m00,
+                        m01,
+                        m10,
+                        m11
+                    };
 
-                    // m00 * other.m00
-                    // m01 * other.m00
-                    // m00 * other.m10
-                    // m01 * other.m10
-                    __m128 MV01Res = _mm_mul_ps(MV0, MV1);
+                    alignas(16) f32 mat1[4] = {
+                        other.m00,
+                        other.m01,
+                        other.m10,
+                        other.m11
+                    };
 
-                    __m128 MV2 = _mm_set_ps(m10, m11, m10, m11);
-                    __m128 MV3 = _mm_set_ps(other.m01, other.m01, other.m11, other.m11);
+                    __m128 lhs = _mm_load_ps(mat0);
+                    __m128 rhs = _mm_load_ps(mat1);
 
-                    // m10 * other.m01
-                    // m11 * other.m01
-                    // m10 * other.m11
-                    // m11 * other.m11
-                    __m128 MV23Res = _mm_mul_ps(MV2, MV3);
+                    __m128 m0 = _mm_shuffle_ps(lhs, lhs, _MM_SHUFFLE(3, 1, 3, 1));
+                    __m128 m1 = _mm_shuffle_ps(rhs, rhs, _MM_SHUFFLE(3, 3, 2, 2));
 
-                    // m00 * other.m00 + m10 * other.m01
-                    // m01 * other.m00 + m11 * other.m01
-                    // m00 * other.m10 + m10 * other.m11
-                    // m01 * other.m10 + m11 * other.m11
-                    __m128 MV0123Res = _mm_add_ps(MV01Res, MV23Res);
+                    __m128 res1 = _mm_mul_ps(m0, m1);
 
-                    _mm_store_ps(v, MV0123Res);
+                    __m128 m2 = _mm_shuffle_ps(lhs, lhs, _MM_SHUFFLE(2, 0, 2, 0));
+                    __m128 m3 = _mm_shuffle_ps(rhs, rhs, _MM_SHUFFLE(1, 1, 0, 0));
+                    
+                    __m128 res2 = _mm_mul_ps(m2, m3);
+
+                    __m128 res = _mm_add_ps(res1, res2);
+
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m128d MV00 = _mm_set_pd(m00, m01);
+                    alignas(16) f64 res[4];
+                    __m128d col0 = _mm_load_pd(&m00);
+                    __m128d col1 = _mm_load_pd(&m10);
 
-                    __m128d MV10 = _mm_set1_pd(other.m00);
-                    __m128d MV11 = _mm_set1_pd(other.m10);
+                    for(s32 i = 0; i < 2; i++)
+                    {
+                        __m128d elem0 = _mm_set1_pd(*(&other.m00 + (2 * i + 0)));
+                        __m128d elem1 = _mm_set1_pd(*(&other.m00 + (2 * i + 1)));
 
-                    // m00 * other.m00
-                    // m01 * other.m00
-                    __m128d MV01Res = _mm_mul_pd(MV00, MV10);
+                        __m128d result = _mm_add_pd(_mm_mul_pd(elem0, col0), _mm_mul_pd(elem1, col1));
+                        
+                        _mm_store_pd(res + (2 * i), result);
+                    }
 
-                    // m00 * other.m10
-                    // m01 * other.m10
-                    __m128d MV02Res = _mm_mul_pd(MV00, MV11);
-
-                    __m128d MV20 = _mm_set_pd(m10, m11);
-
-                    __m128d MV30 = _mm_set_pd(other.m01, other.m01);
-                    __m128d MV31 = _mm_set_pd(other.m11, other.m11);
-
-                    // m10 * other.m01
-                    // m11 * other.m01
-                    __m128d MV03Res = _mm_mul_pd(MV20, MV30);
-
-                    // m10 * other.m11
-                    // m11 * other.m11
-                    __m128d MV04Res = mm_mul_pd(MV20, MV31);
-
-                    // m00 * other.m00 + m10 * other.m01;
-                    // m01 * other.m00 + m11 * other.m01;
-                    __m128d MV10Res = _mm_add_pd(MV01Res, MV03Res);
-
-                    // m00 * other.m10 + m10 * other.m11;
-                    // m01 * other.m10 + m11 * other.m11;
-                    __m128d MV11Res = _mm_add_pd(MV02Res, MV04Res);
-
-                    T upper[2];
-                    T lower[2];
-
-                    _mm_store_pd(upper, MV10Res);
-                    _mm_store_pd(lower, MV11Res);
-
-                    m00 = upper[0];
-                    m10 = upper[1];
-                    m01 = lower[0];
-                    m11 = lower[1];
+                    _mm_store_pd(&m00 + 0, _mm_load_pd(res + 0));
+                    _mm_store_pd(&m00 + 2, _mm_load_pd(res + 2));
 
                     return *this;
                 }
@@ -283,66 +279,6 @@ namespace sml
                 m11 = newM11;
 
                 return *this;
-            }
-
-            vec2<T> operator *= (const vec2<T>& other)
-            {
-                if(std::is_same<T, f32>::value)
-                {
-                    __m128 me1 = _mm_set_ps(m00, m01, 0, 0);
-                    __m128 me2 = _mm_set_ps(m10, m11, 0, 0);
-
-                    __m128 other1 = _mm_set_ps(other.x, other.x, 0, 0);
-                    __m128 other2 = _mm_set_ps(other.y, other.y, 0, 0);
-
-                    // m00 * other.x
-                    // m01 * other.x
-                    __m128 res1 = _mm_mul_ps(me1, other1);
-
-                    // m10 * other.y
-                    // m11 * other.y
-                    __m128 res2 = _mm_mul_ps(me2, other2);
-
-                    // m00 * other.x + m10 * other.y
-                    // m01 * other.x + m11 * other.y
-                    __m128 res = _mm_add_ps(res1, res2);
-
-                    T data[4];
-                    _mm_store_ps(data, res);
-
-                    return {data[0], data[1]};
-                }
-
-                if(std::is_same<T, f64>::value)
-                {
-                    __m128d me1 = _mm_set_pd(m00, m01);
-                    __m128d me2 = _mm_set_pd(m10, m11);
-
-                    __m128d other1 = _mm_set_pd(other.x, other.x);
-                    __m128d other2 = _mm_set_pd(other.y, other.y);
-
-                    // m00 * other.x
-                    // m01 * other.x
-                    __m128d res1 = _mm_mul_pd(me1, other1);
-
-                    // m10 * other.y
-                    // m11 * other.y
-                    __m128d res2 = _mm_mul_pd(me2, other2);
-
-                    // m00 * other.x + m10 * other.y
-                    // m01 * other.x + m11 * other.y
-                    __m128d res = _mm_add_pd(res1, res2);
-
-                    T data[2];
-                    _mm_store_pd(data, res);
-
-                    return {data[0], data[1]};
-                }
-
-                T x = m00 * other.x + m10 * other.y;
-                T y = m01 * other.x + m11 * other.y;
-
-                return {x, y};
             }
 
             // Operations
@@ -381,13 +317,9 @@ namespace sml
 
                     if constexpr(std::is_same<T, f32>::value)
                     {
-                        __m128 me = _mm_set_ps(m11, -m01, m00, -m10);
+                        __m128 me = _mm_set_ps(m11, -m01, -m10, m00);
                         __m128 det = _mm_set_ps1(det_inv);
 
-                        // m11 * det_inv
-                        // -m01 * det_inv
-                        // m00 * det_inv
-                        // -m10 * det_inv  
                         __m128 res = _mm_mul_ps(me, det);
 
                         _mm_store_ps(v, res);
@@ -398,41 +330,23 @@ namespace sml
                     if constexpr(std::is_same<T, f64>::value)
                     {
                         __m128d me1 = _mm_set_pd(m11, -m01);
-                        __m128d me2 = _mm_set_pd(m00, -m10);
+                        __m128d me2 = _mm_set_pd(-m10, m00);
 
-                        __m128d det = _mm_set_pd1(det_inv);
+                        __m128d det = _mm_set1_pd(det_inv);
 
-                        // m11 * det_inv
-                        // -m01 * det_inv
                         __m128d res1 = _mm_mul_pd(me1, det);
-
-                        // m00 * det_inv
-                        // -m10 * det_inv 
                         __m128d res2 = _mm_mul_pd(me2, det);
 
-                        T upper[2];
-                        T lower[2];
-
-                        _mm_store_pd(upper, res1);
-                        _mm_store_pd(lower, res2);
-
-                        m00 = upper[0];
-                        m10 = upper[1];
-                        m01 = lower[0];
-                        m11 = lower[1];
+                        _mm_store_pd(&m00 + 0, res1);
+                        _mm_store_pd(&m00 + 2, res2);
 
                         return *this;
                     }
 
-                    T t00 = m11 * det_inv;
-                    T t01 = -m01 * det_inv;
-                    T t11 = m00 * det_inv;
-                    T t10 = -m10 * det_inv;
-
-                    m00 = t00;
-                    m10 = t10;
-                    m01 = t01;
-                    m11 = t11;
+                    m00 = m11 * det_inv;
+                    m10 = -m01 * det_inv;
+                    m01 = -m10 * det_inv;
+                    m11 = m00 * det_inv;
                 }
 
                 return *this;
@@ -450,11 +364,11 @@ namespace sml
 
             inline mat2 inverted() const
             {
-                mat2 c = mat(*this);
+                mat2 c; c.set(m00, m10, m01, m11);
                 return c.invert();
             }
 
-            inline T determinant()
+            inline T determinant() const
             {
                 return m00 * m11 - m01 * m10;
             }
@@ -469,12 +383,12 @@ namespace sml
             {
                 struct 
                 {
-                    T m00, m10, m01, m11;
+                    T m00, m01, m10, m11;
                 };
 
-                vec2<T> row[2];
+                vec2view<T> col[2];
 
-                T v[4];            
+                T v[4];
             };
     };
 
@@ -487,10 +401,40 @@ namespace sml
     }
 
     template<typename T>
-    vec2<T> operator * (mat2<T> left, vec2<T> right)
+    vec2<T> operator * (const mat2<T>& lhs, const vec2<T>& rhs)
     {
-        vec2 r = left *= right;
-        return r;
+        alignas(16) vec2<T> res;
+
+        if constexpr(std::is_same<T, f32>::value)
+        {
+            __m128 x = _mm_broadcast_ss(&rhs.x);
+            __m128 y = _mm_broadcast_ss(&rhs.y);
+
+            __m128 c0 = _mm_load_ps(lhs.v + 0);
+            __m128 c1 = _mm_load_ps(lhs.v + 2);
+
+            _mm_store_ps(res.v, _mm_add_ps(_mm_mul_ps(x, c0), _mm_mul_ps(y, c1)));
+
+            return res;
+        }
+
+        if constexpr(std::is_same<T, f64>::value)
+        {
+            __m128d x = _mm_set1_pd(rhs.x);
+            __m128d y = _mm_set1_pd(rhs.y);
+
+            __m128d c0 = _mm_load_pd(lhs.v + 0);
+            __m128d c1 = _mm_load_pd(lhs.v + 2);
+
+            _mm_store_pd(res.v, _mm_add_pd(_mm_mul_pd(x, c0), _mm_mul_pd(y, c1)));
+
+            return res;
+        }
+
+        T x = lhs.m00 * rhs.x + lhs.m10 * rhs.y;
+        T y = lhs.m01 * rhs.x + lhs.m11 * rhs.y;
+
+        return {x, y};
     }
 
     // Predefined types
