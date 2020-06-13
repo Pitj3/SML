@@ -364,25 +364,9 @@ namespace sml
 
             inline mat3& transpose()
             {
-                T newM00 = m00;
-                T newM01 = m10;
-                T newM02 = m20;
-                T newM10 = m01;
-                T newM11 = m11;
-                T newM12 = m21;
-                T newM20 = m02;
-                T newM21 = m12;
-                T newM22 = m22;
-
-                this->m00 = newM00;
-                this->m01 = newM01;
-                this->m02 = newM02;
-                this->m10 = newM10;
-                this->m11 = newM11;
-                this->m12 = newM12;
-                this->m20 = newM20;
-                this->m21 = newM21;
-                this->m22 = newM22;
+                std::swap(m01, m10);
+                std::swap(m02, m20);
+                std::swap(m21, m12);
 
                 return *this;
             }
@@ -397,27 +381,32 @@ namespace sml
             {
                 T det = determinant();
 
-                T t00 = m11 * m22 - m12 * m21;
-                T t01 = -m10 * m22 + m12 * m20;
-                T t02 = m10 * m21 - m11 * m20;
-                T t10 = -m01 * m22 + m02 * m21;
-                T t11 = m00 * m22 - m02 * m20;
-                T t12 = -m00 * m21 + m01 * m20;
-                T t20 = m01 * m12 - m02 * m11;
-                T t21 = -m00 * m12 + m02 * m10;
-                T t22 = m00 * m11 - m01 * m10;
+                if (det != T(0))
+                {
+                    T det_inv = T(1) / det;
 
-                m00 = t00 * det_inv;
-                m11 = t11 * det_inv;
-                m22 = t22 * det_inv;
+                    T t00 = m11 * m22 - m12 * m21;
+                    T t01 = -m10 * m22 + m12 * m20;
+                    T t02 = m10 * m21 - m11 * m20;
+                    T t10 = -m01 * m22 + m02 * m21;
+                    T t11 = m00 * m22 - m02 * m20;
+                    T t12 = -m00 * m21 + m01 * m20;
+                    T t20 = m01 * m12 - m02 * m11;
+                    T t21 = -m00 * m12 + m02 * m10;
+                    T t22 = m00 * m11 - m01 * m10;
 
-                m01 = t10 * det_inv;
-                m10 = t11 * det_inv;
-                m20 = t12 * det_inv;
+                    m00 = t00 * det_inv;
+                    m11 = t11 * det_inv;
+                    m22 = t22 * det_inv;
 
-                m02 = t20 * det_inv;
-                m12 = t21 * det_inv;
-                m21 = t12 * det_inv;
+                    m01 = t10 * det_inv;
+                    m10 = t11 * det_inv;
+                    m20 = t12 * det_inv;
+
+                    m02 = t20 * det_inv;
+                    m12 = t21 * det_inv;
+                    m21 = t12 * det_inv;
+                }
 
                 return *this;
             }
@@ -439,7 +428,7 @@ namespace sml
 
             inline mat3 inverted() const
             {
-                mat3 c = mat(*this);
+                mat3 c; c.set(const_cast<T*>(v));
                 return c.invert();
             }
 

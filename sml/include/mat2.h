@@ -293,11 +293,7 @@ namespace sml
 
             inline mat2& transpose()
             {
-                T m2copy = m10;
-                T m01copy = m01;
-
-                m01 = m2copy;
-                m10 = m01copy;
+                std::swap(m01, m10);
 
                 return *this;
             }

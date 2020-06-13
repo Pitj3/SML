@@ -238,7 +238,11 @@ TEST_CASE("fmat2 tests", "[mat2]") {
     sml::fmat2 res = mat * mat2;
     sml::fmat2 cmp(26, 34, 17, 27);
 
+    sml::fmat2 tp(2, 7, 5, 2);
+
     REQUIRE(res == cmp);
+
+    REQUIRE(mat.transposed() == tp);
 
     mat = sml::fmat2(5, 3, 5, 2);
     sml::fvec2 vec(4, 3);
@@ -253,10 +257,6 @@ TEST_CASE("fmat2 tests", "[mat2]") {
 
     REQUIRE(mat.inverted() == inv);
 
-    sml::fmat2 tp(4, 5, 2, 3);
-
-    REQUIRE(mat == tp);
-
     cmp = sml::fmat2(-4, -2, -5, -3);
 
     REQUIRE(mat.negate() == cmp);
@@ -269,7 +269,11 @@ TEST_CASE("dmat2 tests", "[mat2]") {
     sml::dmat2 res = mat * mat2;
     sml::dmat2 cmp(26, 34, 17, 27);
 
+    sml::dmat2 tp(2, 7, 5, 2);
+
     REQUIRE(res == cmp);
+
+    REQUIRE(mat.transposed() == tp);
 
     mat = sml::dmat2(5, 3, 5, 2);
     sml::dvec2 vec(4, 3);
@@ -284,10 +288,6 @@ TEST_CASE("dmat2 tests", "[mat2]") {
 
     REQUIRE(mat.inverted() == inv);
 
-    sml::dmat2 tp(4, 5, 2, 3);
-
-    REQUIRE(mat == tp);
-
     cmp = sml::dmat2(-4, -2, -5, -3);
 
     REQUIRE(mat.negate() == cmp);
@@ -297,10 +297,14 @@ TEST_CASE("fmat3 tests", "[mat3]") {
     sml::fmat3 mat(2, 4, 7, 3, 4, 8, 1, 3, 8);
     sml::fmat3 mat2(1, 6, 3, 4, 7, 5, 7, 8, 3);
 
+    sml::fmat3 tp(2, 3, 1, 4, 4, 3, 7, 8, 8);
+
     sml::fmat3 res = mat * mat2;
     sml::fmat3 cmp(23, 37, 79, 34, 59, 124, 41, 69, 137);
 
     REQUIRE(res == cmp);
+
+    REQUIRE(mat.transposed() == tp);
 
     mat = sml::fmat3(5, 3, 5, 2, 5, 4, 7, 5, 3);
     sml::fvec3 vec(4, 3, 2);
@@ -309,16 +313,24 @@ TEST_CASE("fmat3 tests", "[mat3]") {
     sml::fvec3 cmp2(40, 37, 38);
 
     REQUIRE(res2 == cmp2);
+
+    cmp.set(5.0f / 84.0f, -4.0f / 21.0f, 13.0f / 84.0f, -11.0f / 42.0f, 5.0f / 21.0f, 5.0f / 42.0f, 25.0f / 84.0f, 1.0f / 21.0f, -19.0f / 84.0f);
+
+    REQUIRE(mat.inverted() == cmp);
 }
 
 TEST_CASE("dmat3 tests", "[mat3]") {
     sml::dmat3 mat(2, 4, 7, 3, 4, 8, 1, 3, 8);
     sml::dmat3 mat2(1, 6, 3, 4, 7, 5, 7, 8, 3);
 
+    sml::dmat3 tp(2, 3, 1, 4, 4, 3, 7, 8, 8);
+
     sml::dmat3 res = mat * mat2;
     sml::dmat3 cmp(23, 37, 79, 34, 59, 124, 41, 69, 137);
 
     REQUIRE(res == cmp);
+
+    REQUIRE(mat.transposed() == tp);
 
     mat = sml::dmat3(5, 3, 5, 2, 5, 4, 7, 5, 3);
     sml::dvec3 vec(4, 3, 2);
@@ -327,16 +339,24 @@ TEST_CASE("dmat3 tests", "[mat3]") {
     sml::dvec3 cmp2(40, 37, 38);
 
     REQUIRE(res2 == cmp2);
+
+    cmp.set(5.0 / 84.0, -4.0 / 21.0, 13.0 / 84.0, -11.0 / 42.0, 5.0 / 21.0, 5.0 / 42.0, 25.0 / 84.0, 1.0 / 21.0, -19.0 / 84.0);
+
+    REQUIRE(mat.inverted() == cmp);
 }
 
 TEST_CASE("fmat4 tests", "[mat4]") {
     sml::fmat4 mat(2, 4, 7, 3, 4, 8, 1, 3, 8, 5, 4, 3, 2, 3, 4, 5);
     sml::fmat4 mat2(1, 6, 3, 4, 7, 5, 7, 8, 3, 5, 4, 3, 2, 3, 4, 5);
 
+    sml::fmat4 tp(2, 4, 7, 3, 4, 8, 1, 3, 8, 5, 4, 3, 2, 3, 4, 5);
+
     sml::fmat4 res = mat * mat2;
     sml::fmat4 cmp(58, 79, 41, 50, 106, 127, 114, 97, 64, 81, 54, 51, 58, 67, 53, 52);
 
     REQUIRE(res == cmp);
+
+    REQUIRE(mat.transposed() == tp);
 
     mat = sml::fmat4(5, 3, 5, 2, 5, 4, 7, 5, 3, 5, 4, 3, 2, 3, 4, 5);
     sml::fvec4 vec(4, 3, 2, 3);
@@ -348,13 +368,21 @@ TEST_CASE("fmat4 tests", "[mat4]") {
 }
 
 TEST_CASE("dmat4 tests", "[mat4]") {
-    sml::dmat4 mat(2, 4, 7, 3, 4, 8, 1, 3, 8, 5, 4, 3, 2, 3, 4, 5);
+    sml::dmat4 mat(2, 4, 7, 3, 
+                   4, 8, 1, 3, 
+                   8, 5, 4, 3, 
+                   2, 3, 4, 5);
+
     sml::dmat4 mat2(1, 6, 3, 4, 7, 5, 7, 8, 3, 5, 4, 3, 2, 3, 4, 5);
+
+    sml::dmat4 tp(2, 4, 7, 3, 4, 8, 1, 3, 8, 5, 4, 3, 2, 3, 4, 5);
 
     sml::dmat4 res = mat * mat2;
     sml::dmat4 cmp(58, 79, 41, 50, 106, 127, 114, 97, 64, 81, 54, 51, 58, 67, 53, 52);
 
     REQUIRE(res == cmp);
+
+    REQUIRE(mat.transposed() == tp);
 
     mat = sml::dmat4(5, 3, 5, 2, 5, 4, 7, 5, 3, 5, 4, 3, 2, 3, 4, 5);
     sml::dvec4 vec(4, 3, 2, 3);
