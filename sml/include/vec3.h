@@ -34,28 +34,33 @@ namespace sml
             vec3()
             {
                 zero();
+                v[3] = 0;
             }
 
             vec3(T x, T y, T z)
             {
                 set(x, y, z);
+                v[3] = 0;
             }
 
             explicit vec3(T v)
             {
                 set(v, v, v);
+                v[3] = 0;
             }
 
             vec3(const vec3& other)
             {
                 set(other.v);
+                v[3] = 0;
             }
 
             vec3(vec3&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
-                v[1] = std::move(other.v[2]);
+                v[2] = std::move(other.v[2]);
+                v[3] = 0;
             }
 
             vec3& operator = (const vec3view<T>& other);
@@ -81,13 +86,81 @@ namespace sml
             }
 
             // Operators
-            inline bool operator == (const vec3& other) const
+            inline constexpr bool operator == (const vec3& other) const
             {
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    union m128
+                    {
+                        __m128 f;
+                        __m128i i;
+                    };
+
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
+
+                    m128 cmp = { _mm_cmpeq_ps(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+
+                    return result != 0;
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    union m128
+                    {
+                        __m128d d;
+                        __m128i i;
+                    };
+
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
+
+                    m128 cmp = { _mm_cmpeq_pd(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+
+                    return result != 0;
+                }
+
                 return x == other.x && y == other.y && z == other.z;
             }
 
             inline bool operator != (const vec3& other) const
             {
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    union m128
+                    {
+                        __m128 f;
+                        __m128i i;
+                    };
+
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
+
+                    m128 cmp = { _mm_cmpneq_ps(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+
+                    return result != 0;
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    union m128
+                    {
+                        __m128d d;
+                        __m128i i;
+                    };
+
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
+
+                    m128 cmp = { _mm_cmpneq_pd(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+
+                    return result != 0;
+                }
+
                 return x != other.x || y != other.y || z != other.z;
             }
 
@@ -111,22 +184,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
-                    __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 him = _mm_load_ps(other.v);
                     __m128 res = _mm_add_ps(me, him);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
-                    __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
+                    __m256d me = _mm256_load_pd(v);
+                    __m256d him = _mm256_load_pd(other.v);
                     __m256d res = _mm256_add_pd(me, him);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -142,22 +215,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
-                    __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 him = _mm_load_ps(other.v);
                     __m128 res = _mm_sub_ps(me, him);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
-                    __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
+                    __m256d me = _mm256_load_pd(v);
+                    __m256d him = _mm256_load_pd(other.v);
                     __m256d res = _mm256_sub_pd(me, him);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -173,22 +246,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
-                    __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 him = _mm_load_ps(other.v);
                     __m128 res = _mm_mul_ps(me, him);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
-                    __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
+                    __m256d me = _mm256_load_pd(v);
+                    __m256d him = _mm256_load_pd(other.v);
                     __m256d res = _mm256_mul_pd(me, him);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -204,22 +277,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
-                    __m128 him = _mm_set_ps1(other);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 him = _mm_broadcast_ss(&other);
                     __m128 res = _mm_mul_ps(me, him);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
+                    __m256d me = _mm256_load_pd(v);
                     __m256d him = _mm256_set_pd1(other);
                     __m256d res = _mm256_mul_pd(me, him);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -235,22 +308,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
-                    __m128 him = _mm_set_ps(other.v[0], other.v[1], other.v[2], 0);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 him = _mm_load_ps(other.v);
                     __m128 res = _mm_div_ps(me, him);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
-                    __m256d him = _mm256_set_pd(other.v[0], other.v[1], other.v[2], 0);
+                    __m256d me = _mm256_load_pd(v);
+                    __m256d him = _mm256_load_pd(other.v);
                     __m256d res = _mm256_div_pd(me, him);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -266,22 +339,22 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_set_ps(v[0], v[1], v[2], 0);
-                    __m128 him = _mm_set_ps1(other);
+                    __m128 me = _mm_load_ps(v);
+                    __m128 him = _mm_broadcast_ss(&other);
                     __m128 res = _mm_div_ps(me, him);
 
-                    _mm_storer_ps(v, res);
+                    _mm_store_ps(v, res);
 
                     return *this;
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    __m256d me = _mm256_set_pd(v[0], v[1], v[2], 0);
+                    __m256d me = _mm256_load_pd(v);
                     __m256d him = _mm256_set_pd1(other);
                     __m256d res = _mm256_div_pd(me, him);
 
-                    _mm_storer_pd(v, res);
+                    _mm_store_pd(v, res);
 
                     return *this;
                 }
@@ -296,6 +369,30 @@ namespace sml
             // Operations
             inline T dot(vec3 other) const
             {
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
+                    __m128 product = _mm_mul_ps(me, ot);
+                    __m128 dp = _mm_hadd_ps(product, product);
+
+                    s32 res = _mm_extract_epi32(_mm_hadd_ps(dp, dp), 0);
+
+                    return *reinterpret_cast<f32*>(&(res));
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    __m256d me = _mm256_load_pd(v);
+                    __m256d ot = _mm256_load_pd(other.v);
+                    __m256d product = _mm256_mul_pd(me, ot);
+                    __m256d dp = _mm256_hadd_pd(product, product);
+
+                    s32 res = _mm256_extract_epi32(_mm256_hadd_ps(dp, dp), 0);
+
+                    return *reinterpret_cast<f64*>(&(res));
+                }
+
                 return (x * other.x) + (y * other.y) + (z * other.z);
             }
 
@@ -356,6 +453,32 @@ namespace sml
 
             static inline vec3 min(const vec3& a, const vec3& b)
             {
+                vec4 result;
+
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    __m128 me = _mm_load_ps(a.v);
+                    __m128 ot = _mm_load_ps(b.v);
+
+                    __m128 maxres = _mm_min_ps(me, ot);
+
+                    _mm_store_ps(result.v, maxres);
+
+                    return result;
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    __m256d me = _mm256_load_pd(a.v);
+                    __m256d ot = _mm256_load_pd(b.v);
+
+                    __m256d maxres = _mm256_min_pd(me, ot);
+
+                    _mm256_store_pd(result.v, maxres);
+
+                    return result;
+                }
+
                 return 
                 {
                     sml::min(a.x, b.x), 
@@ -366,6 +489,32 @@ namespace sml
 
             static inline vec3 max(const vec3& a, const vec3& b)
             {
+                vec4 result;
+
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    __m128 me = _mm_load_ps(a.v);
+                    __m128 ot = _mm_load_ps(b.v);
+
+                    __m128 maxres = _mm_max_ps(me, ot);
+
+                    _mm_store_ps(result.v, maxres);
+
+                    return result;
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    __m256d me = _mm256_load_pd(a.v);
+                    __m256d ot = _mm256_load_pd(b.v);
+
+                    __m256d maxres = _mm256_max_pd(me, ot);
+
+                    _mm256_store_pd(result.v, maxres);
+
+                    return result;
+                }
+
                 return 
                 {
                     sml::max(a.x, b.y), 

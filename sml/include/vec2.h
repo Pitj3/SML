@@ -93,11 +93,79 @@ namespace sml
             // Operators
             inline bool operator == (const vec2& other) const
             {
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    union m128
+                    {
+                        __m128 f;
+                        __m128i i;
+                    };
+
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
+
+                    m128 cmp = { _mm_cmpeq_ps(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+
+                    return result != 0;
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    union m128
+                    {
+                        __m128d d;
+                        __m128i i;
+                    };
+
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
+
+                    m128 cmp = { _mm_cmpeq_pd(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+
+                    return result != 0;
+                }
+
                 return x == other.x && y == other.y;
             }
 
             inline bool operator != (const vec2& other) const
             {
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    union m128
+                    {
+                        __m128 f;
+                        __m128i i;
+                    };
+
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
+
+                    m128 cmp = { _mm_cmpneq_ps(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+
+                    return result != 0;
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    union m128
+                    {
+                        __m128d d;
+                        __m128i i;
+                    };
+
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
+
+                    m128 cmp = { _mm_cmpneq_pd(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+
+                    return result != 0;
+                }
+
                 return x != other.x || y != other.y;
             }
 
@@ -300,6 +368,30 @@ namespace sml
             // Operations
             inline T dot(vec2 other) const
             {
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    __m128 me = _mm_load_ps(v);
+                    __m128 ot = _mm_load_ps(other.v);
+                    __m128 product = _mm_mul_ps(me, ot);
+                    __m128 dp = _mm_hadd_ps(product, product);
+
+                    s32 res = _mm_extract_epi32(_mm_hadd_ps(dp, dp), 0);
+
+                    return *reinterpret_cast<f32*>(&(res));
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    __m256d me = _mm256_load_pd(v);
+                    __m256d ot = _mm256_load_pd(other.v);
+                    __m256d product = _mm256_mul_pd(me, ot);
+                    __m256d dp = _mm256_hadd_pd(product, product);
+
+                    s32 res = _mm256_extract_epi32(_mm256_hadd_ps(dp, dp), 0);
+
+                    return *reinterpret_cast<f64*>(&(res));
+                }
+
                 return (x * other.x) + (y * other.y);
             }
 
@@ -360,6 +452,32 @@ namespace sml
 
             static inline vec2 min(const vec2& a, const vec2& b)
             {
+                vec4 result;
+
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    __m128 me = _mm_load_ps(a.v);
+                    __m128 ot = _mm_load_ps(b.v);
+
+                    __m128 maxres = _mm_min_ps(me, ot);
+
+                    _mm_store_ps(result.v, maxres);
+
+                    return result;
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    __m256d me = _mm256_load_pd(a.v);
+                    __m256d ot = _mm256_load_pd(b.v);
+
+                    __m256d maxres = _mm256_min_pd(me, ot);
+
+                    _mm256_store_pd(result.v, maxres);
+
+                    return result;
+                }
+
                 return 
                 {
                     sml::min(a.x, b.x), 
@@ -369,6 +487,32 @@ namespace sml
 
             static inline vec2 max(const vec2& a, const vec2& b)
             {
+                vec4 result;
+
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    __m128 me = _mm_load_ps(a.v);
+                    __m128 ot = _mm_load_ps(b.v);
+
+                    __m128 maxres = _mm_max_ps(me, ot);
+
+                    _mm_store_ps(result.v, maxres);
+
+                    return result;
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    __m256d me = _mm256_load_pd(a.v);
+                    __m256d ot = _mm256_load_pd(b.v);
+
+                    __m256d maxres = _mm256_max_pd(me, ot);
+
+                    _mm256_store_pd(result.v, maxres);
+
+                    return result;
+                }
+
                 return 
                 {
                     sml::max(a.x, b.y), 
