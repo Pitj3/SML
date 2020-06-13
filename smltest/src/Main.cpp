@@ -23,7 +23,7 @@ TEST_CASE("Abs is computed", "[abs]") {
     REQUIRE(sml::abs(-156.394756394674) == std::abs(-156.394756394674));
 }
 
-TEST_CASE("vec2 tests", "[vec2]") {
+TEST_CASE("fvec2 tests", "[vec2]") {
     sml::fvec2 vec = sml::fvec2(1.0f, 0.0f);
 
     REQUIRE(vec != sml::fvec2(0.0f, 1.0f));
@@ -58,7 +58,42 @@ TEST_CASE("vec2 tests", "[vec2]") {
     REQUIRE(vec == sml::fvec2(1, 20));
 }
 
-TEST_CASE("vec3 tests", "[vec3]") {
+TEST_CASE("dvec2 tests", "[vec2]") {
+    sml::dvec2 vec = sml::dvec2(1.0, 0.0);
+
+    REQUIRE(vec != sml::dvec2(0.0, 1.0));
+    REQUIRE(vec == sml::dvec2(1.0, 0.0));
+
+    vec = sml::dvec2(1, 20);
+
+    REQUIRE(vec == sml::dvec2(1, 20));
+
+    vec += sml::dvec2(10, 1);
+
+    REQUIRE(vec == sml::dvec2(11, 21));
+
+    vec -= sml::dvec2(10, 1);
+
+    REQUIRE(vec == sml::dvec2(1, 20));
+
+    vec *= sml::dvec2(2, 3);
+
+    REQUIRE(vec == sml::dvec2(2, 60));
+
+    vec *= 2.0;
+
+    REQUIRE(vec == sml::dvec2(4, 120));
+
+    vec /= sml::dvec2(2, 3);
+
+    REQUIRE(vec == sml::dvec2(2, 40));
+
+    vec /= 2.0;
+
+    REQUIRE(vec == sml::dvec2(1, 20));
+}
+
+TEST_CASE("fvec3 tests", "[vec3]") {
     sml::fvec3 vec = sml::fvec3(1.0f, 0.0f, 2.0f);
 
     REQUIRE(vec != sml::fvec3(0.0f, 1.0f, 3.0f));
@@ -93,7 +128,42 @@ TEST_CASE("vec3 tests", "[vec3]") {
     REQUIRE(vec == sml::fvec3(1, 20, 5));
 }
 
-TEST_CASE("vec4 tests", "[vec4]") {
+TEST_CASE("dvec3 tests", "[vec3]") {
+    sml::dvec3 vec = sml::dvec3(1.0, 0.0, 2.0);
+
+    REQUIRE(vec != sml::dvec3(0.0, 1.0, 3.0));
+    REQUIRE(vec == sml::dvec3(1.0, 0.0, 2.0));
+
+    vec = sml::dvec3(1, 20, 5);
+
+    REQUIRE(vec == sml::dvec3(1, 20, 5));
+
+    vec += sml::dvec3(10, 1, 2);
+
+    REQUIRE(vec == sml::dvec3(11, 21, 7));
+
+    vec -= sml::dvec3(10, 1, 2);
+
+    REQUIRE(vec == sml::dvec3(1, 20, 5));
+
+    vec *= sml::dvec3(2, 3, 2);
+
+    REQUIRE(vec == sml::dvec3(2, 60, 10));
+
+    vec *= 2.0;
+
+    REQUIRE(vec == sml::dvec3(4, 120, 20));
+
+    vec /= sml::dvec3(2, 3, 2);
+
+    REQUIRE(vec == sml::dvec3(2, 40, 10));
+
+    vec /= 2.0;
+
+    REQUIRE(vec == sml::dvec3(1, 20, 5));
+}
+
+TEST_CASE("fvec4 tests", "[vec4]") {
     sml::fvec4 vec = sml::fvec4(1.0f, 0.0f, 2.0f, 10.0f);
 
     REQUIRE(vec != sml::fvec4(0.0f, 1.0f, 3.0f, 5.0f));
@@ -125,6 +195,40 @@ TEST_CASE("vec4 tests", "[vec4]") {
     vec /= 2.0f;
 
     REQUIRE(vec == sml::fvec4(1, 20, 5, 20));
+}
+
+TEST_CASE("dvec4 tests", "[vec4]") {
+    sml::dvec4 vec = sml::dvec4(1.0, 0.0, 2.0, 10.0);
+
+    REQUIRE(vec != sml::dvec4(0.0, 1.0, 3.0, 5.0));
+    REQUIRE(vec == sml::dvec4(1.0, 0.0, 2.0, 10.0));
+
+    vec = sml::dvec4(1, 20, 5, 20);
+
+    REQUIRE(vec == sml::dvec4(1, 20, 5, 20));
+
+    vec += sml::dvec4(10, 1, 2, 2);
+
+    REQUIRE(vec == sml::dvec4(11, 21, 7, 22));
+
+    vec -= sml::dvec4(10, 1, 2, 2);
+
+    REQUIRE(vec == sml::dvec4(1, 20, 5, 20));
+    vec *= sml::dvec4(2, 3, 2, 2);
+
+    REQUIRE(vec == sml::dvec4(2, 60, 10, 40));
+
+    vec *= 2.0;
+
+    REQUIRE(vec == sml::dvec4(4, 120, 20, 80));
+
+    vec /= sml::dvec4(2, 3, 2, 2);
+
+    REQUIRE(vec == sml::dvec4(2, 40, 10, 40));
+
+    vec /= 2.0;
+
+    REQUIRE(vec == sml::dvec4(1, 20, 5, 20));
 }
 
 TEST_CASE("fmat2 tests", "[mat2]") {
@@ -203,6 +307,60 @@ TEST_CASE("fmat3 tests", "[mat3]") {
 
     sml::fvec3 res2 = mat * vec;
     sml::fvec3 cmp2(40, 37, 38);
+
+    REQUIRE(res2 == cmp2);
+}
+
+TEST_CASE("dmat3 tests", "[mat3]") {
+    sml::dmat3 mat(2, 4, 7, 3, 4, 8, 1, 3, 8);
+    sml::dmat3 mat2(1, 6, 3, 4, 7, 5, 7, 8, 3);
+
+    sml::dmat3 res = mat * mat2;
+    sml::dmat3 cmp(23, 37, 79, 34, 59, 124, 41, 69, 137);
+
+    REQUIRE(res == cmp);
+
+    mat = sml::dmat3(5, 3, 5, 2, 5, 4, 7, 5, 3);
+    sml::dvec3 vec(4, 3, 2);
+
+    sml::dvec3 res2 = mat * vec;
+    sml::dvec3 cmp2(40, 37, 38);
+
+    REQUIRE(res2 == cmp2);
+}
+
+TEST_CASE("fmat4 tests", "[mat4]") {
+    sml::fmat4 mat(2, 4, 7, 3, 4, 8, 1, 3, 8, 5, 4, 3, 2, 3, 4, 5);
+    sml::fmat4 mat2(1, 6, 3, 4, 7, 5, 7, 8, 3, 5, 4, 3, 2, 3, 4, 5);
+
+    sml::fmat4 res = mat * mat2;
+    sml::fmat4 cmp(58, 79, 41, 50, 106, 127, 114, 97, 64, 81, 54, 51, 58, 67, 53, 52);
+
+    REQUIRE(res == cmp);
+
+    mat = sml::fmat4(5, 3, 5, 2, 5, 4, 7, 5, 3, 5, 4, 3, 2, 3, 4, 5);
+    sml::fvec4 vec(4, 3, 2, 3);
+
+    sml::fvec4 res2 = mat * vec;
+    sml::fvec4 cmp2(47, 43, 61, 44);
+
+    REQUIRE(res2 == cmp2);
+}
+
+TEST_CASE("dmat4 tests", "[mat4]") {
+    sml::dmat4 mat(2, 4, 7, 3, 4, 8, 1, 3, 8, 5, 4, 3, 2, 3, 4, 5);
+    sml::dmat4 mat2(1, 6, 3, 4, 7, 5, 7, 8, 3, 5, 4, 3, 2, 3, 4, 5);
+
+    sml::dmat4 res = mat * mat2;
+    sml::dmat4 cmp(58, 79, 41, 50, 106, 127, 114, 97, 64, 81, 54, 51, 58, 67, 53, 52);
+
+    REQUIRE(res == cmp);
+
+    mat = sml::dmat4(5, 3, 5, 2, 5, 4, 7, 5, 3, 5, 4, 3, 2, 3, 4, 5);
+    sml::dvec4 vec(4, 3, 2, 3);
+
+    sml::dvec4 res2 = mat * vec;
+    sml::dvec4 cmp2(47, 43, 61, 44);
 
     REQUIRE(res2 == cmp2);
 }

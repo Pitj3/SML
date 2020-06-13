@@ -1,7 +1,7 @@
 #ifndef sml_mat2_h__
 #define sml_mat2_h__
 
-/* mat2.h -- col major mat2 implementation of the 'Simple Math Library'
+/* column.h -- col major mat2 implementation of the 'Simple Math Library'
   Copyright (C) 2020 Roderick Griffioen
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -28,7 +28,7 @@
 namespace sml
 {
     template<typename T>
-    class alignas(16) mat2
+    class alignas(simdalign<T>::value) mat2
     {
         public:
             mat2()
@@ -212,14 +212,14 @@ namespace sml
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
-                    alignas(16) f32 mat0[4] = {
+                    alignas(simdalign<T>::value) f32 mat0[4] = {
                         m00,
                         m01,
                         m10,
                         m11
                     };
 
-                    alignas(16) f32 mat1[4] = {
+                    alignas(simdalign<T>::value) f32 mat1[4] = {
                         other.m00,
                         other.m01,
                         other.m10,
@@ -248,7 +248,8 @@ namespace sml
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    alignas(16) f64 res[4];
+                    alignas(simdalign<T>::value) f64 res[4];
+
                     __m128d col0 = _mm_load_pd(&m00);
                     __m128d col1 = _mm_load_pd(&m10);
 
@@ -403,7 +404,7 @@ namespace sml
     template<typename T>
     vec2<T> operator * (const mat2<T>& lhs, const vec2<T>& rhs)
     {
-        alignas(16) vec2<T> res;
+        alignas(simdalign<T>::value) vec2<T> res;
 
         if constexpr(std::is_same<T, f32>::value)
         {

@@ -1,7 +1,7 @@
-#ifndef sml_mat3_h__
-#define sml_mat3_h__
+#ifndef sml_mat4_h__
+#define sml_mat4_h__
 
-/* mat3.h -- column major mat3 implementation of the 'Simple Math Library'
+/* mat4.h -- column major mat4 implementation of the 'Simple Math Library'
   Copyright (C) 2020 Roderick Griffioen
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -22,91 +22,130 @@
 #include <mmintrin.h>
 #include <smmintrin.h>
 
-#include "vec3.h"
+#include "vec4.h"
 #include "smltypes.h"
 
 namespace sml
 {
     template<typename T>
-    class alignas(simdalign<T>::value) mat3
+    class alignas(simdalign<T>::value) mat4
     {
         public:
-            mat3()
+            mat4()
             {
                 identity();
             }
 
-            mat3(T diagonal)
+            mat4(T diagonal)
             {
                 m00 = diagonal;
                 m10 = T(0);
                 m20 = T(0);
+                m30 = T(0);
                 m01 = T(0);
                 m11 = diagonal;
                 m21 = T(0);
+                m31 = T(0);
                 m02 = T(0);
                 m12 = T(0);
                 m22 = diagonal;
+                m32 = T(0);
+                m03 = T(0);
+                m13 = T(0);
+                m23 = T(0);
+                m33 = diagonal;
             }
 
-            mat3(T col1[3], T col2[3], T col3[3])
+            mat4(T col1[4], T col2[4], T col3[4], T col4[4])
             {
                 m00 = col1[0];
                 m01 = col1[1];
                 m02 = col1[2];
+                m03 = col1[3];
 
                 m10 = col2[0];
                 m11 = col2[1];
                 m12 = col2[2];
+                m13 = col2[3];
                 
                 m20 = col3[0];
                 m21 = col3[1];
                 m22 = col3[2];
+                m23 = col3[3];
+
+                m30 = col4[0];
+                m31 = col4[1];
+                m32 = col4[2];
+                m33 = col4[3];
             }
 
-            mat3(T m00, T m01, T m02, T m10, T m11, T m12, T m20, T m21, T m22)
+            mat4(T m00, T m01, T m02, T m03, T m10, T m11, T m12, T m13, T m20, T m21, T m22, T m23, T m30, T m31, T m32, T m33)
             {
                 this->m00 = m00;
                 this->m10 = m10;
                 this->m20 = m20;
+                this->m30 = m30;
 
                 this->m01 = m01;
                 this->m11 = m11;
                 this->m21 = m21;
+                this->m31 = m31;
                 
                 this->m02 = m02;
                 this->m12 = m12;
                 this->m22 = m22;
+                this->m32 = m32;
+
+                this->m03 = m03;
+                this->m13 = m13;
+                this->m23 = m23;
+                this->m33 = m33;
             }
 
-            mat3(const mat3& other)
+            mat4(const mat4& other)
             {
                 m00 = other.m00;
                 m10 = other.m10;
                 m20 = other.m20;
+                m30 = other.m30;
 
                 m01 = other.m01;
                 m11 = other.m11;
                 m21 = other.m21;
+                m31 = other.m31;
                 
                 m02 = other.m02;
                 m12 = other.m12;
                 m22 = other.m22;
+                m32 = other.m32;
+                
+                m03 = other.m03;
+                m13 = other.m13;
+                m23 = other.m23;
+                m33 = other.m33;
             }
 
-            mat3(mat3&& other) noexcept
+            mat4(mat4&& other) noexcept
             {
                 m00 = std::move(other.m00);
                 m10 = std::move(other.m10);
                 m20 = std::move(other.m20);
+                m30 = std::move(other.m30);
 
                 m01 = std::move(other.m01);
                 m11 = std::move(other.m11);
                 m21 = std::move(other.m21);
+                m31 = std::move(other.m31);
 
                 m02 = std::move(other.m02);
                 m12 = std::move(other.m12);
                 m22 = std::move(other.m22);
+                m32 = std::move(other.m32);
+
+                m03 = std::move(other.m03);
+                m13 = std::move(other.m13);
+                m23 = std::move(other.m23);
+                m33 = std::move(other.m33);
             }
 
             void set(T m00, T m01, T m02, T m10, T m11, T m12, T m20, T m21, T m22)
@@ -114,60 +153,84 @@ namespace sml
                 this->m00 = m00;
                 this->m10 = m10;
                 this->m20 = m20;
+                this->m30 = m30;
 
                 this->m01 = m01;
                 this->m11 = m11;
                 this->m21 = m21;
+                this->m31 = m31;
                 
                 this->m02 = m02;
                 this->m12 = m12;
                 this->m22 = m22;
+                this->m32 = m32;
+
+                this->m03 = m03;
+                this->m13 = m13;
+                this->m23 = m23;
+                this->m33 = m33;
             }
 
-            void set(T v[9])
+            void set(T v[16])
             {
-                for(int i = 0; i < 9; i++)
+                for(int i = 0; i < 16; i++)
                 {
                     this->v[i] = v[i];
                 }
             }
 
-            mat3& operator = (const mat3& other)
+            mat4& operator = (const mat4& other)
             {
                 m00 = other.m00;
                 m10 = other.m10;
                 m20 = other.m20;
+                m30 = other.m30;
 
                 m01 = other.m01;
                 m11 = other.m11;
                 m21 = other.m21;
+                m31 = other.m31;
                 
                 m02 = other.m02;
                 m12 = other.m12;
                 m22 = other.m22;
+                m32 = other.m32;
+                
+                m03 = other.m03;
+                m13 = other.m13;
+                m23 = other.m23;
+                m33 = other.m33;
 
                 return *this;
             }
 
-            mat3& operator = (mat3&& other) noexcept
+            mat4& operator = (mat4&& other) noexcept
             {
                 m00 = std::move(other.m00);
                 m10 = std::move(other.m10);
                 m20 = std::move(other.m20);
+                m30 = std::move(other.m30);
 
                 m01 = std::move(other.m01);
                 m11 = std::move(other.m11);
                 m21 = std::move(other.m21);
+                m31 = std::move(other.m31);
 
                 m02 = std::move(other.m02);
                 m12 = std::move(other.m12);
                 m22 = std::move(other.m22);
+                m32 = std::move(other.m32);
+
+                m03 = std::move(other.m03);
+                m13 = std::move(other.m13);
+                m23 = std::move(other.m23);
+                m33 = std::move(other.m33);
 
                 return *this;
             }
 
             // Operators
-            inline bool operator == (const mat3& other) const
+            inline bool operator == (const mat4& other) const
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -178,7 +241,7 @@ namespace sml
                     };
 
                     s32 result = 1;
-                    for (s32 i = 0; i < 3; i++)
+                    for (s32 i = 0; i < 4; i++)
                     {
                         __m128 me = _mm_load_ps(&m00 + (2 * i + 0));
                         __m128 ot = _mm_load_ps(&other.m00 + (2 * i + 0));
@@ -216,12 +279,13 @@ namespace sml
                     return result != 0;
                 }
 
-                return m00 == other.m00 && m10 == other.m10 && m20 == other.m20 
-                    && m01 == other.m01 && m11 == other.m11 && m21 == other.m21
-                    && m02 == other.m02 && m12 == other.m12 && m22 == other.m22;
+                return m00 == other.m00 && m10 == other.m10 && m20 == other.m20  && m30 == other.m30
+                    && m01 == other.m01 && m11 == other.m11 && m21 == other.m21 && m31 == other.m31
+                    && m02 == other.m02 && m12 == other.m12 && m22 == other.m22 && m32 == other.m32
+                    && m03 == other.m03 && m13 == other.m13 && m23 == other.m23 && m33 == other.m33;
             }
 
-            inline bool operator != (const mat3& other) const
+            inline bool operator != (const mat4& other) const
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -232,7 +296,7 @@ namespace sml
                     };
 
                     s32 result = 1;
-                    for (s32 i = 0; i < 3; i++)
+                    for (s32 i = 0; i < 4; i++)
                     {
                         __m128 me = _mm_load_ps(&m00 + (2 * i + 0));
                         __m128 ot = _mm_load_ps(&other.m00 + (2 * i + 0));
@@ -270,26 +334,29 @@ namespace sml
                     return result != 0;
                 }
 
-                return m00 == other.m00 || m10 == other.m10 || m20 == other.m20 
-                    || m01 == other.m01 || m11 == other.m11 || m21 == other.m21
-                    || m02 == other.m02 || m12 == other.m12 || m22 == other.m22;
+                return m00 == other.m00 || m10 == other.m10 || m20 == other.m20 || m30 == other.m30
+                    || m01 == other.m01 || m11 == other.m11 || m21 == other.m21 || m31 == other.m31
+                    || m02 == other.m02 || m12 == other.m12 || m22 == other.m22 || m32 == other.m32
+                    || m03 == other.m03 || m13 == other.m13 || m23 == other.m23 || m33 == other.m33;
             }
 
-            mat3& operator *= (const mat3& other)
+            mat4& operator *= (const mat4& other)
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
                     __m128 col0 = _mm_load_ps(v + 0);
                     __m128 col1 = _mm_load_ps(v + 4);
                     __m128 col2 = _mm_load_ps(v + 8);
+                    __m128 col3 = _mm_load_ps(v + 8);
 
-                    for (s32 i = 0; i < 3; i++)
+                    for (s32 i = 0; i < 4; i++)
                     {
                         __m128 elem0 = _mm_broadcast_ss(other.v + (4 * i + 0));
                         __m128 elem1 = _mm_broadcast_ss(other.v + (4 * i + 1));
                         __m128 elem2 = _mm_broadcast_ss(other.v + (4 * i + 2));
+                        __m128 elem3 = _mm_broadcast_ss(other.v + (4 * i + 3));
 
-                        __m128 result = _mm_add_ps(_mm_add_ps(_mm_mul_ps(elem0, col0), _mm_mul_ps(elem1, col1)), _mm_mul_ps(elem2, col2));
+                        __m128 result = _mm_add_ps(_mm_add_ps(_mm_mul_ps(elem0, col0), _mm_mul_ps(elem1, col1)), _mm_add_ps(_mm_mul_ps(elem2, col2), _mm_mul_ps(elem3, col3)));
                         _mm_store_ps(v + 4 * i, result);
                     }
 
@@ -302,14 +369,16 @@ namespace sml
                     __m256d col0 = _mm256_load_pd(&m00);
                     __m256d col1 = _mm256_load_pd(&m10);
                     __m256d col2 = _mm256_load_pd(&m20);
+                    __m256d col3 = _mm256_load_pd(&m20);
 
-                    for (s32 i = 0; i < 3; i++)
+                    for (s32 i = 0; i < 4; i++)
                     {
                         __m256d elem0 = _mm256_set1_pd(*(&other.m00 + (2 * i + 0)));
                         __m256d elem1 = _mm256_set1_pd(*(&other.m00 + (2 * i + 1)));
                         __m256d elem2 = _mm256_set1_pd(*(&other.m00 + (2 * i + 2)));
+                        __m256d elem3 = _mm256_set1_pd(*(&other.m00 + (2 * i + 2)));
 
-                        __m256d result = _mm256_add_pd(_mm256_mul_pd(elem0, col0), _mm256_add_pd(_mm256_mul_pd(elem1, col1), _mm256_mul_pd(elem2, col2)));
+                        __m256d result = _mm256_add_pd(_mm256_mul_pd(elem0, col0), _mm256_add_pd(_mm256_mul_pd(elem1, col1), _mm256_add_pd(_mm256_mul_pd(elem2, col2), _mm256_mul_pd(elem3, col3))));
 
                         _mm256_store_pd(res + (2 * i), result);
                     }
@@ -317,6 +386,7 @@ namespace sml
                     _mm256_store_pd(&m00, _mm256_load_pd(res + 0));
                     _mm256_store_pd(&m10, _mm256_load_pd(res + 4));
                     _mm256_store_pd(&m20, _mm256_load_pd(res + 8));
+                    _mm256_store_pd(&m30, _mm256_load_pd(res + 12));
 
                     return *this;
                 }
@@ -354,15 +424,22 @@ namespace sml
                 m00 = T(1);
                 m10 = T(0);
                 m20 = T(0);
+                m30 = T(0);
                 m01 = T(0);
                 m11 = T(1);
                 m21 = T(0);
+                m31 = T(0);
                 m02 = T(0);
                 m12 = T(0);
                 m22 = T(1);
+                m32 = T(0);
+                m03 = T(0);
+                m13 = T(0);
+                m23 = T(0);
+                m33 = T(1);
             }
 
-            inline mat3& transpose()
+            inline mat4& transpose()
             {
                 T newM00 = m00;
                 T newM01 = m10;
@@ -387,13 +464,13 @@ namespace sml
                 return *this;
             }
 
-            inline mat3 transposed() const
+            inline mat4 transposed() const
             {
-                mat3 c = mat3(*this);
+                mat4 c = mat4(*this);
                 return c.transpose();
             }
 
-            inline mat3& invert()
+            inline mat4& invert()
             {
                 T det = determinant();
 
@@ -422,24 +499,31 @@ namespace sml
                 return *this;
             }
 
-            inline mat3& negate()
+            inline mat4& negate()
             {
                 m00 = -m00;
                 m10 = -m10;
                 m20 = -m20;
+                m30 = -m30;
                 m01 = -m01;
                 m11 = -m11;
                 m21 = -m21;
+                m31 = -m31;
                 m02 = -m02;
                 m12 = -m12;
                 m22 = -m22;
+                m32 = -m32;
+                m03 = -m03;
+                m13 = -m13;
+                m23 = -m23;
+                m33 = -m33;
 
                 return *this;
             }
 
-            inline mat3 inverted() const
+            inline mat4 inverted() const
             {
-                mat3 c = mat(*this);
+                mat4 c = mat(*this);
                 return c.invert();
             }
 
@@ -452,9 +536,10 @@ namespace sml
 
             inline std::string toString() const
             {
-                return std::to_string(m00) + ", " + std::to_string(m10) + ", " + std::to_string(m20) + "\n" 
-                    + std::to_string(m01) + ", " + std::to_string(m11) + ", " + std::to_string(m21) + "\n"
-                    + std::to_string(m02) + ", " + std::to_string(m12) + ", " + std::to_string(m22);
+                return std::to_string(m00) + ", " + std::to_string(m10) + ", " + std::to_string(m20) + std::to_string(m30) + "\n" 
+                    + std::to_string(m01) + ", " + std::to_string(m11) + ", " + std::to_string(m21) + std::to_string(m31) + "\n"
+                    + std::to_string(m02) + ", " + std::to_string(m12) + ", " + std::to_string(m22) + std::to_string(m32) + "\n"
+                    + std::to_string(m03) + ", " + std::to_string(m13) + ", " + std::to_string(m23) + std::to_string(m33);
             }
 
             // Data
@@ -464,62 +549,73 @@ namespace sml
                 {
                     union
                     {
-                        vec3<T> col0;
+                        vec4<T> col0;
                         struct
                         {
-                            T m00, m01, m02;
+                            T m00, m01, m02, m03;
                         };
                     };
 
                     union
                     {
-                        vec3<T> col1;
+                        vec4<T> col1;
                         struct
                         {
-                            T m10, m11, m12;
+                            T m10, m11, m12, m13;
                         };
                     };
 
                     union
                     {
-                        vec3<T> col2;
+                        vec4<T> col2;
                         struct
                         {
-                            T m20, m21, m22;
+                            T m20, m21, m22, m23;
+                        };
+                    };
+
+                    union
+                    {
+                        vec4<T> col3;
+                        struct
+                        {
+                            T m30, m31, m32, m33;
                         };
                     };
                 };
 
-                vec3<T> row[3];
+                vec4<T> row[4];
 
-                T v[12];            
+                T v[16];            
             };
     };
 
     // Operators
     template<typename T>
-    mat3<T> operator * (mat3<T> left, mat3<T> right)
+    mat4<T> operator * (mat4<T> left, mat4<T> right)
     {
         left *= right;
         return left;
     }
 
     template<typename T>
-    vec3<T> operator * (const mat3<T>& lhs, const vec3<T>& rhs)
+    vec4<T> operator * (const mat4<T>& lhs, const vec4<T>& rhs)
     {
-        alignas(simdalign<T>::value) vec3<T> res;
+        alignas(simdalign<T>::value) vec4<T> res;
 
         if constexpr (std::is_same<T, f32>::value)
         {
             __m128 x = _mm_broadcast_ss(&rhs.x);
             __m128 y = _mm_broadcast_ss(&rhs.y);
             __m128 z = _mm_broadcast_ss(&rhs.z);
+            __m128 w = _mm_broadcast_ss(&rhs.w);
 
             __m128 c0 = _mm_load_ps(&lhs.m00);
             __m128 c1 = _mm_load_ps(&lhs.m10);
             __m128 c2 = _mm_load_ps(&lhs.m20);
+            __m128 c3 = _mm_load_ps(&lhs.m30);
 
-            _mm_store_ps(res.v, _mm_add_ps(_mm_mul_ps(x, c0), _mm_add_ps(_mm_mul_ps(y, c1), _mm_mul_ps(z, c2))));
+            _mm_store_ps(res.v, _mm_add_ps(_mm_add_ps(_mm_mul_ps(x, c0), _mm_mul_ps(y, c1)), _mm_add_ps(_mm_mul_ps(z, c2), _mm_mul_ps(w, c3))));
 
             return res;
         }
@@ -529,28 +625,29 @@ namespace sml
             __m256d x = _mm256_set1_pd(rhs.x);
             __m256d y = _mm256_set1_pd(rhs.y);
             __m256d z = _mm256_set1_pd(rhs.z);
+            __m256d w = _mm256_set1_pd(rhs.w);
 
-            __m256d c0 = _mm256_load_pd(lhs.col0.v);
-            __m256d c1 = _mm256_load_pd(lhs.col1.v);
-            __m256d c2 = _mm256_load_pd(lhs.col2.v);
+            __m256d c0 = _mm256_load_pd(&lhs.m00);
+            __m256d c1 = _mm256_load_pd(&lhs.m10);
+            __m256d c2 = _mm256_load_pd(&lhs.m20);
+            __m256d c3 = _mm256_load_pd(&lhs.m30);
 
-            __m256d resu = _mm256_add_pd(_mm256_mul_pd(x, c0), _mm256_add_pd(_mm256_mul_pd(y, c1), _mm256_mul_pd(z, c2)));
-
-            _mm256_store_pd(res.v, resu);
+            _mm256_store_pd(res.v, _mm256_add_pd(_mm256_add_pd(_mm256_mul_pd(x, c0), _mm256_mul_pd(y, c1)), _mm256_add_pd(_mm256_mul_pd(z, c2), _mm256_mul_pd(w, c3))));
 
             return res;
         }
 
-        T x = lhs.m00 * rhs.x + lhs.m10 * rhs.y + lhs.m20 * rhs.z;
-        T y = lhs.m01 * rhs.x + lhs.m11 * rhs.y + lhs.m21 * rhs.z;
-        T z = lhs.m02 * rhs.x + lhs.m11 * rhs.y + lhs.m22 * rhs.z;
+        T x = lhs.m00 * rhs.x + lhs.m10 * rhs.y + lhs.m20 * rhs.z + lhs.m30 * rhs.w;
+        T y = lhs.m01 * rhs.x + lhs.m11 * rhs.y + lhs.m21 * rhs.z + lhs.m31 * rhs.w;
+        T z = lhs.m02 * rhs.x + lhs.m12 * rhs.y + lhs.m22 * rhs.z + lhs.m32 * rhs.w;
+        T w = lhs.m03 * rhs.x + lhs.m13 * rhs.y + lhs.m23 * rhs.z + lhs.m33 * rhs.w;
 
-        return { x, y, z };
+        return { x, y, z, w };
     }
 
     // Predefined types
-    typedef mat3<f32> fmat3;
-    typedef mat3<f64> dmat3;
+    typedef mat4<f32> fmat4;
+    typedef mat4<f64> dmat4;
 } // namespace sml
 
-#endif // sml_mat3_h__
+#endif // sml_mat4_h__

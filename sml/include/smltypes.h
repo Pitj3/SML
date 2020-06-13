@@ -19,6 +19,7 @@
 */
 
 #include <cstdint>
+#include <type_traits>
 
 // Predefined types
 typedef unsigned char u8;
@@ -32,6 +33,24 @@ typedef signed long s64;
 
 typedef float f32;
 typedef double f64;
+
+namespace sml
+{
+    template<typename T>
+    struct simdalign : std::integral_constant<size_t, 1>
+    {
+    };
+
+    template<>
+    struct simdalign<f32> : std::integral_constant<size_t, 16>
+    {
+    };
+
+    template<>
+    struct simdalign<f64> : std::integral_constant<size_t, 32>
+    {
+    };
+}
 
 #endif // smltypes_h__
 

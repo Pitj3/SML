@@ -26,7 +26,7 @@
 namespace sml
 {
     template<typename T>
-    class alignas(16) vec4
+    class alignas(simdalign<T>::value) vec4
     {
         public:
             vec4()
@@ -125,7 +125,7 @@ namespace sml
                     __m256d him = _mm256_load_pd(other.v);
                     __m256d res = _mm256_add_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm256_store_pd(v, res);
 
                     return *this;
                 }
@@ -157,7 +157,7 @@ namespace sml
                     __m256d him = _mm256_load_pd(other.v);
                     __m256d res = _mm256_sub_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm256_store_pd(v, res);
 
                     return *this;
                 }
@@ -189,7 +189,7 @@ namespace sml
                     __m256d him = _mm256_load_pd(other.v);
                     __m256d res = _mm256_mul_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm256_store_pd(v, res);
 
                     return *this;
                 }
@@ -218,10 +218,10 @@ namespace sml
                 if constexpr(std::is_same<T, f64>::value)
                 {
                     __m256d me = _mm256_load_pd(v);
-                    __m256d him = _mm256_set_pd1(other);
+                    __m256d him = _mm256_set1_pd(other);
                     __m256d res = _mm256_mul_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm256_store_pd(v, res);
 
                     return *this;
                 }
@@ -253,7 +253,7 @@ namespace sml
                     __m256d him = _mm256_load_pd(other.v);
                     __m256d res = _mm256_div_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm256_store_pd(v, res);
 
                     return *this;
                 }
@@ -282,10 +282,10 @@ namespace sml
                 if constexpr(std::is_same<T, f64>::value)
                 {
                     __m256d me = _mm256_load_pd(v);
-                    __m256d him = _mm256_set_pd1(other);
+                    __m256d him = _mm256_set1_pd(other);
                     __m256d res = _mm256_div_pd(me, him);
 
-                    _mm_store_pd(v, res);
+                    _mm256_store_pd(v, res);
 
                     return *this;
                 }

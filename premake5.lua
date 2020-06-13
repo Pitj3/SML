@@ -13,6 +13,8 @@ workspace "SML"
     IncludeDir = {}
     IncludeDir["SML"] = "sml/include"
 
+    architecture "x64"
+
 project "sml"
     kind "StaticLib"
     language "C++"

@@ -31,7 +31,7 @@ namespace sml
     class vec2view;
 
     template<typename T>
-    class alignas(16) vec2
+    class alignas(sml::simdalign<T>::value) vec2
     {
         public:
             vec2()
@@ -291,7 +291,7 @@ namespace sml
                 if constexpr(std::is_same<T, f64>::value)
                 {
                     __m128d me = _mm_load_pd(v);
-                    __m128d ot = _mm_set1_pd(&other);
+                    __m128d ot = _mm_set1_pd(other);
                     __m128d res = _mm_mul_pd(me, ot);
 
                     _mm_store_pd(v, res);
@@ -351,7 +351,7 @@ namespace sml
                 if constexpr(std::is_same<T, f64>::value)
                 {
                     __m128d me = _mm_load_pd(v);
-                    __m128d ot = _mm_set1_pd(&other);
+                    __m128d ot = _mm_set1_pd(other);
                     __m128d res = _mm_div_pd(me, ot);
 
                     _mm_store_pd(v, res);
