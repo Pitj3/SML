@@ -51,7 +51,7 @@ namespace sml
 	};
 
 	/// Current version.
-	extern smlVersion version;
+	smlVersion version = { 0, 1, 0 };
 } // namespace sml
 
 #endif // sml_config_h__
