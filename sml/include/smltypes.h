@@ -34,6 +34,8 @@ typedef signed long s64;
 typedef float f32;
 typedef double f64;
 
+#define SML_NO_DISCARD [[nodiscard]]
+
 namespace sml
 {
     template<typename T>

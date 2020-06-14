@@ -34,35 +34,35 @@ namespace sml
     class alignas(sml::simdalign<T>::value) vec2
     {
         public:
-            vec2()
+            constexpr vec2() noexcept
             {
                 zero();
                 v[2] = 0;
                 v[3] = 0;
             }
 
-            vec2(T x, T y)
+            constexpr vec2(T x, T y) noexcept
             {
                 set(x, y);
                 v[2] = 0;
                 v[3] = 0;
             }
 
-            explicit vec2(T v)
+            constexpr explicit vec2(T v) noexcept
             {
                 set(v, v);
                 v[2] = 0;
                 v[3] = 0;
             }
 
-            vec2(const vec2& other)
+            constexpr vec2(const vec2& other) noexcept
             {
-                set(other.v);
+                set(const_cast<T*>(other.v));
                 v[2] = 0;
                 v[3] = 0;
             }
 
-            vec2(vec2&& other) noexcept
+            constexpr vec2(vec2&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
@@ -70,28 +70,28 @@ namespace sml
                 v[3] = 0;
             }
 
-            vec2& operator = (const vec2view<T>& other);
-            vec2& operator = (vec2view<T>&& other);
+            constexpr vec2& operator = (const vec2view<T>& other) noexcept;
+            constexpr vec2& operator = (vec2view<T>&& other) noexcept;
 
-            void zero()
+            SML_NO_DISCARD constexpr void zero() noexcept
             {
-                set(T(0), T(0));
+                set(static_cast<T>(0), static_cast<T>(0));
             }
 
-            void set(T x, T y)
+            SML_NO_DISCARD constexpr void set(T x, T y) noexcept
             {
                 this->x = x;
                 this->y = y;
             }
 
-            void set(T v[2])
+            SML_NO_DISCARD void set(T v[2]) noexcept
             {
                 this->v[0] = v[0];
                 this->v[1] = v[1];
             }
 
             // Operators
-            inline bool operator == (const vec2& other) const
+            inline constexpr bool operator == (const vec2& other) const noexcept
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -130,7 +130,7 @@ namespace sml
                 return x == other.x && y == other.y;
             }
 
-            inline bool operator != (const vec2& other) const
+            inline constexpr bool operator != (const vec2& other) const noexcept
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -169,14 +169,14 @@ namespace sml
                 return x != other.x || y != other.y;
             }
 
-            vec2& operator = (const vec2& other)
+            constexpr vec2& operator = (const vec2& other) noexcept
             {
                 set(other.v);
 
                 return *this;
             }
 
-            vec2& operator = (vec2&& other) noexcept
+            constexpr vec2& operator = (vec2&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
@@ -184,7 +184,7 @@ namespace sml
                 return *this;
             }
 
-            vec2& operator += (const vec2& other)
+            vec2& operator += (const vec2& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -215,7 +215,7 @@ namespace sml
                 return *this;
             }
 
-            vec2& operator -= (const vec2& other)
+            vec2& operator -= (const vec2& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -245,7 +245,7 @@ namespace sml
                 return *this;
             }
 
-            vec2& operator *= (const vec2& other)
+            vec2& operator *= (const vec2& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -275,7 +275,7 @@ namespace sml
                 return *this;
             }
 
-            vec2& operator *= (const T other)
+            vec2& operator *= (const T other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -305,7 +305,7 @@ namespace sml
                 return *this;
             }
 
-            vec2& operator /= (const vec2& other)
+            vec2& operator /= (const vec2& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -335,7 +335,7 @@ namespace sml
                 return *this;
             }
 
-            vec2& operator /= (const T other)
+            vec2& operator /= (const T other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -365,8 +365,8 @@ namespace sml
                 return *this;
             }
 
-            // Operations
-            inline T dot(vec2 other) const
+            // Operations 
+            SML_NO_DISCARD inline constexpr T dot(vec2 other) const noexcept
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -395,17 +395,17 @@ namespace sml
                 return (x * other.x) + (y * other.y);
             }
 
-            inline T length() const
+            SML_NO_DISCARD inline constexpr T length() const noexcept
             {
                 return sml::sqrt((x * x) + (y * y));
             }
 
-            inline T lengthsquared() const
+            SML_NO_DISCARD inline constexpr T lengthsquared() const noexcept
             {
                 return (x * x) + (y * y);
             }
 
-            inline vec2& normalize()
+            SML_NO_DISCARD inline constexpr vec2& normalize() noexcept
             {
                 float mag = length();
 
@@ -417,40 +417,40 @@ namespace sml
                 return *this;
             }
 
-            inline vec2 normalized()
+            SML_NO_DISCARD inline constexpr vec2 normalized() const  noexcept
             {
                 vec2 copy(x, y);
                 return copy.normalize();
             }
 
-            inline bool any() const
+            SML_NO_DISCARD inline constexpr bool any() const noexcept
             {
                 return x || y;
             }
 
-            inline bool all() const
+            SML_NO_DISCARD inline constexpr bool all() const noexcept
             {
                 return x && y;
             } 
 
-            inline bool none() const
+            SML_NO_DISCARD inline constexpr bool none() const noexcept
             {
                 return !x && !y;
             }
 
-            inline std::string toString()
+            SML_NO_DISCARD inline constexpr std::string toString() const noexcept
             {
                 return std::to_string(x) + ", " + std::to_string(y);
             }
 
             // Statics
-            static inline vec2 distance(const vec2& a, const vec2& b)
+            SML_NO_DISCARD static inline constexpr T distance(const vec2& a, const vec2& b) noexcept
             {
                 vec2 delta = b - a;
                 return delta.length();
             }
 
-            static inline vec2 min(const vec2& a, const vec2& b)
+            SML_NO_DISCARD static inline constexpr vec2 min(const vec2& a, const vec2& b) noexcept
             {
                 vec2 result;
 
@@ -485,7 +485,7 @@ namespace sml
                 };
             }
 
-            static inline vec2 max(const vec2& a, const vec2& b)
+            SML_NO_DISCARD static inline constexpr vec2 max(const vec2& a, const vec2& b) noexcept
             {
                 vec2 result;
 
@@ -520,12 +520,12 @@ namespace sml
                 };
             }
 
-            static inline vec2 clamp(const vec2& v, const vec2& a, const vec2& b)
+            SML_NO_DISCARD static inline constexpr vec2 clamp(const vec2& v, const vec2& a, const vec2& b) noexcept
             {
                 return max(a, min(v, b));
             }
 
-            static inline vec2 lerp(const vec2& a, const vec2& b, T t)
+            SML_NO_DISCARD static inline constexpr vec2 lerp(const vec2& a, const vec2& b, T t) noexcept
             {
                 T retX = sml::lerp(a.x, b.x, t);
                 T retY = sml::lerp(a.y, b.y, t);
@@ -533,7 +533,7 @@ namespace sml
                 return vec2(retX, retY);
             }
 
-            static inline vec2 lerpclamped(const vec2& a, const vec2& b, T t)
+            SML_NO_DISCARD static inline constexpr vec2 lerpclamped(const vec2& a, const vec2& b, T t) noexcept
             {
                 T retX = sml::lerpclamped(a.x, b.x, t);
                 T retY = sml::lerpclamped(a.y, b.y, t);
@@ -555,42 +555,42 @@ namespace sml
 
     // Operators
     template<typename T>
-    vec2<T> operator + (vec2<T> left, vec2<T> right)
+    constexpr vec2<T> operator + (vec2<T> left, vec2<T> right) noexcept
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator - (vec2<T> left, vec2<T> right)
+    constexpr vec2<T> operator - (vec2<T> left, vec2<T> right) noexcept
     {
         left -= right;
         return left;
     }
 
-    template<typename T>
-    vec2<T> operator * (vec2<T> left, vec2<T> right)
+    template<typename T> 
+    constexpr vec2<T> operator * (vec2<T> left, vec2<T> right) noexcept
     {
         left *= right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator * (vec2<T> left, T right)
+    constexpr vec2<T> operator * (vec2<T> left, T right) noexcept
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator / (vec2<T> left, vec2<T> right)
+    constexpr vec2<T> operator / (vec2<T> left, vec2<T> right) noexcept
     {
         left /= right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator / (vec2<T> left, T right)
+    constexpr vec2<T> operator / (vec2<T> left, T right) noexcept
     {
         left += right;
         return left;
@@ -607,21 +607,21 @@ namespace sml
     class vec2view
     {
         public:
-            vec2view() = default;
+            constexpr vec2view() = default;
 
-            vec2view(const vec2<T>& other)
+            constexpr vec2view(const vec2<T>& other) noexcept
             {
                 x = other.x;
                 y = other.y;
             }
 
-            vec2view(vec2<T>&& other) noexcept
+            constexpr vec2view(vec2<T>&& other) noexcept
             {
                 x = std::move(other.x);
                 y = std::move(other.y);
             }
 
-            vec2view& operator = (const vec2<T>& other)
+            constexpr vec2view& operator = (const vec2<T>& other) noexcept
             {
                 x = other.x;
                 y = other.y;
@@ -629,7 +629,7 @@ namespace sml
                 return *this;
             }
 
-            vec2view& operator = (vec2<T>&& other) noexcept
+            constexpr vec2view& operator = (vec2<T>&& other) noexcept
             {
                 x = std::move(other.x);
                 y = std::move(other.y);
@@ -641,7 +641,7 @@ namespace sml
     };
 
     template<typename T>
-    vec2<T>& vec2<T>::operator = (const vec2view<T>& other)
+    constexpr vec2<T>& vec2<T>::operator = (const vec2view<T>& other) noexcept
     {
         x = other.x;
         y = other.y;
@@ -650,7 +650,7 @@ namespace sml
     }
 
     template<typename T>
-    vec2<T>& vec2<T>::operator = (vec2view<T>&& other)
+    constexpr vec2<T>& vec2<T>::operator = (vec2view<T>&& other) noexcept
     {
         x = std::move(other.x);
         y = std::move(other.y);

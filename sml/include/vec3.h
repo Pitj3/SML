@@ -32,31 +32,31 @@ namespace sml
     class alignas(simdalign<T>::value) vec3
     {
         public:
-            vec3()
+            constexpr vec3() noexcept
             {
                 zero();
                 v[3] = 0;
             }
 
-            vec3(T x, T y, T z)
+            constexpr vec3(T x, T y, T z) noexcept
             {
                 set(x, y, z);
                 v[3] = 0;
             }
 
-            explicit vec3(T v)
+            constexpr explicit vec3(T v) noexcept
             {
                 set(v, v, v);
                 v[3] = 0;
             }
 
-            vec3(const vec3& other)
-            {
-                set(other.v);
+            constexpr vec3(const vec3& other) noexcept
+            { 
+                set(const_cast<T*>(other.v));
                 v[3] = 0;
             }
 
-            vec3(vec3&& other) noexcept
+            constexpr vec3(vec3&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
@@ -64,22 +64,22 @@ namespace sml
                 v[3] = 0;
             }
 
-            vec3& operator = (const vec3view<T>& other);
-            vec3& operator = (vec3view<T>&& other);
+            constexpr vec3& operator = (const vec3view<T>& other) noexcept;
+            constexpr vec3& operator = (vec3view<T>&& other) noexcept;
 
-            void zero()
+            SML_NO_DISCARD constexpr void zero() noexcept
             {
-                set(T(0), T(0), T(0));
+                set(static_cast<T>(0), static_cast<T>(0), static_cast<T>(0));
             }
 
-            void set(T x, T y, T z)
+            SML_NO_DISCARD constexpr void set(T x, T y, T z) noexcept
             {
                 this->x = x;
                 this->y = y;
                 this->z = z;
             }
 
-            void set(T v[3])
+            SML_NO_DISCARD constexpr void set(T v[3]) noexcept
             {
                 this->v[0] = v[0];
                 this->v[1] = v[1];
@@ -87,7 +87,7 @@ namespace sml
             }
 
             // Operators
-            inline constexpr bool operator == (const vec3& other) const
+            inline constexpr bool operator == (const vec3& other) const noexcept
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -126,7 +126,7 @@ namespace sml
                 return x == other.x && y == other.y && z == other.z;
             }
 
-            inline bool operator != (const vec3& other) const
+            inline constexpr bool operator != (const vec3& other) const noexcept
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -165,14 +165,14 @@ namespace sml
                 return x != other.x || y != other.y || z != other.z;
             }
 
-            vec3& operator = (const vec3& other)
+            constexpr vec3& operator = (const vec3& other) noexcept
             {
                 set(other.v);
 
                 return *this;
             }
 
-            vec3& operator = (vec3&& other) noexcept
+            constexpr vec3& operator = (vec3&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
@@ -181,7 +181,7 @@ namespace sml
                 return *this;
             }
 
-            vec3& operator += (const vec3& other)
+            vec3& operator += (const vec3& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -212,7 +212,7 @@ namespace sml
                 return *this;
             }
 
-            vec3& operator -= (const vec3& other)
+            vec3& operator -= (const vec3& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -243,7 +243,7 @@ namespace sml
                 return *this;
             }
 
-            vec3& operator *= (const vec3& other)
+            vec3& operator *= (const vec3& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -274,7 +274,7 @@ namespace sml
                 return *this;
             }
 
-            vec3& operator *= (const T other)
+            vec3& operator *= (const T other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -305,7 +305,7 @@ namespace sml
                 return *this;
             }
 
-            vec3& operator /= (const vec3& other)
+            vec3& operator /= (const vec3& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -336,7 +336,7 @@ namespace sml
                 return *this;
             }
 
-            vec3& operator /= (const T other)
+            vec3& operator /= (const T other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -368,7 +368,7 @@ namespace sml
             }
 
             // Operations
-            inline T dot(vec3 other) const
+            SML_NO_DISCARD inline constexpr T dot(vec3 other) const noexcept
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -397,17 +397,17 @@ namespace sml
                 return (x * other.x) + (y * other.y) + (z * other.z);
             }
 
-            inline T length() const
+            SML_NO_DISCARD inline constexpr T length() const noexcept
             {
                 return sml::sqrt((x * x) + (y * y) + (z * z));
             }
 
-            inline T lengthsquared() const
+            SML_NO_DISCARD inline constexpr T lengthsquared() const noexcept
             {
                 return (x * x) + (y * y) + (z * z);
             }
 
-            inline vec3& normalize()
+            SML_NO_DISCARD inline constexpr vec3& normalize() noexcept
             {
                 float mag = length();
 
@@ -419,40 +419,40 @@ namespace sml
                 return *this;
             }
 
-            inline vec3 normalized()
+            SML_NO_DISCARD inline constexpr vec3 normalized() const noexcept
             {
                 vec3 copy(x, y, z);
                 return copy.normalize();
             }
 
-            inline bool any() const
+            SML_NO_DISCARD inline constexpr bool any() const noexcept
             {
                 return x || y || z;
             }
 
-            inline bool all() const
+            SML_NO_DISCARD inline constexpr bool all() const noexcept
             {
                 return x && y && z;
             } 
 
-            inline bool none() const
+            SML_NO_DISCARD inline constexpr bool none() const noexcept
             {
                 return !x && !y && !z;
             }
 
-            inline std::string toString()
+            SML_NO_DISCARD inline constexpr std::string toString() const noexcept
             {
                 return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
             }
 
             // Statics
-            static inline vec3 distance(const vec3& a, const vec3& b)
+            SML_NO_DISCARD static inline constexpr T distance(const vec3& a, const vec3& b) noexcept
             {
                 vec3 delta = b - a;
                 return delta.length();
             }
 
-            static inline vec3 min(const vec3& a, const vec3& b)
+            SML_NO_DISCARD static inline constexpr vec3 min(const vec3& a, const vec3& b) noexcept
             {
                 vec3 result;
 
@@ -488,7 +488,7 @@ namespace sml
                 };
             }
 
-            static inline vec3 max(const vec3& a, const vec3& b)
+            SML_NO_DISCARD static inline constexpr vec3 max(const vec3& a, const vec3& b) noexcept
             {
                 vec3 result;
 
@@ -524,12 +524,12 @@ namespace sml
                 };
             }
 
-            static inline vec3 clamp(const vec3& v, const vec3& a, const vec3& b)
+            SML_NO_DISCARD static inline constexpr vec3 clamp(const vec3& v, const vec3& a, const vec3& b) noexcept
             {
                 return max(a, min(v, b));
             }
 
-            static inline vec3 lerp(const vec3& a, const vec3& b, T t)
+            SML_NO_DISCARD static inline constexpr vec3 lerp(const vec3& a, const vec3& b, T t) noexcept
             {
                 T retX = sml::lerp(a.x, b.x, t);
                 T retY = sml::lerp(a.y, b.y, t);
@@ -538,7 +538,7 @@ namespace sml
                 return vec3(retX, retY, retZ);
             }
 
-            static inline vec3 lerpclamped(const vec3& a, const vec3& b, T t)
+            SML_NO_DISCARD static inline constexpr vec3 lerpclamped(const vec3& a, const vec3& b, T t) noexcept
             {
                 T retX = sml::lerpclamped(a.x, b.x, t);
                 T retY = sml::lerpclamped(a.y, b.y, t);
@@ -547,7 +547,7 @@ namespace sml
                 return vec3(retX, retY, retZ);
             }
 
-            static inline vec3 cross(const vec3& left, const vec3& right)
+            SML_NO_DISCARD static inline constexpr vec3 cross(const vec3& left, const vec3& right) noexcept
             {
                 return
                 {
@@ -557,7 +557,7 @@ namespace sml
                 };
             }
 
-            static inline vec3 project(const vec3& a, const vec3& b)
+            SML_NO_DISCARD static inline constexpr vec3 project(const vec3& a, const vec3& b) noexcept
             {
                 return b * (dot(a, b) / dot(b, b));
             }
@@ -576,42 +576,42 @@ namespace sml
 
     // Operators
     template<typename T>
-    vec3<T> operator + (vec3<T> left, vec3<T> right)
+    constexpr vec3<T> operator + (vec3<T> left, vec3<T> right) noexcept
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec3<T> operator - (vec3<T> left, vec3<T> right)
+    constexpr vec3<T> operator - (vec3<T> left, vec3<T> right) noexcept
     {
         left -= right;
         return left;
     }
 
     template<typename T>
-    vec3<T> operator * (vec3<T> left, vec3<T> right)
+    constexpr vec3<T> operator * (vec3<T> left, vec3<T> right) noexcept
     {
         left *= right;
         return left;
     }
 
     template<typename T>
-    vec3<T> operator * (vec3<T> left, T right)
+    constexpr vec3<T> operator * (vec3<T> left, T right) noexcept
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec3<T> operator / (vec3<T> left, vec3<T> right)
+    constexpr vec3<T> operator / (vec3<T> left, vec3<T> right) noexcept
     {
         left /= right;
         return left;
     }
 
     template<typename T>
-    vec3<T> operator / (vec3<T> left, T right)
+    constexpr vec3<T> operator / (vec3<T> left, T right) noexcept
     {
         left += right;
         return left;
@@ -628,23 +628,23 @@ namespace sml
     class vec3view
     {
     public:
-        vec3view() = default;
+        constexpr vec3view() = default;
 
-        vec3view(const vec3<T>& other)
+        constexpr vec3view(const vec3<T>& other) noexcept
         {
             x = other.x;
             y = other.y;
             z = other.z;
         }
 
-        vec3view(vec3<T>&& other) noexcept
+        constexpr vec3view(vec3<T>&& other) noexcept
         {
             x = std::move(other.x);
             y = std::move(other.y);
             z = std::move(other.z);
         }
 
-        vec3view& operator = (const vec3<T>& other)
+        constexpr vec3view& operator = (const vec3<T>& other) noexcept
         {
             x = other.x;
             y = other.y;
@@ -653,7 +653,7 @@ namespace sml
             return *this;
         }
 
-        vec3view& operator = (vec3<T>&& other) noexcept
+        constexpr vec3view& operator = (vec3<T>&& other) noexcept
         {
             x = std::move(other.x);
             y = std::move(other.y);
@@ -666,7 +666,7 @@ namespace sml
     };
 
     template<typename T>
-    vec3<T>& vec3<T>::operator = (const vec3view<T>& other)
+    constexpr vec3<T>& vec3<T>::operator = (const vec3view<T>& other) noexcept
     {
         x = other.x;
         y = other.y;
@@ -676,7 +676,7 @@ namespace sml
     }
 
     template<typename T>
-    vec3<T>& vec3<T>::operator = (vec3view<T>&& other)
+    constexpr vec3<T>& vec3<T>::operator = (vec3view<T>&& other) noexcept
     {
         x = std::move(other.x);
         y = std::move(other.y);

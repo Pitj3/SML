@@ -26,30 +26,33 @@
 namespace sml
 {
     template<typename T>
+    class vec4view;
+
+    template<typename T>
     class alignas(simdalign<T>::value) vec4
     {
         public:
-            vec4()
+            constexpr vec4() noexcept
             {
                 zero();
             }
 
-            vec4(T x, T y, T z, T w)
+            constexpr vec4(T x, T y, T z, T w) noexcept
             {
                 set(x, y, z, w);
             }
 
-            explicit vec4(T v)
+            constexpr explicit vec4(T v) noexcept
             {
                 set(v, v, v, v);
             }
 
-            vec4(const vec4& other)
+            constexpr vec4(const vec4& other) noexcept
             {
                 set(other.v);
             }
 
-            vec4(vec4&& other) noexcept
+            constexpr vec4(vec4&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
@@ -57,12 +60,15 @@ namespace sml
                 v[3] = std::move(other.v[3]);
             }
 
-            void zero()
+            constexpr vec4& operator = (const vec4view<T>& other) noexcept;
+            constexpr vec4& operator = (vec4view<T>&& other) noexcept;
+
+            SML_NO_DISCARD constexpr void zero() noexcept
             {
-                set(T(0), T(0), T(0), T(0));
+                set(static_cast<T>(0), static_cast<T>(0), static_cast<T>(0), static_cast<T>(0));
             }
 
-            void set(T x, T y, T z, T w)
+            SML_NO_DISCARD constexpr void set(T x, T y, T z, T w) noexcept
             {
                 this->x = x;
                 this->y = y;
@@ -70,7 +76,7 @@ namespace sml
                 this->w = w;
             }
 
-            void set(T v[4])
+            SML_NO_DISCARD constexpr void set(T v[4]) noexcept
             {
                 this->v[0] = v[0];
                 this->v[1] = v[1];
@@ -79,24 +85,24 @@ namespace sml
             }
 
             // Operators 
-            inline bool operator == (const vec4& other) const
+            inline constexpr bool operator == (const vec4& other) const noexcept
             {
                 return x == other.x && y == other.y && z == other.z && w == other.w;
             }
 
-            inline bool operator != (const vec4& other) const
+            inline constexpr bool operator != (const vec4& other) const noexcept
             {
                 return x != other.x || y != other.y || z != other.z || w != other.w;
             }
 
-            vec4& operator = (const vec4& other)
+            constexpr vec4& operator = (const vec4& other) noexcept
             {
                 set(other.v);
 
                 return *this;
             }
 
-            vec4& operator = (vec4&& other) noexcept
+            constexpr vec4& operator = (vec4&& other) noexcept
             {
                 v[0] = std::move(other.v[0]);
                 v[1] = std::move(other.v[1]);
@@ -106,7 +112,7 @@ namespace sml
                 return *this;
             }
 
-            vec4& operator += (const vec4& other)
+            vec4& operator += (const vec4& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -138,7 +144,7 @@ namespace sml
                 return *this;
             }
 
-            vec4& operator -= (const vec4& other)
+            vec4& operator -= (const vec4& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -170,7 +176,7 @@ namespace sml
                 return *this;
             }
 
-            vec4& operator *= (const vec4& other)
+            vec4& operator *= (const vec4& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -202,7 +208,7 @@ namespace sml
                 return *this;
             }
 
-            vec4& operator *= (const T other)
+            vec4& operator *= (const T other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -234,7 +240,7 @@ namespace sml
                 return *this;
             }
 
-            vec4& operator /= (const vec4& other)
+            vec4& operator /= (const vec4& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -266,7 +272,7 @@ namespace sml
                 return *this;
             }
 
-            vec4& operator /= (const T other)
+            vec4& operator /= (const T other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -299,7 +305,7 @@ namespace sml
             }
 
             // Operations
-            inline constexpr T dot(vec4 other) const
+            SML_NO_DISCARD inline constexpr T dot(vec4 other) const noexcept
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -328,17 +334,17 @@ namespace sml
                 return (x * other.x) + (y * other.y) + (z * other.z) + (w * other.w);
             }
 
-            inline T length() const
+            SML_NO_DISCARD inline constexpr T length() const noexcept
             {
                 return sml::sqrt((x * x) + (y * y) + (z * z) + (w * w));
             }
 
-            inline T lengthsquared() const
+            SML_NO_DISCARD inline constexpr T lengthsquared() const noexcept
             {
                 return (x * x) + (y * y) + (z * z) + (w * w);
             }
 
-            inline vec4& normalize()
+            SML_NO_DISCARD inline constexpr vec4& normalize() noexcept
             {
                 float mag = length();
 
@@ -350,40 +356,40 @@ namespace sml
                 return *this;
             }
 
-            inline vec4 normalized()
+            SML_NO_DISCARD inline constexpr vec4 normalized() const noexcept
             {
                 vec4 copy(x, y, z, w);
                 return copy.normalize();
             }
 
-            inline bool any() const
+            SML_NO_DISCARD inline constexpr bool any() const noexcept
             {
                 return x || y || z || w;
             }
 
-            inline bool all() const
+            SML_NO_DISCARD inline constexpr bool all() const noexcept
             {
                 return x && y && z && w;
             } 
 
-            inline bool none() const
+            SML_NO_DISCARD inline constexpr bool none() const noexcept
             {
                 return !x && !y && !z && !w;
             }
 
-            inline std::string toString()
+            SML_NO_DISCARD inline constexpr std::string toString() const noexcept
             {
                 return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ", " + std::to_string(w);
             }
 
             // Statics
-            static inline vec4 distance(const vec4& a, const vec4& b)
+            SML_NO_DISCARD static inline constexpr T distance(const vec4& a, const vec4& b) noexcept
             {
                 vec4 delta = b - a;
                 return delta.length();
             }
 
-            static inline vec4 min(const vec4& a, const vec4& b)
+            SML_NO_DISCARD static inline constexpr vec4 min(const vec4& a, const vec4& b) noexcept
             {
                 vec4 result;
 
@@ -420,7 +426,7 @@ namespace sml
                 };
             }
 
-            static constexpr inline vec4 max(const vec4& a, const vec4& b)
+            SML_NO_DISCARD static inline constexpr vec4 max(const vec4& a, const vec4& b) noexcept
             {
                 vec4 result;
 
@@ -457,12 +463,12 @@ namespace sml
                 };
             }
 
-            static inline vec4 clamp(const vec4& v, const vec4& a, const vec4& b)
+            SML_NO_DISCARD static inline constexpr vec4 clamp(const vec4& v, const vec4& a, const vec4& b) noexcept
             {
                 return max(a, min(v, b));
             }
 
-            static inline vec4 lerp(const vec4& a, const vec4& b, T t)
+            SML_NO_DISCARD static inline constexpr vec4 lerp(const vec4& a, const vec4& b, T t) noexcept
             {
                 T retX = sml::lerp(a.x, b.x, t);
                 T retY = sml::lerp(a.y, b.y, t);
@@ -472,7 +478,7 @@ namespace sml
                 return vec4(retX, retY, retZ, retW);
             }
 
-            static inline vec4 lerpclamped(const vec4& a, const vec4& b, T t)
+            SML_NO_DISCARD static inline constexpr vec4 lerpclamped(const vec4& a, const vec4& b, T t) noexcept
             {
                 T retX = sml::lerpclamped(a.x, b.x, t);
                 T retY = sml::lerpclamped(a.y, b.y, t);
@@ -482,7 +488,7 @@ namespace sml
                 return vec4(retX, retY, retZ, retW);
             }
 
-            static inline vec4 project(const vec4& a, const vec4& b)
+            SML_NO_DISCARD static inline constexpr vec4 project(const vec4& a, const vec4& b) noexcept
             {
                 return b * (dot(a, b) / dot(b, b));
             }
@@ -501,42 +507,42 @@ namespace sml
 
     // Operators
     template<typename T>
-    vec4<T> operator + (vec4<T> left, vec4<T> right)
+    constexpr vec4<T> operator + (vec4<T> left, vec4<T> right) noexcept
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec4<T> operator - (vec4<T> left, vec4<T> right)
+    constexpr vec4<T> operator - (vec4<T> left, vec4<T> right) noexcept
     {
         left -= right;
         return left;
     }
 
     template<typename T>
-    vec4<T> operator * (vec4<T> left, vec4<T> right)
+    constexpr vec4<T> operator * (vec4<T> left, vec4<T> right) noexcept
     {
         left *= right;
         return left;
     }
 
     template<typename T>
-    vec4<T> operator * (vec4<T> left, T right)
+    constexpr vec4<T> operator * (vec4<T> left, T right) noexcept
     {
         left += right;
         return left;
     }
 
     template<typename T>
-    vec4<T> operator / (vec4<T> left, vec4<T> right)
+    constexpr vec4<T> operator / (vec4<T> left, vec4<T> right) noexcept
     {
         left /= right;
         return left;
     }
 
     template<typename T>
-    vec4<T> operator / (vec4<T> left, T right)
+    constexpr vec4<T> operator / (vec4<T> left, T right) noexcept
     {
         left += right;
         return left;
@@ -548,6 +554,71 @@ namespace sml
     typedef vec4<s32> ivec4;
     typedef vec4<f32> fvec4;
     typedef vec4<f64> dvec4;
+
+    template<typename T>
+    class vec4view
+    {
+    public:
+        constexpr vec4view() = default;
+
+        constexpr vec4view(const vec4<T>& other) noexcept
+        {
+            x = other.x;
+            y = other.y;
+            z = other.z;
+            w = other.w;
+        }
+
+        constexpr vec4view(vec4<T>&& other) noexcept
+        {
+            x = std::move(other.x);
+            y = std::move(other.y);
+            z = std::move(other.z);
+            w = std::move(other.w);
+        }
+
+        constexpr vec4view& operator = (const vec4<T>& other) noexcept
+        {
+            x = other.x;
+            y = other.y;
+            z = other.z;
+            w = other.w;
+
+            return *this;
+        }
+
+        constexpr vec4view& operator = (vec4<T>&& other) noexcept
+        {
+            x = std::move(other.x);
+            y = std::move(other.y);
+            z = std::move(other.z);
+            w = std::move(other.w);
+
+            return *this;
+        }
+
+        T x = static_cast<T>(0), y = static_cast<T>(0), z = static_cast<T>(0), w = static_cast<T>(0);
+    };
+
+    template<typename T>
+    constexpr vec4<T>& vec4<T>::operator = (const vec4view<T>& other) noexcept
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+
+        return *this;
+    }
+
+    template<typename T>
+    constexpr vec4<T>& vec4<T>::operator = (vec4view<T>&& other) noexcept
+    {
+        x = std::move(other.x);
+        y = std::move(other.y);
+        z = std::move(other.z);
+
+        return *this;
+    }
 } // namespace sml
 
 #endif // sml_vec4_h__

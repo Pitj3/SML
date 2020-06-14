@@ -161,6 +161,11 @@ TEST_CASE("dvec3 tests", "[vec3]") {
     vec /= 2.0;
 
     REQUIRE(vec == sml::dvec3(1, 20, 5));
+
+    sml::dvec3 a(1, 0, 0);
+    sml::dvec3 b(5, 0, 0);
+
+    REQUIRE(sml::dvec3::distance(a, b) == 4.0);
 }
 
 TEST_CASE("fvec4 tests", "[vec4]") {

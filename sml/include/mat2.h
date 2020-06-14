@@ -31,20 +31,20 @@ namespace sml
     class alignas(simdalign<T>::value) mat2
     {
         public:
-            mat2()
+            constexpr mat2() noexcept
             {
                 identity();
             }
 
-            mat2(T diagonal)
+            constexpr explicit mat2(T diagonal) noexcept
             {
                 m00 = diagonal;
-                m10 = T(0);
-                m01 = T(0);
+                m10 = static_cast<T>(0);
+                m01 = static_cast<T>(0);
                 m11 = diagonal;
             }
 
-            mat2(T col1[2], T col2[2])
+            constexpr mat2(T col1[2], T col2[2]) noexcept
             {
                 m00 = col1[0];
                 m01 = col1[1];
@@ -53,7 +53,7 @@ namespace sml
                 m11 = col2[1];
             }
 
-            mat2(T m00, T m01, T m10, T m11)
+            constexpr mat2(T m00, T m01, T m10, T m11) noexcept
             {
                 this->m00 = m00;
                 this->m10 = m10;
@@ -61,7 +61,7 @@ namespace sml
                 this->m11 = m11;
             }
 
-            mat2(const mat2& other)
+            constexpr mat2(const mat2& other) noexcept
             {
                 m00 = other.m00;
                 m10 = other.m10;
@@ -69,7 +69,7 @@ namespace sml
                 m11 = other.m11;
             }
 
-            mat2(mat2&& other) noexcept
+            constexpr mat2(mat2&& other) noexcept
             {
                 m00 = std::move(other.m00);
                 m10 = std::move(other.m10);
@@ -77,7 +77,7 @@ namespace sml
                 m11 = std::move(other.m11);
             }
 
-            void set(T m00, T m01, T m10, T m11)
+            SML_NO_DISCARD constexpr void set(T m00, T m01, T m10, T m11) noexcept
             {
                 this->m00 = m00;
                 this->m10 = m10;
@@ -85,7 +85,7 @@ namespace sml
                 this->m11 = m11;
             }
 
-            void set(T v[4])
+            SML_NO_DISCARD constexpr void set(T v[4]) noexcept
             {
                 for(int i = 0; i < 4; i++)
                 {
@@ -93,7 +93,7 @@ namespace sml
                 }
             }
 
-            mat2& operator = (const mat2& other)
+            constexpr mat2& operator = (const mat2& other) noexcept
             {
                 m00 = other.m00;
                 m10 = other.m10;
@@ -103,7 +103,7 @@ namespace sml
                 return *this;
             }
 
-            mat2& operator = (mat2&& other) noexcept
+            constexpr mat2& operator = (mat2&& other) noexcept
             {
                 m00 = std::move(other.m00);
                 m10 = std::move(other.m10);
@@ -114,7 +114,7 @@ namespace sml
             }
 
             // Operators
-            inline constexpr bool operator == (const mat2& other) const
+            inline constexpr bool operator == (const mat2& other) const noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -161,7 +161,7 @@ namespace sml
                 return m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11;
             }
 
-            inline constexpr bool operator != (const mat2& other) const
+            inline constexpr bool operator != (const mat2& other) const noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -208,7 +208,7 @@ namespace sml
                 return m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11;
             }
 
-            mat2& operator *= (const mat2& other)
+            mat2& operator *= (const mat2& other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -283,32 +283,32 @@ namespace sml
             }
 
             // Operations
-            inline void identity()
+            SML_NO_DISCARD constexpr inline void identity() noexcept
             {
                 m00 = T(1);
-                m10 = T(0);
-                m01 = T(0);
+                m10 = static_cast<T>(0);
+                m01 = static_cast<T>(0);
                 m11 = T(1);
             }
 
-            inline mat2& transpose()
+            SML_NO_DISCARD constexpr inline mat2& transpose() noexcept
             {
                 std::swap(m01, m10);
 
                 return *this;
             }
 
-            inline mat2 transposed() const
+            SML_NO_DISCARD constexpr inline mat2 transposed() const noexcept
             {
                 mat2 c = mat2(*this);
                 return c.transpose();
             }
 
-            inline mat2& invert()
+            SML_NO_DISCARD constexpr inline mat2& invert() noexcept
             {
                 T det = determinant();
 
-                if(det != T(0))
+                if(det != static_cast<T>(0))
                 {
                     T det_inv = T(1) / det;
 
@@ -349,7 +349,7 @@ namespace sml
                 return *this;
             }
 
-            inline mat2& negate()
+            SML_NO_DISCARD constexpr inline mat2& negate() noexcept
             {
                 m00 = -m00;
                 m10 = -m10;
@@ -359,18 +359,18 @@ namespace sml
                 return *this;
             }
 
-            inline mat2 inverted() const
+            SML_NO_DISCARD constexpr inline mat2 inverted() const noexcept
             {
                 mat2 c; c.set(m00, m10, m01, m11);
                 return c.invert();
             }
 
-            inline T determinant() const
+            SML_NO_DISCARD constexpr inline T determinant() const noexcept
             {
                 return m00 * m11 - m01 * m10;
             }
 
-            inline std::string toString() const
+            SML_NO_DISCARD constexpr inline std::string toString() const noexcept
             {
                 return std::to_string(m00) + ", " + std::to_string(m10) + "\n" + std::to_string(m01) + ", " + std::to_string(m11);
             }
@@ -391,14 +391,14 @@ namespace sml
 
     // Operators
     template<typename T>
-    mat2<T> operator * (mat2<T> left, mat2<T> right)
+    constexpr mat2<T> operator * (mat2<T> left, mat2<T> right) noexcept
     {
         left *= right;
         return left;
     }
 
     template<typename T>
-    vec2<T> operator * (const mat2<T>& lhs, const vec2<T>& rhs)
+    constexpr vec2<T> operator * (const mat2<T>& lhs, const vec2<T>& rhs) noexcept
     {
         alignas(simdalign<T>::value) vec2<T> res;
 
