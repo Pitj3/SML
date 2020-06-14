@@ -269,10 +269,10 @@ namespace sml
             // Operations
             constexpr inline void identity() noexcept
             {
-                m00 = T(1);
+                m00 = static_cast<T>(1);
                 m10 = static_cast<T>(0);
                 m01 = static_cast<T>(0);
-                m11 = T(1);
+                m11 = static_cast<T>(1);
             }
 
             SML_NO_DISCARD constexpr inline mat2& transpose() noexcept
@@ -294,7 +294,7 @@ namespace sml
 
                 if(det != static_cast<T>(0))
                 {
-                    T det_inv = T(1) / det;
+                    T det_inv = static_cast<T>(1) / det;
 
                     if constexpr(std::is_same<T, f32>::value)
                     {

@@ -383,6 +383,18 @@ namespace sml
             }
 
             // Statics
+            SML_NO_DISCARD static inline constexpr vec4 normalize(const vec4& a) noexcept
+            {
+                vec4 copy(a.x, a.y, a.z, a.w);
+                copy.normalize();
+                return copy;
+            }
+
+            SML_NO_DISCARD static inline constexpr T dot(const vec4& lhs, const vec4& rhs) noexcept
+            {
+                return lhs.dot(rhs);
+            }
+
             SML_NO_DISCARD static inline constexpr T distance(const vec4& a, const vec4& b) noexcept
             {
                 vec4 delta = b - a;

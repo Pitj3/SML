@@ -347,15 +347,15 @@ namespace sml
             // Operations
             inline constexpr void identity() noexcept
             {
-                m00 = T(1);
+                m00 = static_cast<T>(1);
                 m10 = static_cast<T>(0);
                 m20 = static_cast<T>(0);
                 m01 = static_cast<T>(0);
-                m11 = T(1);
+                m11 = static_cast<T>(1);
                 m21 = static_cast<T>(0);
                 m02 = static_cast<T>(0);
                 m12 = static_cast<T>(0);
-                m22 = T(1);
+                m22 = static_cast<T>(1);
             }
 
             SML_NO_DISCARD inline constexpr mat3& transpose() noexcept
@@ -379,7 +379,7 @@ namespace sml
 
                 if (det != static_cast<T>(0))
                 {
-                    T det_inv = T(1) / det;
+                    T det_inv = static_cast<T>(1) / det;
 
                     T t00 = m11 * m22 - m12 * m21;
                     T t01 = -m10 * m22 + m12 * m20;
@@ -475,7 +475,7 @@ namespace sml
                     };
                 };
 
-                vec3<T> row[3];
+                vec3<T> col[3];
 
                 T v[12];            
             };

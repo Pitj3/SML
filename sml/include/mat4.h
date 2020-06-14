@@ -24,6 +24,7 @@
 
 #include "vec4.h"
 #include "smltypes.h"
+#include "common.h"
 
 namespace sml
 {
@@ -417,22 +418,22 @@ namespace sml
             // Operations
             inline constexpr void identity() noexcept
             {
-                m00 = T(1);
+                m00 = static_cast<T>(1);
                 m10 = static_cast<T>(0);
                 m20 = static_cast<T>(0);
                 m30 = static_cast<T>(0);
                 m01 = static_cast<T>(0);
-                m11 = T(1);
+                m11 = static_cast<T>(1);
                 m21 = static_cast<T>(0);
                 m31 = static_cast<T>(0);
                 m02 = static_cast<T>(0);
                 m12 = static_cast<T>(0);
-                m22 = T(1);
+                m22 = static_cast<T>(1);
                 m32 = static_cast<T>(0);
                 m03 = static_cast<T>(0);
                 m13 = static_cast<T>(0);
                 m23 = static_cast<T>(0);
-                m33 = T(1);
+                m33 = static_cast<T>(1);
             }
 
             SML_NO_DISCARD inline constexpr mat4& transpose() noexcept
@@ -459,7 +460,7 @@ namespace sml
 
                 if (det != static_cast<T>(0))
                 {
-                    T det_inv = T(1) / det;
+                    T det_inv = static_cast<T>(1) / det;
 
                     T t00 = m11 * m22 - m12 * m21;
                     T t01 = -m10 * m22 + m12 * m20;
@@ -528,6 +529,154 @@ namespace sml
                     + std::to_string(m03) + ", " + std::to_string(m13) + ", " + std::to_string(m23) + std::to_string(m33);
             }
 
+            SML_NO_DISCARD static inline constexpr mat4 view(const vec3<T>& eye, const vec3<T>& to, const vec3<T>& up) noexcept
+            {
+                mat4 res(static_cast<T>(1));
+
+                vec3<T> zAxis = vec3<T>::normalize(eye - at);
+                vec3<T> xAxis = vec3<T>::normalize(vec3<T>::cross(up, zAxis));
+                vec3<T> yAxis = vec3<T>::normalize(vec3<T>::cross(zAxis, xAxis));
+
+                res.m00 = xAxis.x;      res.m10 = xAxis.y;      res.m20 = xAxis.z;      res.m30 = -vec3<T>::dot(xAxis, eye);
+                res.m01 = yAxis.x;      res.m11 = yAxis.y;      res.m21 = yAxis.z;      res.m31 = -vec3<T>::dot(yAxis, eye);
+                res.m02 = zAxis.x;      res.m12 = zAxis.y;      res.m22 = zAxis.z;      res.m32 = -vec3<T>::dot(zAxis, eye);
+
+                return res;
+            }
+
+            SML_NO_DISCARD static inline constexpr mat4 perspective(T fov, T aspect, T zNear, T zFar) noexcept
+            {
+                mat4 res(static_cast<T>(1));
+                
+                T width = static_cast<T>(1) - sml::tan(fov / static_cast<T>(2)), height = aspect / sml::tan(fov / static_cast<T>(2));
+
+                res.m00 = width;
+                res.m11 = height;
+                res.m22 - zFar / (zNear - zFar);
+                res.m32 = zFar * zNear / (zNear - zFar);
+                res.m23 = static_cast<T>(-1);
+
+                return res;
+            }
+
+            SML_NO_DISCARD static inline constexpr mat4 ortho(T width, T height, T zNear, T zFar) noexcept
+            {
+                mat4 res(static_cast<T>(1));
+
+                res.m00 = static_cast<T>(2) / width;
+                res.m11 = static_cast<T>(2) / height;
+                res.m22 = static_cast<T>(2) / (zNear - zFar);
+                res.m32 = zNear / (zNear - zFar);
+
+                return res;
+            }
+
+
+            SML_NO_DISCARD static inline constexpr mat4 translate(const vec3<T>& translation) noexcept
+            {
+                mat4 res(static_cast<T>(1));
+
+                res.m30 = translation.x;
+                res.m31 = translation.y;
+                res.m32 = translation.z;
+
+                return res;
+            }
+
+            SML_NO_DISCARD static inline constexpr mat4 scale(const vec3<T>& scale) noexcept
+            {
+                mat4 res(static_cast<T>(1));
+
+                res.m00 = scale.x;
+                res.m11 = scale.y;
+                res.m22 = scale.z;
+
+                return res;
+            }
+
+            SML_NO_DISCARD static inline constexpr mat4 rotateX(T theta) noexcept
+            {
+                mat4 res(static_cast<T>(1));
+
+                float cosT = sml::cos(theta);
+                float sinT = sml::sin(theta);
+
+                res.m11 = cosT;
+                res.m12 = sinT;
+                res.m21 = -sinT;
+                res.m22 = cosT;
+
+                return res;
+            }
+
+            SML_NO_DISCARD static inline constexpr mat4 rotateY(T theta) noexcept
+            {
+                mat4 res(static_cast<T>(1));
+
+                float cosT = sml::cos(theta);
+                float sinT = sml::sin(theta);
+
+                res.m00 = cosT;
+                res.m02 = sinT;
+                res.m20 = -sinT;
+                res.m22 = cosT;
+
+                return res;
+            }
+
+            SML_NO_DISCARD static inline constexpr mat4 rotateZ(T theta) noexcept
+            {
+                mat4 res(static_cast<T>(1));
+
+                float cosT = sml::cos(theta);
+                float sinT = sml::sin(theta);
+
+                res.m00 = cosT;
+                res.m01 = sinT;
+                res.m10 = -sinT;
+                res.m11 = cosT;
+
+                return res;
+            }
+
+            SML_NO_DISCARD static inline constexpr mat4 rotate(const vec3<T>& axis, T angle) noexcept
+            {
+                mat4 res(static_cast<T>(1));
+
+                T c = sml::cos(angle);
+                T s = sml::sin(angle);
+                T t = static_cast<T>(1) - c;
+
+                vec3<T> normalizedAxis = axis.normalized();
+                T x = normalizedAxis.x;
+                T y = normalizedAxis.y;
+                T z = normalizedAxis.z;
+
+                res.m00 = static_cast<T>(1) + t * (x * x - 1);
+                res.m01 = z * s + t * x * y;
+                res.m02 = -y * s + t * x * z;
+                
+                res.m10 = -z * s + t * x * y;
+                res.m11 = static_cast<T>(1) + t * (y * y - 1);
+                res.m12 = x * s + t * y * z;
+
+                res.m20 = y * s + t * x * z;
+                res.m21 = -x * s + t * y * z;
+                res.m22 = static_cast<T>(1) + t * (z * z - 1);
+
+                return res;
+            }
+
+            SML_NO_DISCARD static inline constexpr mat4 rotate(T yaw, T pitch, T roll) noexcept
+            {
+                return rotateY(yaw) * rotateX(pitch) * rotateZ(roll);
+            }
+
+            SML_NO_DISCARD static inline constexpr mat4 rotate(const vec3<T>& axis, T angle, const vec3<T>& center) noexcept
+            {
+                return translate(-center) * rotate(axis, angle) * translate(center);
+            }
+
             // Data
             union
             {
@@ -570,7 +719,7 @@ namespace sml
                     };
                 };
 
-                vec4<T> row[4];
+                vec4<T> col[4];
 
                 T v[16];            
             };
