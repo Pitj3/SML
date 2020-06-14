@@ -533,7 +533,7 @@ namespace sml
             {
                 mat4 res(static_cast<T>(1));
 
-                vec3<T> zAxis = vec3<T>::normalize(eye - at);
+                vec3<T> zAxis = vec3<T>::normalize(eye - to);
                 vec3<T> xAxis = vec3<T>::normalize(vec3<T>::cross(up, zAxis));
                 vec3<T> yAxis = vec3<T>::normalize(vec3<T>::cross(zAxis, xAxis));
 
