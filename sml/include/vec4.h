@@ -314,7 +314,7 @@ namespace sml
                     __m128 product = _mm_mul_ps(me, ot);
                     __m128 dp = _mm_hadd_ps(product, product);
 
-                    s32 res = _mm_extract_epi32(_mm_hadd_ps(dp, dp), 0);
+                    s32 res = _mm_extract_epi32(static_cast<__m128i>(_mm_hadd_ps(dp, dp)), 0);
 
                     return *reinterpret_cast<f32*>(&(res));
                 }
@@ -326,7 +326,7 @@ namespace sml
                     __m256d product = _mm256_mul_pd(me, ot);
                     __m256d dp = _mm256_hadd_pd(product, product);
 
-                    s32 res = _mm256_extract_epi32(_mm256_hadd_pd(dp, dp), 0);
+                    s32 res = _mm256_extract_epi32(static_cast<__m256i>(_mm256_hadd_pd(dp, dp)), 0);
 
                     return *reinterpret_cast<f64*>(&(res));
                 }
