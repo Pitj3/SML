@@ -440,7 +440,7 @@ namespace sml
                 return !x && !y && !z;
             }
 
-            SML_NO_DISCARD inline constexpr std::string toString() const noexcept
+            SML_NO_DISCARD inline std::string toString() const noexcept
             {
                 return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
             }

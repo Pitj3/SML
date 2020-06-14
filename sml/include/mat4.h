@@ -521,7 +521,7 @@ namespace sml
                 return static_cast<T>(0);
             }
 
-            SML_NO_DISCARD inline constexpr std::string toString() const noexcept
+            SML_NO_DISCARD inline std::string toString() const noexcept
             {
                 return std::to_string(m00) + ", " + std::to_string(m10) + ", " + std::to_string(m20) + std::to_string(m30) + "\n" 
                     + std::to_string(m01) + ", " + std::to_string(m11) + ", " + std::to_string(m21) + std::to_string(m31) + "\n"

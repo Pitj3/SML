@@ -267,7 +267,7 @@ namespace sml
             }
 
             // Operations
-            constexpr inline void identity() noexcept
+            inline constexpr void identity() noexcept
             {
                 m00 = static_cast<T>(1);
                 m10 = static_cast<T>(0);
@@ -275,20 +275,20 @@ namespace sml
                 m11 = static_cast<T>(1);
             }
 
-            SML_NO_DISCARD constexpr inline mat2& transpose() noexcept
+            SML_NO_DISCARD inline constexpr mat2& transpose() noexcept
             {
                 std::swap(m01, m10);
 
                 return *this;
             }
 
-            SML_NO_DISCARD constexpr inline mat2 transposed() const noexcept
+            SML_NO_DISCARD inline constexpr mat2 transposed() const noexcept
             {
                 mat2 c = mat2(*this);
                 return c.transpose();
             }
 
-            SML_NO_DISCARD constexpr inline mat2& invert() noexcept
+            SML_NO_DISCARD inline constexpr mat2& invert() noexcept
             {
                 T det = determinant();
 
@@ -333,7 +333,7 @@ namespace sml
                 return *this;
             }
 
-            SML_NO_DISCARD constexpr inline mat2& negate() noexcept
+            SML_NO_DISCARD inline constexpr mat2& negate() noexcept
             {
                 m00 = -m00;
                 m10 = -m10;
@@ -343,18 +343,18 @@ namespace sml
                 return *this;
             }
 
-            SML_NO_DISCARD constexpr inline mat2 inverted() const noexcept
+            SML_NO_DISCARD inline constexpr mat2 inverted() const noexcept
             {
                 mat2 c; c.set(m00, m10, m01, m11);
                 return c.invert();
             }
 
-            SML_NO_DISCARD constexpr inline T determinant() const noexcept
+            SML_NO_DISCARD inline constexpr T determinant() const noexcept
             {
                 return m00 * m11 - m01 * m10;
             }
 
-            SML_NO_DISCARD constexpr inline std::string toString() const noexcept
+            SML_NO_DISCARD inline std::string toString() const noexcept
             {
                 return std::to_string(m00) + ", " + std::to_string(m10) + "\n" + std::to_string(m01) + ", " + std::to_string(m11);
             }
@@ -401,13 +401,13 @@ namespace sml
 
         if constexpr(std::is_same<T, f64>::value)
         {
-            __m128d x = _mm_set1_pd(rhs.x);
-            __m128d y = _mm_set1_pd(rhs.y);
+            __m256d x = _mm256_set1_pd(rhs.x);
+            __m256d y = _mm256_set1_pd(rhs.y);
 
-            __m128d c0 = _mm_load_pd(&lhs.m00);
-            __m128d c1 = _mm_shuffle_pd(c0, c0, _MM_SHUFFLE(2, 3, 0, 0));
+            __m256d c0 = _mm256_load_pd(&lhs.m00);
+            __m256d c1 = _mm256_shuffle_pd(c0, c0, 0);
 
-            _mm_store_pd(res.v, _mm_add_pd(_mm_mul_pd(x, c0), _mm_mul_pd(y, c1)));
+            _mm256_store_pd(res.v, _mm256_add_pd(_mm256_mul_pd(x, c0), _mm256_mul_pd(y, c1)));
 
             return res;
         }

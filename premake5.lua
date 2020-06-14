@@ -1,7 +1,12 @@
 workspace "SML"
-   configurations { 
+    configurations { 
        "Debug", 
        "Release" 
+    }
+
+    platforms {
+        "Static32",
+        "Static64"
     }
 
     flags {
@@ -12,8 +17,6 @@ workspace "SML"
 
     IncludeDir = {}
     IncludeDir["SML"] = "sml/include"
-
-    architecture "x64"
 
 project "sml"
     kind "StaticLib"
@@ -51,6 +54,12 @@ project "sml"
         runtime "Release"
         optimize "On"
 
+    filter "platforms:Static32"
+        architecture "x86"
+
+    filter "platforms:Static64"
+        architecture "x86_64"
+
 
 project "SMLTest"
     kind "ConsoleApp"
@@ -74,10 +83,6 @@ project "SMLTest"
         "smltest/include"
     }
 
-    links {
-        "sml"
-    }
-
     filter "configurations:Debug"
         defines { 
             "DEBUG" 
@@ -89,3 +94,6 @@ project "SMLTest"
             "NDEBUG" 
         }
         optimize "On"
+
+    filter "system:Windows"
+        toolset "msc-ClangCL"
