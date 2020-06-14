@@ -124,36 +124,28 @@ namespace sml
                         __m128i i;
                     };
 
-                    s32 result = 1;
-                    for(s32 i = 0; i < 2; i++)
-                    {
-                        __m128 me = _mm_load_ps(&m00 + (2 * i));
-                        __m128 ot = _mm_load_ps(&other.m00 + (2 * i));
+                    __m128 me = _mm_load_ps(&m00);
+                    __m128 ot = _mm_load_ps(&other.m00);
 
-                        m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                        result &= _mm_testc_si128(cmp.i, cmp.i);
-                    }                  
+                    m128 cmp = { _mm_cmpeq_ps(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
 
                     return result != 0; 
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    union m128
+                    union m256
                     {
-                        __m128d d;
-                        __m128i i;
+                        __m256d d;
+                        __m256i i;
                     };
 
-                    s32 result = 1;
-                    for(s32 i = 0; i < 2; i++)
-                    {
-                        __m128d me = _mm_load_pd(&m00 + (2 * i));
-                        __m128d ot = _mm_load_pd(&other.m00 + (2 * i));
+                    __m256d me = _mm256_load_pd(&m00);
+                    __m256d ot = _mm256_load_pd(&other.m00);
 
-                        m128 cmp = { _mm_cmpneq_pd(me, ot) };
-                        result &= _mm_testc_si128(cmp.i, cmp.i);
-                    }
+                    m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_EQ_OQ) };
+                    s32 result = _mm256_testc_si256(cmp.i, cmp.i);
 
                     return result != 0;
                 }
@@ -171,36 +163,28 @@ namespace sml
                         __m128i i;
                     };
 
-                    s32 result = 1;
-                    for(s32 i = 0; i < 2; i++)
-                    {
-                        __m128 me = _mm_load_ps(col[i].v);
-                        __m128 ot = _mm_load_ps(other.col[i].v);
+                    __m128 me = _mm_load_ps(&m00);
+                    __m128 ot = _mm_load_ps(&other.m00);
 
-                        m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                        result &= _mm_testc_si128(cmp.i, cmp.i);
-                    }                  
+                    m128 cmp = { _mm_cmpneq_ps(me, ot) };
+                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
 
                     return result != 0; 
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    union m128
+                    union m256
                     {
-                        __m128d d;
-                        __m128i i;
+                        __m256d d;
+                        __m256i i;
                     };
 
-                    s32 result = 1;
-                    for(s32 i = 0; i < 2; i++)
-                    {
-                        __m128d me = _mm_load_pd(col[i].v);
-                        __m128d ot = _mm_load_pd(other.col[i].v);
+                    __m256d me = _mm256_load_pd(&m00);
+                    __m256d ot = _mm256_load_pd(&other.m00);
 
-                        m128 cmp = { _mm_cmpneq_pd(me, ot) };
-                        result &= _mm_testc_si128(cmp.i, cmp.i);
-                    }
+                    m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ) };
+                    s32 result = _mm256_testc_si128(cmp.i, cmp.i);
 
                     return result != 0;
                 }
@@ -407,8 +391,8 @@ namespace sml
             __m128 x = _mm_broadcast_ss(&rhs.x);
             __m128 y = _mm_broadcast_ss(&rhs.y);
 
-            __m128 c0 = _mm_load_ps(lhs.v + 0);
-            __m128 c1 = _mm_load_ps(lhs.v + 2);
+            __m128 c0 = _mm_load_ps(&lhs.m00);
+            __m128 c1 = _mm_shuffle_ps(c0, c0, _MM_SHUFFLE(2, 3, 0, 0));
 
             _mm_store_ps(res.v, _mm_add_ps(_mm_mul_ps(x, c0), _mm_mul_ps(y, c1)));
 
@@ -420,8 +404,8 @@ namespace sml
             __m128d x = _mm_set1_pd(rhs.x);
             __m128d y = _mm_set1_pd(rhs.y);
 
-            __m128d c0 = _mm_load_pd(lhs.v + 0);
-            __m128d c1 = _mm_load_pd(lhs.v + 2);
+            __m128d c0 = _mm_load_pd(&lhs.m00);
+            __m128d c1 = _mm_shuffle_pd(c0, c0, _MM_SHUFFLE(2, 3, 0, 0));
 
             _mm_store_pd(res.v, _mm_add_pd(_mm_mul_pd(x, c0), _mm_mul_pd(y, c1)));
 

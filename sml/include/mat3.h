@@ -180,8 +180,8 @@ namespace sml
                     s32 result = 1;
                     for (s32 i = 0; i < 3; i++)
                     {
-                        __m128 me = _mm_load_ps(&m00 + (2 * i + 0));
-                        __m128 ot = _mm_load_ps(&other.m00 + (2 * i + 0));
+                        __m128 me = _mm_load_ps(&m00 + (4 * i));
+                        __m128 ot = _mm_load_ps(&other.m00 + (4 * i));
 
                         m128 cmp = { _mm_cmpeq_ps(me, ot) };
                         result &= _mm_testc_si128(cmp.i, cmp.i);
@@ -201,16 +201,12 @@ namespace sml
                     s32 result = 1;
                     for (s32 i = 0; i < 4; i++)
                     {
-                        __m256d me = _mm256_load_pd(&m00 + (2 * i + 0));
-                        __m256d me1 = _mm256_load_pd(&m00 + (2 * i + 2));
-                        __m256d ot = _mm256_load_pd(&other.m00 + (2 * i + 0));
-                        __m256d ot1 = _mm256_load_pd(&other.m00 + (2 * i + 2));
+                        __m256d me = _mm256_load_pd(&m00 + (4 * i));
+                        __m256d ot = _mm256_load_pd(&other.m00 + (4 * i));
                         
                         m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_EQ_OQ) };
-                        m256 cmp1 = { _mm256_cmp_pd(me1, ot1, _CMP_EQ_OQ) };
                         
                         result &= _mm256_testc_si256(cmp.i, cmp.i);
-                        result &= _mm256_testc_si256(cmp1.i, cmp1.i);
                     }
 
                     return result != 0;
@@ -305,13 +301,13 @@ namespace sml
 
                     for (s32 i = 0; i < 3; i++)
                     {
-                        __m256d elem0 = _mm256_set1_pd(*(&other.m00 + (2 * i + 0)));
-                        __m256d elem1 = _mm256_set1_pd(*(&other.m00 + (2 * i + 1)));
-                        __m256d elem2 = _mm256_set1_pd(*(&other.m00 + (2 * i + 2)));
+                        __m256d elem0 = _mm256_set1_pd(*(&other.m00 + (4 * i + 0)));
+                        __m256d elem1 = _mm256_set1_pd(*(&other.m00 + (4 * i + 1)));
+                        __m256d elem2 = _mm256_set1_pd(*(&other.m00 + (4 * i + 2)));
 
                         __m256d result = _mm256_add_pd(_mm256_mul_pd(elem0, col0), _mm256_add_pd(_mm256_mul_pd(elem1, col1), _mm256_mul_pd(elem2, col2)));
 
-                        _mm256_store_pd(res + (2 * i), result);
+                        _mm256_store_pd(res + (4 * i), result);
                     }
 
                     _mm256_store_pd(&m00, _mm256_load_pd(res + 0));
