@@ -94,6 +94,3 @@ project "SMLTest"
             "NDEBUG" 
         }
         optimize "On"
-
-    filter "system:Windows"
-        toolset "msc-ClangCL"
