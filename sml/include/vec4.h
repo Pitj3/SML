@@ -63,12 +63,12 @@ namespace sml
             constexpr vec4& operator = (const vec4view<T>& other) noexcept;
             constexpr vec4& operator = (vec4view<T>&& other) noexcept;
 
-            SML_NO_DISCARD constexpr void zero() noexcept
+            constexpr void zero() noexcept
             {
                 set(static_cast<T>(0), static_cast<T>(0), static_cast<T>(0), static_cast<T>(0));
             }
 
-            SML_NO_DISCARD constexpr void set(T x, T y, T z, T w) noexcept
+            constexpr void set(T x, T y, T z, T w) noexcept
             {
                 this->x = x;
                 this->y = y;
@@ -76,7 +76,7 @@ namespace sml
                 this->w = w;
             }
 
-            SML_NO_DISCARD constexpr void set(T v[4]) noexcept
+            constexpr void set(T v[4]) noexcept
             {
                 this->v[0] = v[0];
                 this->v[1] = v[1];

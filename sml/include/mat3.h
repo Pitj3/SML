@@ -109,7 +109,7 @@ namespace sml
                 m22 = std::move(other.m22);
             }
 
-            SML_NO_DISCARD constexpr void set(T m00, T m01, T m02, T m10, T m11, T m12, T m20, T m21, T m22) noexcept
+            constexpr void set(T m00, T m01, T m02, T m10, T m11, T m12, T m20, T m21, T m22) noexcept
             {
                 this->m00 = m00;
                 this->m10 = m10;
@@ -124,7 +124,7 @@ namespace sml
                 this->m22 = m22;
             }
 
-            SML_NO_DISCARD constexpr void set(T v[9]) noexcept
+            constexpr void set(T v[9]) noexcept
             {
                 for(int i = 0; i < 9; i++)
                 {
@@ -349,7 +349,7 @@ namespace sml
             }
 
             // Operations
-            SML_NO_DISCARD inline constexpr void identity() noexcept
+            inline constexpr void identity() noexcept
             {
                 m00 = T(1);
                 m10 = static_cast<T>(0);
