@@ -44,3 +44,6 @@ bin-int/
 *.sln
 *.vcxproj
 *.vcxproj.filters
+
+*.hint
+*.user
