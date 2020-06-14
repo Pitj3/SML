@@ -105,9 +105,9 @@ namespace sml
                     __m128 ot = _mm_load_ps(other.v);
 
                     m128 cmp = { _mm_cmpeq_ps(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return result != 0;
+                    return (result & 0x00FF) == 0x00FF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -122,9 +122,9 @@ namespace sml
                     __m128d ot = _mm_load_pd(other.v);
 
                     m128 cmp = { _mm_cmpeq_pd(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return result != 0;
+                    return (result & 0x00FF) == 0x00FF;
                 }
 
                 return x == other.x && y == other.y;
@@ -144,9 +144,9 @@ namespace sml
                     __m128 ot = _mm_load_ps(other.v);
 
                     m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return result != 0;
+                    return (result & 0x00FF) == 0x00FF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -161,9 +161,9 @@ namespace sml
                     __m128d ot = _mm_load_pd(other.v);
 
                     m128 cmp = { _mm_cmpneq_pd(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return result != 0;
+                    return (result & 0x00FF) == 0x00FF;
                 }
 
                 return x != other.x || y != other.y;
@@ -345,6 +345,8 @@ namespace sml
 
                     _mm_store_ps(v, res);
 
+                    v[2] = v[3] = static_cast<T>(0);
+
                     return *this;
                 }
 
@@ -355,6 +357,8 @@ namespace sml
                     __m128d res = _mm_div_pd(me, ot);
 
                     _mm_store_pd(v, res);
+
+                    v[2] = v[3] = static_cast<T>(0);
 
                     return *this;
                 }

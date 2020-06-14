@@ -392,7 +392,7 @@ namespace sml
             __m128 y = _mm_broadcast_ss(&rhs.y);
 
             __m128 c0 = _mm_load_ps(&lhs.m00);
-            __m128 c1 = _mm_shuffle_ps(c0, c0, _MM_SHUFFLE(2, 3, 0, 0));
+            __m128 c1 = _mm_shuffle_ps(c0, c0, _MM_SHUFFLE(0, 0, 3, 2));
 
             _mm_store_ps(res.v, _mm_add_ps(_mm_mul_ps(x, c0), _mm_mul_ps(y, c1)));
 
@@ -405,7 +405,7 @@ namespace sml
             __m256d y = _mm256_set1_pd(rhs.y);
 
             __m256d c0 = _mm256_load_pd(&lhs.m00);
-            __m256d c1 = _mm256_shuffle_pd(c0, c0, 0);
+            __m256d c1 = _mm256_shuffle_pd(c0, c0, _MM_SHUFFLE(0, 0, 3, 2));
 
             _mm256_store_pd(res.v, _mm256_add_pd(_mm256_mul_pd(x, c0), _mm256_mul_pd(y, c1)));
 

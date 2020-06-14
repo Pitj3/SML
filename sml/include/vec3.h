@@ -101,26 +101,32 @@ namespace sml
                     __m128 ot = _mm_load_ps(other.v);
 
                     m128 cmp = { _mm_cmpeq_ps(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return result != 0;
+                    return (result & 0x00FF) == 0x00FF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
                 {
                     union m128
                     {
-                        __m128d d;
+                        __m128 f;
                         __m128i i;
                     };
 
-                    __m128d me = _mm_load_pd(v);
-                    __m128d ot = _mm_load_pd(other.v);
+                    __m128 me = _mm_load_pd(v);
+                    __m128 ot = _mm_load_pd(other.v);
 
                     m128 cmp = { _mm_cmpeq_pd(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return result != 0;
+                    me = _mm_load_pd(v + 2);
+                    ot = _mm_load_pd(other.v + 2);
+
+                    cmp = { _mm_cmpeq_pd(me, ot) };
+                    result |= _mm_movemask_epi8(cmp.i);
+
+                    return (result & 0x00FF) == 0x00FF;
                 }
 
                 return x == other.x && y == other.y && z == other.z;
@@ -140,26 +146,32 @@ namespace sml
                     __m128 ot = _mm_load_ps(other.v);
 
                     m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return result != 0;
+                    return (result & 0x00FF) == 0x00FF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
                 {
                     union m128
                     {
-                        __m128d d;
+                        __m128 f;
                         __m128i i;
                     };
 
-                    __m128d me = _mm_load_pd(v);
-                    __m128d ot = _mm_load_pd(other.v);
+                    __m128 me = _mm_load_pd(v);
+                    __m128 ot = _mm_load_pd(other.v);
 
                     m128 cmp = { _mm_cmpneq_pd(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return result != 0;
+                    me = _mm_load_pd(v + 2);
+                    ot = _mm_load_pd(other.v + 2);
+
+                    cmp = { _mm_cmpneq_pd(me, ot) };
+                    result &= _mm_movemask_epi8(cmp.i);
+
+                    return (result & 0x00FF) == 0x00FF;
                 }
 
                 return x != other.x || y != other.y || z != other.z;
@@ -315,6 +327,8 @@ namespace sml
 
                     _mm_store_ps(v, res);
 
+                    v[2] = v[3] = static_cast<T>(0);
+
                     return *this;
                 }
 
@@ -325,6 +339,8 @@ namespace sml
                     __m256d res = _mm256_div_pd(me, him);
 
                     _mm256_store_pd(v, res);
+
+                    v[2] = v[3] = static_cast<T>(0);
 
                     return *this;
                 }
@@ -346,6 +362,8 @@ namespace sml
 
                     _mm_store_ps(v, res);
 
+                    v[2] = v[3] = static_cast<T>(0);
+
                     return *this;
                 }
 
@@ -356,6 +374,8 @@ namespace sml
                     __m256d res = _mm256_div_pd(me, him);
 
                     _mm256_store_pd(v, res);
+
+                    v[2] = v[3] = static_cast<T>(0);
 
                     return *this;
                 }
