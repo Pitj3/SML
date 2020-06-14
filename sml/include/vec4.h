@@ -320,7 +320,7 @@ namespace sml
                     __m256d product = _mm256_mul_pd(me, ot);
                     __m256d dp = _mm256_hadd_pd(product, product);
 
-                    s32 res = _mm256_extract_epi32(_mm256_hadd_ps(dp, dp), 0);
+                    s32 res = _mm256_extract_epi32(_mm256_hadd_pd(dp, dp), 0);
 
                     return *reinterpret_cast<f64*>(&(res));
                 }
@@ -459,7 +459,7 @@ namespace sml
 
             static inline vec4 clamp(const vec4& v, const vec4& a, const vec4& b)
             {
-                return max(a, min(x, b));
+                return max(a, min(v, b));
             }
 
             static inline vec4 lerp(const vec4& a, const vec4& b, T t)

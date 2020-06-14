@@ -389,7 +389,7 @@ namespace sml
                     __m256d product = _mm256_mul_pd(me, ot);
                     __m256d dp = _mm256_hadd_pd(product, product);
 
-                    s32 res = _mm256_extract_epi32(_mm256_hadd_ps(dp, dp), 0);
+                    s32 res = _mm256_extract_epi32(_mm256_hadd_pd(dp, dp), 0);
 
                     return *reinterpret_cast<f64*>(&(res));
                 }
@@ -454,7 +454,7 @@ namespace sml
 
             static inline vec3 min(const vec3& a, const vec3& b)
             {
-                vec4 result;
+                vec3 result;
 
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -490,7 +490,7 @@ namespace sml
 
             static inline vec3 max(const vec3& a, const vec3& b)
             {
-                vec4 result;
+                vec3 result;
 
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -526,7 +526,7 @@ namespace sml
 
             static inline vec3 clamp(const vec3& v, const vec3& a, const vec3& b)
             {
-                return max(a, min(x, b));
+                return max(a, min(v, b));
             }
 
             static inline vec3 lerp(const vec3& a, const vec3& b, T t)

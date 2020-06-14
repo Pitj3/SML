@@ -461,27 +461,32 @@ namespace sml
             {
                 T det = determinant();
 
-                T t00 = m11 * m22 - m12 * m21;
-                T t01 = -m10 * m22 + m12 * m20;
-                T t02 = m10 * m21 - m11 * m20;
-                T t10 = -m01 * m22 + m02 * m21;
-                T t11 = m00 * m22 - m02 * m20;
-                T t12 = -m00 * m21 + m01 * m20;
-                T t20 = m01 * m12 - m02 * m11;
-                T t21 = -m00 * m12 + m02 * m10;
-                T t22 = m00 * m11 - m01 * m10;
+                if (det != T(0))
+                {
+                    T det_inv = T(1) / det;
 
-                m00 = t00 * det_inv;
-                m11 = t11 * det_inv;
-                m22 = t22 * det_inv;
+                    T t00 = m11 * m22 - m12 * m21;
+                    T t01 = -m10 * m22 + m12 * m20;
+                    T t02 = m10 * m21 - m11 * m20;
+                    T t10 = -m01 * m22 + m02 * m21;
+                    T t11 = m00 * m22 - m02 * m20;
+                    T t12 = -m00 * m21 + m01 * m20;
+                    T t20 = m01 * m12 - m02 * m11;
+                    T t21 = -m00 * m12 + m02 * m10;
+                    T t22 = m00 * m11 - m01 * m10;
 
-                m01 = t10 * det_inv;
-                m10 = t11 * det_inv;
-                m20 = t12 * det_inv;
+                    m00 = t00 * det_inv;
+                    m11 = t11 * det_inv;
+                    m22 = t22 * det_inv;
 
-                m02 = t20 * det_inv;
-                m12 = t21 * det_inv;
-                m21 = t12 * det_inv;
+                    m01 = t10 * det_inv;
+                    m10 = t11 * det_inv;
+                    m20 = t12 * det_inv;
+
+                    m02 = t20 * det_inv;
+                    m12 = t21 * det_inv;
+                    m21 = t12 * det_inv;
+                }
 
                 return *this;
             }
@@ -516,7 +521,7 @@ namespace sml
 
             inline T determinant()
             {
-                return 
+                return T(0);
             }
 
             inline std::string toString() const

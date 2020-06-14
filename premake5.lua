@@ -71,7 +71,7 @@ project "SMLTest"
 
     includedirs {
         "%{IncludeDir.SML}",
-        "%{prj.name}/include"
+        "smltest/include"
     }
 
     links {
