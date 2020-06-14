@@ -110,12 +110,12 @@ namespace sml
                 {
                     union m128
                     {
-                        __m128 f;
+                        __m128d f;
                         __m128i i;
                     };
 
-                    __m128 me = _mm_load_pd(v);
-                    __m128 ot = _mm_load_pd(other.v);
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
 
                     m128 cmp = { _mm_cmpeq_pd(me, ot) };
                     s32 result = _mm_movemask_epi8(cmp.i);
@@ -155,12 +155,12 @@ namespace sml
                 {
                     union m128
                     {
-                        __m128 f;
+                        __m128d f;
                         __m128i i;
                     };
 
-                    __m128 me = _mm_load_pd(v);
-                    __m128 ot = _mm_load_pd(other.v);
+                    __m128d me = _mm_load_pd(v);
+                    __m128d ot = _mm_load_pd(other.v);
 
                     m128 cmp = { _mm_cmpneq_pd(me, ot) };
                     s32 result = _mm_movemask_epi8(cmp.i);
