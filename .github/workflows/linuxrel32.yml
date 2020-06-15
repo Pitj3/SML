@@ -16,11 +16,5 @@ jobs:
       run: sudo bash run_premake.sh
     - name: make
       run: make config=release_static32
-      
-  test:
-    needs: [build]
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: unittest
-        run: ./bin/Release-linux-/SMLTest/SMLTest
+    - name: unittest
+      run: ./bin/Release-linux-/SMLTest/SMLTest
