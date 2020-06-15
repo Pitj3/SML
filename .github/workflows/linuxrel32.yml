@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: premake
-      run: ./run_premake.sh
+      run: sudo ./run_premake.sh
     - name: make
       run: make config=release_static32
