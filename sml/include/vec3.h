@@ -286,7 +286,7 @@ namespace sml
                 return *this;
             }
 
-            vec3& operator *= (const T other) noexcept
+            vec3& operator *= (T other) noexcept
             {
                 if constexpr(std::is_same<T, f32>::value)
                 {
@@ -631,7 +631,7 @@ namespace sml
     template<typename T>
     constexpr vec3<T> operator * (vec3<T> left, T right) noexcept
     {
-        left += right;
+        left *= right;
         return left;
     }
 
@@ -647,6 +647,15 @@ namespace sml
     {
         left += right;
         return left;
+    }
+
+    template<typename T>
+    constexpr vec3<T> operator - (vec3<T> left) noexcept
+    {
+        vec3<T> res(left);
+        res *= -1;
+
+        return res;
     }
 
     // Predefined types

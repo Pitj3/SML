@@ -612,6 +612,15 @@ namespace sml
         return left;
     }
 
+    template<typename T>
+    constexpr vec2<T> operator - (vec2<T> left) noexcept
+    {
+        vec2<T> res(left);
+        res *= -1;
+
+        return res;
+    }
+
     // Predefined types
     typedef vec2<bool> bvec2;
     typedef vec2<u32> uvec2;

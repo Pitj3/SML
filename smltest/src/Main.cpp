@@ -477,3 +477,9 @@ TEST_CASE("dmat4 tests", "[mat4]") {
 
     REQUIRE(res2 == cmp2);
 }
+
+TEST_CASE("fquat tests", "[fquat]") {
+    //sml::fquat quat = sml::fquat::euler({ sml::degtorad(90.0f), 0, sml::degtorad(45.0f) });
+
+    //sml::fvec3 euler = quat.eulerAngles();
+ }

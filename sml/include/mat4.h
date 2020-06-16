@@ -529,6 +529,7 @@ namespace sml
                     + std::to_string(m03) + ", " + std::to_string(m13) + ", " + std::to_string(m23) + std::to_string(m33);
             }
 
+            // Statics
             SML_NO_DISCARD static inline constexpr mat4 view(const vec3<T>& eye, const vec3<T>& to, const vec3<T>& up) noexcept
             {
                 mat4 res(static_cast<T>(1));

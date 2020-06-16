@@ -640,6 +640,15 @@ namespace sml
         return left;
     }
 
+    template<typename T>
+    constexpr vec4<T> operator - (vec4<T> left) noexcept
+    {
+        vec4<T> res(left);
+        res *= -1;
+
+        return res;
+    }
+
     // Predefined types
     typedef vec4<bool> bvec4;
     typedef vec4<u32> uvec4;
