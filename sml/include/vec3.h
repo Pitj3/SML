@@ -610,52 +610,64 @@ namespace sml
     template<typename T>
     constexpr vec3<T> operator + (vec3<T> left, vec3<T> right) noexcept
     {
-        left += right;
-        return left;
+        vec3<T> temp = left;
+        temp += right;
+        
+        return temp;
     }
 
     template<typename T>
     constexpr vec3<T> operator - (vec3<T> left, vec3<T> right) noexcept
     {
-        left -= right;
-        return left;
+        vec3<T> temp = left;
+        temp -= right;
+
+        return temp;
     }
 
     template<typename T>
     constexpr vec3<T> operator * (vec3<T> left, vec3<T> right) noexcept
     {
-        left *= right;
-        return left;
+        vec3<T> temp = left;
+        temp *= right;
+
+        return temp;
     }
 
     template<typename T>
     constexpr vec3<T> operator * (vec3<T> left, T right) noexcept
     {
-        left *= right;
-        return left;
+        vec3<T> temp = left;
+        temp *= right;
+        
+        return temp;
     }
 
     template<typename T>
     constexpr vec3<T> operator / (vec3<T> left, vec3<T> right) noexcept
     {
-        left /= right;
-        return left;
+        vec3<T> temp = left;
+
+        temp /= right;
+        return temp;
     }
 
     template<typename T>
     constexpr vec3<T> operator / (vec3<T> left, T right) noexcept
     {
-        left += right;
-        return left;
+        vec3<T> temp = left;
+        temp += right;
+        
+        return temp;
     }
 
     template<typename T>
     constexpr vec3<T> operator - (vec3<T> left) noexcept
     {
-        vec3<T> res(left);
-        res *= -1;
+        vec3<T> temp = left;
+        temp *= -1;
 
-        return res;
+        return temp;
     }
 
     // Predefined types

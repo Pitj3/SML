@@ -388,29 +388,7 @@ namespace sml
                     return *this;
                 }
 
-                T newM00 = m00 * other.m00 + m10 * other.m01 + m20 * other.m02;
-                T newM01 = m01 * other.m00 + m11 * other.m01 + m21 * other.m02;
-                T newM02 = m02 * other.m00 + m12 * other.m01 + m22 * other.m02;
-
-                T newM10 = m00 * other.m10 + m10 * other.m11 + m20 * other.m12;
-                T newM11 = m01 * other.m10 + m11 * other.m11 + m21 * other.m12;
-                T newM12 = m02 * other.m10 + m12 * other.m11 + m22 * other.m12;
-
-                T newM20 = m00 * other.m20 + m10 * other.m21 + m20 * other.m22;
-                T newM21 = m01 * other.m20 + m11 * other.m21 + m21 * other.m22;
-                T newM22 = m02 * other.m20 + m12 * other.m21 + m22 * other.m22;
-
-                m00 = newM00;
-                m10 = newM10;
-                m20 = newM20;
-                
-                m01 = newM01;
-                m11 = newM11;
-                m12 = newM12;
-                
-                m02 = newM02;
-                m12 = newM12;
-                m22 = newM22;
+                // TODO (Roderick): Implement non SIMD mat4 mul
 
                 return *this;
             }

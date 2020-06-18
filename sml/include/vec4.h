@@ -601,52 +601,64 @@ namespace sml
     template<typename T>
     constexpr vec4<T> operator + (vec4<T> left, vec4<T> right) noexcept
     {
-        left += right;
-        return left;
+        vec4<T> temp = left;
+        temp += right;
+
+        return temp;
     }
 
     template<typename T>
     constexpr vec4<T> operator - (vec4<T> left, vec4<T> right) noexcept
     {
-        left -= right;
-        return left;
+        vec4<T> temp = left;
+        temp -= right;
+
+        return temp;
     }
 
     template<typename T>
     constexpr vec4<T> operator * (vec4<T> left, vec4<T> right) noexcept
     {
-        left *= right;
-        return left;
+        vec4<T> temp = left;
+        temp *= right;
+
+        return temp;
     }
 
     template<typename T>
     constexpr vec4<T> operator * (vec4<T> left, T right) noexcept
     {
-        left += right;
-        return left;
+        vec4<T> temp = left;
+        temp += right;
+
+        return temp;
     }
 
     template<typename T>
     constexpr vec4<T> operator / (vec4<T> left, vec4<T> right) noexcept
     {
-        left /= right;
-        return left;
+        vec4<T> temp = left;
+        temp /= right;
+
+        return temp;
     }
 
     template<typename T>
     constexpr vec4<T> operator / (vec4<T> left, T right) noexcept
     {
-        left += right;
-        return left;
+        vec4<T> temp = left;
+        temp += right;
+        
+        return temp;
     }
 
     template<typename T>
     constexpr vec4<T> operator - (vec4<T> left) noexcept
     {
-        vec4<T> res(left);
-        res *= -1;
+        vec4<T> temp = left;
+        temp *= -1;
 
-        return res;
+        return temp;
     }
 
     // Predefined types

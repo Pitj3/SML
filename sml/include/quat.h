@@ -225,10 +225,6 @@ namespace sml
 
             SML_NO_DISCARD inline constexpr vec3<T> eulerAngles() const noexcept
             {
-                alignas(simdalign<T>::value) vec3<T> res;
-
-                const T SINGULARITY_THRESHOLD = static_cast<T>(0.4999995);
-
                 T sqw = w * w;
                 T sqx = x * x;
                 T sqy = y * y;
@@ -236,31 +232,32 @@ namespace sml
                 T unit = sqx + sqy + sqz + sqw;
                 T singularityTest = (x * w) - (y * z);
 
-                if (singularityTest > static_cast<T>(0.4995) * unit)
+                vec3<T> res;
+
+                if (singularityTest > static_cast<T>(0.4995 * unit))
                 {
-                    res.y = static_cast<T>(2) * sml::atan2(y, x);
-                    res.x = constants::pi / static_cast<T>(2);
+                    res.x = static_cast<T>(2) * sml::atan2(y, x);
+                    res.y = constants::pi / static_cast<T>(2);
                     res.z = static_cast<T>(0);
 
                     return normalizeAngles(res * constants::rad2deg);
                 }
 
-                if (singularityTest < static_cast<T>(-0.4995) * unit)
+                if (singularityTest < static_cast<T>(-0.4995 * unit))
                 {
-                    res.y = static_cast<T>(-2) * sml::atan2(y, x);
-                    res.x = -constants::pi / static_cast<T>(2);
+                    res.x = static_cast<T>(-2) * sml::atan2(y, x);
+                    res.y = -constants::pi / static_cast<T>(2);
                     res.z = static_cast<T>(0);
 
                     return normalizeAngles(res * constants::rad2deg);
                 }
 
-                quat q(w, z, x, y);
-                res.y = sml::atan2(static_cast<T>(2) * q.x * q.w + static_cast<T>(2) * q.y * q.z, static_cast<T>(1 - 2) * (q.z * q.z + q.w * q.w));
-                res.x = sml::asin(static_cast<T>(2) * (q.x * q.z - q.w * q.y));
-                res.z = sml::atan2(static_cast<T>(2) * q.x * q.y + static_cast<T>(2) * q.z * q.w, static_cast<T>(1 - 2) * (q.y * q.y + q.z * q.z));
+                quat q(x, y, z, w);
+                res.x = sml::atan2(static_cast<T>(2) * q.x * q.w + static_cast<T>(2) * q.y * q.z, static_cast<T>(1) - static_cast<T>(2) * (q.z * q.z + q.w * q.w));
+                res.y = sml::asin(static_cast<T>(2) * (q.x * q.z - q.w * q.y));
+                res.z = sml::atan2(static_cast<T>(2) * q.x * q.y + static_cast<T>(2) * q.z * q.w, static_cast<T>(1) - static_cast<T>(2) * (q.y * q.y + q.z * q.z));
 
                 return normalizeAngles(res * constants::rad2deg);
-
             }
 
             // Statics
@@ -411,22 +408,28 @@ namespace sml
     template<typename T>
     constexpr quat<T> operator + (quat<T> left, quat<T> right) noexcept
     {
-        left += right;
-        return left;
+        quat<T> temp = left;
+        temp += right;
+
+        return temp;
     }
 
     template<typename T>
     constexpr quat<T> operator - (quat<T> left, quat<T> right) noexcept
     {
-        left -= right;
-        return left;
+        quat<T> temp = left;
+        temp -= right;
+
+        return temp;
     }
 
     template<typename T>
     constexpr quat<T> operator * (quat<T> left, quat<T> right) noexcept
     {
-        left *= right;
-        return left;
+        quat<T> temp = left;
+        temp *= right;
+
+        return temp;
     }
 
     template<typename T>

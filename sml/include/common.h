@@ -19,6 +19,8 @@
 */
 
 #include <cmath>
+#include <stdint.h>
+#include <float.h>
 
 #include "smltypes.h"
 
@@ -32,7 +34,7 @@ namespace constants
 	static inline constexpr f32 epsilon = FLT_EPSILON;
 	static inline constexpr f32 infinity = INFINITY;
 	static inline constexpr f32 negativeinfinity = -infinity;
-	static inline constexpr f32 deg2rad = pi * 2.0f / 360.0f;
+	static inline constexpr f32 deg2rad = pi / 180.0f;
 	static inline constexpr f32 rad2deg = 1.0f / deg2rad;
 } // namespace constants
 
