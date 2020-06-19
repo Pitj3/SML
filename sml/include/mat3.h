@@ -184,7 +184,7 @@ namespace sml
                         __m128 ot = _mm_load_ps(&other.m00 + (4 * i));
 
                         m128 cmp = { _mm_cmpeq_ps(me, ot) };
-                        result &= _mm_testc_si128(cmp.i, cmp.i);
+                        result &= _mm_movemask_epi8(cmp.i);
                     }
 
                     return result != 0;
@@ -206,7 +206,7 @@ namespace sml
                         
                         m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_EQ_OQ) };
                         
-                        result &= _mm256_testc_si256(cmp.i, cmp.i);
+                        result &= 1;//_mm256_movemask_epi8(cmp.i);
                     }
 
                     return result != 0;
@@ -234,7 +234,7 @@ namespace sml
                         __m128 ot = _mm_load_ps(&other.m00 + (2 * i + 0));
 
                         m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                        result &= _mm_testc_si128(cmp.i, cmp.i);
+                        result &= 1;//_mm_movemask_epi8(cmp.i);
                     }
 
                     return result != 0;
@@ -259,8 +259,8 @@ namespace sml
                         m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ) };
                         m256 cmp1 = { _mm256_cmp_pd(me1, ot1, _CMP_NEQ_OQ) };
                         
-                        result &= _mm256_testc_si256(cmp.i, cmp.i);
-                        result &= _mm256_testc_si256(cmp1.i, cmp1.i);
+                        result &= _mm256_movemask_epi8(cmp.i);
+                        result &= _mm256_movemask_epi8(cmp1.i);
                     }
 
                     return result != 0;
@@ -379,9 +379,63 @@ namespace sml
 
                 if (det != static_cast<T>(0))
                 {
-                    //T det_inv = static_cast<T>(1) / det;
+                    T det_inv = static_cast<T>(1) / det;
 
-                    // TODO (Roderick): Implement this
+                    /*if constexpr (std::is_same<T, f32>::value)
+                    {
+                        __m128 me1 = _mm_set_ps(m11, m12, m10, m02);
+                        __m128 me2 = _mm_set_ps(m00, m01, m01, m02);
+                        __m128 me3 = _mm_set_ps(m00, m00, m00, m00);
+
+                        __m128 me4 = _mm_set_ps(m22, m20, m21, m21);
+                        __m128 me5 = _mm_set_ps(m22, m20, m12, m10);
+                        __m128 me6 = _mm_set_ps(m11, m11, m11, m11);
+
+                        __m128 mul1 = _mm_mul_ps(me1, me4);
+                        __m128 mul2 = _mm_mul_ps(me2, me5);
+                        __m128 mul3 = _mm_mul_ps(me3, me6);
+
+                        me1 = _mm_set_ps(m12, m10, m11, m11);
+                        me2 = _mm_set_ps(m02, m00, m02, m00);
+                        me3 = _mm_set_ps(m01, m01, m01, m01);
+
+                        me4 = _mm_set_ps(m21, m22, m20, m22);
+                        me5 = _mm_set_ps(m20, m21, m11, m12);
+                        me6 = _mm_set_ps(m10, m10, m10, m10);
+
+                        __m128 mul4 = _mm_mul_ps(me1, me4);
+                        __m128 mul5 = _mm_mul_ps(me2, me5);
+                        __m128 mul6 = _mm_mul_ps(me3, me6);
+
+                        __m128 res1 = _mm_sub_ps(mul1, mul4);
+                        __m128 res2 = _mm_sub_ps(mul2, mul5);
+                        __m128 res3 = _mm_sub_ps(mul3, mul6);
+
+                        __m128 detinvregister = _mm_broadcast_ss(&det_inv);
+
+                        res1 = _mm_mul_ps(res1, detinvregister);
+                        res2 = _mm_mul_ps(res2, detinvregister);
+                        res3 = _mm_mul_ps(res3, detinvregister);
+
+                        _mm_store_ps(v, res1);
+                        _mm_store_ps(v + 4, res2);
+                        _mm_store_ps(v + 8, res3);
+
+                        return *this;
+                    }*/
+
+                    mat3 res;
+                    res.m00 = (m11 * m22 - m12 * m21) * det_inv;
+                    res.m10 = (m12 * m20 - m10 * m22) * det_inv;
+                    res.m20 = (m10 * m21 - m11 * m20) * det_inv;
+                    res.m01 = (m02 * m21 - m11 * m22) * det_inv;
+                    res.m11 = (m00 * m22 - m02 * m20) * det_inv;
+                    res.m21 = (m01 * m20 - m00 * m21) * det_inv;
+                    res.m02 = (m01 * m12 - m02 * m11) * det_inv;
+                    res.m12 = (m02 * m10 - m00 * m12) * det_inv;
+                    res.m22 = (m00 * m11 - m01 * m10) * det_inv;
+
+                    set(res.v);
                 }
 
                 return *this;

@@ -101,7 +101,7 @@ namespace sml
                     m128 cmp = { _mm_cmpeq_ps(me, ot) };
                     s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return (result & 0x00FF) == 0x00FF;
+                    return result == 0xFFFF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -124,7 +124,7 @@ namespace sml
                     cmp = { _mm_cmpeq_pd(me, ot) };
                     result |= _mm_movemask_epi8(cmp.i);
 
-                    return (result & 0x00FF) == 0x00FF;
+                    return result == 0xFFFF;
                 }
 
                 return x == other.x && y == other.y && z == other.z && w == other.w;
@@ -146,7 +146,7 @@ namespace sml
                     m128 cmp = { _mm_cmpneq_ps(me, ot) };
                     s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return (result & 0x00FF) == 0x00FF;
+                    return result == 0xFFFF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)

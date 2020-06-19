@@ -248,7 +248,7 @@ namespace sml
                         __m128 ot = _mm_load_ps(&other.m00 + (4 * i));
 
                         m128 cmp = { _mm_cmpeq_ps(me, ot) };
-                        result &= _mm_testc_si128(cmp.i, cmp.i);
+                        result &= _mm_movemask_epi8(cmp.i);
                     }
 
                     return result != 0;
@@ -270,7 +270,7 @@ namespace sml
                         
                         m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_EQ_OQ) };
                         
-                        result &= _mm256_testc_si256(cmp.i, cmp.i);
+                        result &= 1;//_mm256_movemask_epi8(cmp.i);
                     }
 
                     return result != 0;
@@ -299,7 +299,7 @@ namespace sml
                         __m128 ot = _mm_load_ps(&other.m00 + (4 * i + 0));
 
                         m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                        result &= _mm_testc_si128(cmp.i, cmp.i);
+                        result &= _mm_movemask_epi8(cmp.i);
                     }
 
                     return result != 0;
@@ -324,8 +324,8 @@ namespace sml
                         m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ) };
                         m256 cmp1 = { _mm256_cmp_pd(me1, ot1, _CMP_NEQ_OQ) };
                         
-                        result &= _mm256_testc_si256(cmp.i, cmp.i);
-                        result &= _mm256_testc_si256(cmp1.i, cmp1.i);
+                        result &= 1;//_mm256_movemask_epi8(cmp.i);
+                        result &= 1;//_mm256_movemask_epi8(cmp1.i);
                     }
 
                     return result != 0;
@@ -344,7 +344,7 @@ namespace sml
                     __m128 col0 = _mm_load_ps(v + 0);
                     __m128 col1 = _mm_load_ps(v + 4);
                     __m128 col2 = _mm_load_ps(v + 8);
-                    __m128 col3 = _mm_load_ps(v + 8);
+                    __m128 col3 = _mm_load_ps(v + 12);
 
                     for (s32 i = 0; i < 4; i++)
                     {
@@ -353,7 +353,10 @@ namespace sml
                         __m128 elem2 = _mm_broadcast_ss(other.v + (4 * i + 2));
                         __m128 elem3 = _mm_broadcast_ss(other.v + (4 * i + 3));
 
-                        __m128 result = _mm_add_ps(_mm_add_ps(_mm_mul_ps(elem0, col0), _mm_mul_ps(elem1, col1)), _mm_add_ps(_mm_mul_ps(elem2, col2), _mm_mul_ps(elem3, col3)));
+                        __m128 result = _mm_add_ps(_mm_add_ps(_mm_mul_ps(elem0, col0),
+                            _mm_mul_ps(elem1, col1)),
+                            _mm_add_ps(_mm_mul_ps(elem2, col2),
+                                _mm_mul_ps(elem3, col3)));
                         _mm_store_ps(v + 4 * i, result);
                     }
 
@@ -708,8 +711,10 @@ namespace sml
     template<typename T>
     constexpr mat4<T> operator * (mat4<T> left, mat4<T> right) noexcept
     {
-        left *= right;
-        return left;
+        mat4<T> temp = left;
+        temp *= right;
+
+        return temp;
     }
 
     template<typename T>

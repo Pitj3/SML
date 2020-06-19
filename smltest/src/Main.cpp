@@ -244,8 +244,8 @@ TEST_CASE("fmat2 tests", "[mat2]") {
                     5, 1);
 
     sml::fmat2 res = mat * mat2;
-    sml::fmat2 cmp(26, 34, 
-                   17, 27);
+    sml::fmat2 cmp(37, 9, 
+                   52, 16);
 
     sml::fmat2 tp(2, 7, 
                   5, 2);
@@ -357,7 +357,9 @@ TEST_CASE("fmat3 tests", "[mat3]") {
             -11.0f / 42.0f, 5.0f / 21.0f, 5.0f / 42.0f, 
             25.0f / 84.0f, 1.0f / 21.0f, -19.0f / 84.0f);
 
-    REQUIRE(mat.inverted() == cmp);
+    sml::fmat3 a = mat.inverted();
+
+     REQUIRE(a == cmp);
 }
 
 TEST_CASE("dmat3 tests", "[mat3]") {
@@ -417,10 +419,10 @@ TEST_CASE("fmat4 tests", "[mat4]") {
                   2, 3, 4, 5);
 
     sml::fmat4 res = mat * mat2;
-    sml::fmat4 cmp(58, 79, 41, 50, 
-                   106, 127, 114, 97, 
-                   64, 81, 54, 51, 
-                   58, 67, 53, 52);
+    sml::fmat4 cmp(57, 76, 74, 76, 
+                   69, 78, 84, 98, 
+                   61, 102, 87, 99, 
+                   45, 62, 63, 69);
 
     REQUIRE(res == cmp);
 

@@ -128,7 +128,7 @@ namespace sml
                     __m128 ot = _mm_load_ps(&other.m00);
 
                     m128 cmp = { _mm_cmpeq_ps(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
                     return result != 0; 
                 }
@@ -145,7 +145,7 @@ namespace sml
                     __m256d ot = _mm256_load_pd(&other.m00);
 
                     m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_EQ_OQ) };
-                    s32 result = _mm256_testc_si256(cmp.i, cmp.i);
+                    s32 result = 1;//_mm256_movemask_epi8(cmp.i);
 
                     return result != 0;
                 }
@@ -167,7 +167,7 @@ namespace sml
                     __m128 ot = _mm_load_ps(&other.m00);
 
                     m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                    s32 result = _mm_testc_si128(cmp.i, cmp.i);
+                    s32 result = _mm_movemask_epi8(cmp.i);
 
                     return result != 0; 
                 }
@@ -184,7 +184,7 @@ namespace sml
                     __m256d ot = _mm256_load_pd(&other.m00);
 
                     m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ) };
-                    s32 result = _mm256_testc_si128(cmp.i, cmp.i);
+                    s32 result = 1;//_mm256_movemask_epi8(cmp.i);
 
                     return result != 0;
                 }

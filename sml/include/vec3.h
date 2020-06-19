@@ -103,7 +103,7 @@ namespace sml
                     m128 cmp = { _mm_cmpeq_ps(me, ot) };
                     s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return (result & 0x00FF) == 0x00FF;
+                    return (result & 0x0FFF) == 0x0FFF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -148,7 +148,7 @@ namespace sml
                     m128 cmp = { _mm_cmpneq_ps(me, ot) };
                     s32 result = _mm_movemask_epi8(cmp.i);
 
-                    return (result & 0x00FF) == 0x00FF;
+                    return (result & 0x0FFF) == 0x0FFF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -327,8 +327,6 @@ namespace sml
 
                     _mm_store_ps(v, res);
 
-                    v[2] = v[3] = static_cast<T>(0);
-
                     return *this;
                 }
 
@@ -339,8 +337,6 @@ namespace sml
                     __m256d res = _mm256_div_pd(me, him);
 
                     _mm256_store_pd(v, res);
-
-                    v[2] = v[3] = static_cast<T>(0);
 
                     return *this;
                 }
@@ -362,8 +358,6 @@ namespace sml
 
                     _mm_store_ps(v, res);
 
-                    v[2] = v[3] = static_cast<T>(0);
-
                     return *this;
                 }
 
@@ -374,8 +368,6 @@ namespace sml
                     __m256d res = _mm256_div_pd(me, him);
 
                     _mm256_store_pd(v, res);
-
-                    v[2] = v[3] = static_cast<T>(0);
 
                     return *this;
                 }
