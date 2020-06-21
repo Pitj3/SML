@@ -1,19 +1,15 @@
 workspace "SML"
     configurations { 
-       "Debug", 
-       "Release" 
-    }
-
-    platforms {
-        "Static32",
-        "Static64"
+       "debug", 
+       "release" 
     }
 
     flags {
 		"MultiProcessorCompile"
 	}
 
-    outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+    binaries = "%{sln.location}/bin/%{cfg.buildcfg}/%{cfg.system}/%{cfg.architecture}"
+    intermediate = "%{sln.location}/bin-int/%{cfg.buildcfg}/%{cfg.system}/%{cfg.architecture}"
 
     IncludeDir = {}
     IncludeDir["SML"] = "sml/include"
@@ -24,8 +20,8 @@ project "sml"
     cppdialect "C++17"
 	staticruntime "on"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir (binaries)
+	objdir (intermediate)
 
     files {
         "sml/include/**.h", 
@@ -54,21 +50,14 @@ project "sml"
         runtime "Release"
         optimize "On"
 
-    filter "platforms:Static32"
-        architecture "x86"
-
-    filter "platforms:Static64"
-        architecture "x86_64"
-
-
 project "SMLTest"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
 	staticruntime "on"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir (binaries)
+	objdir (intermediate)
 	
 	vectorextensions "AVX"
 
@@ -82,6 +71,14 @@ project "SMLTest"
         "%{IncludeDir.SML}",
         "smltest/include"
     }
+
+    filter "system:windows"
+        toolset "msc-ClangCL"
+
+    filter "system:linux"
+        toolset "clang"
+
+    filter {}
 
     filter "configurations:Debug"
         defines { 

@@ -1,0 +1,46 @@
+name: C/C++ Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  linux-build:
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, ubuntu-20.04]
+        config: [debug, release]
+
+      fail-fast: true
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: premake
+        run: sudo bash run_premake.sh
+      - name: make
+        run: make config=${{ matrix.config }} -j $(nproc)
+      - name: test
+        run: ./bin/${{ matrix.config }}/linux/SMLTest
+
+  windows-build:
+    strategy:
+      matrix:
+        os: [windows-2019]
+        config: [Debug, Release]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: microsoft/setup-msbuild@v1.0.0
+      - uses: actions/checkout@v2
+      - name: configure
+        shell: cmd
+        run: call win_premake.bat
+      - name: make
+        run: MSBuild SML.sln /p:Configuration=${{ matrix.config }}
+      - name: test
+        run: ./bin/${{ matrix.config }}/windows/SMLTest.exe
