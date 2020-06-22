@@ -97,13 +97,15 @@ namespace sml
                         __m128i i;
                     };
 
+                    s32 result = 0x0000;
+
                     __m128 me = _mm_load_ps(v);
                     __m128 ot = _mm_load_ps(other.v);
 
-                    m128 cmp = { _mm_cmpeq_ps(me, ot) };
-                    s32 result = _mm_movemask_epi8(cmp.i);
+                    m128 cmp = { _mm_cmpneq_ps(me, ot) };
+                    result |= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
 
-                    return (result & 0x0FFF) == 0x0FFF;
+                    return (result & 0x0FFF) == 0;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -114,19 +116,21 @@ namespace sml
                         __m128i i;
                     };
 
+                    s32 result = 0x0000;
+
                     __m128d me = _mm_load_pd(v);
                     __m128d ot = _mm_load_pd(other.v);
 
-                    m128 cmp = { _mm_cmpeq_pd(me, ot) };
-                    s32 result = _mm_movemask_epi8(cmp.i);
+                    m128 cmp = { _mm_cmpneq_pd(me, ot) };
+                    result |= (_mm_movemask_epi8(cmp.i) & 0x00FF);
 
                     me = _mm_load_pd(v + 2);
                     ot = _mm_load_pd(other.v + 2);
 
-                    cmp = { _mm_cmpeq_pd(me, ot) };
-                    result |= _mm_movemask_epi8(cmp.i);
+                    cmp = { _mm_cmpneq_pd(me, ot) };
+                    result |= (_mm_movemask_epi8(cmp.i) & 0x00FF);
 
-                    return (result & 0x00FF) == 0x00FF;
+                    return (result & 0x00FF) == 0;
                 }
 
                 return x == other.x && y == other.y && z == other.z;
@@ -142,13 +146,15 @@ namespace sml
                         __m128i i;
                     };
 
+                    s32 result = 0xFFFF;
+
                     __m128 me = _mm_load_ps(v);
                     __m128 ot = _mm_load_ps(other.v);
 
                     m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                    s32 result = _mm_movemask_epi8(cmp.i);
+                    result &= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
 
-                    return (result & 0x0FFF) == 0x0FFF;
+                    return (result & 0x0FFF) != 0;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -159,19 +165,21 @@ namespace sml
                         __m128i i;
                     };
 
+                    s32 result = 0xFFFF;
+
                     __m128d me = _mm_load_pd(v);
                     __m128d ot = _mm_load_pd(other.v);
 
                     m128 cmp = { _mm_cmpneq_pd(me, ot) };
-                    s32 result = _mm_movemask_epi8(cmp.i);
+                    result &= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
 
                     me = _mm_load_pd(v + 2);
                     ot = _mm_load_pd(other.v + 2);
 
                     cmp = { _mm_cmpneq_pd(me, ot) };
-                    result &= _mm_movemask_epi8(cmp.i);
+                    result &= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
 
-                    return (result & 0x00FF) == 0x00FF;
+                    return (result & 0x0FFF) != 0;
                 }
 
                 return x != other.x || y != other.y || z != other.z;

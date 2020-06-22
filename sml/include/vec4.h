@@ -169,7 +169,7 @@ namespace sml
                     cmp = { _mm_cmpneq_pd(me, ot) };
                     result &= _mm_movemask_epi8(cmp.i);
 
-                    return (result & 0x00FF) == 0x00FF;
+                    return result == 0xFFFF;
                 }
 
                 return x != other.x || y != other.y || z != other.z || w != other.w;

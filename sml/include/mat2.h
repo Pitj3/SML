@@ -135,19 +135,27 @@ namespace sml
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    union m256
+                    union m128
                     {
-                        __m256d d;
-                        __m256i i;
+                        __m128d f;
+                        __m128i i;
                     };
 
+                    s32 result = 0x0000;
                     __m256d me = _mm256_load_pd(&m00);
                     __m256d ot = _mm256_load_pd(&other.m00);
+                    __m256d res = _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ);
 
-                    m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_EQ_OQ) };
-                    s32 result = 1;//_mm256_movemask_epi8(cmp.i);
+                    __m128d high = _mm256_extractf128_pd(res, 1);
+                    __m128d low = _mm256_extractf128_pd(res, 0);
 
-                    return result != 0;
+                    m128 highCMP = { high };
+                    m128 lowCMP = { low };
+
+                    result |= _mm_movemask_epi8(highCMP.i);
+                    result |= _mm_movemask_epi8(lowCMP.i);
+
+                    return result == 0;
                 }
 
                 return m00 != other.m00 || m10 != other.m10 || m01 != other.m01 || m11 != other.m11;
@@ -163,28 +171,37 @@ namespace sml
                         __m128i i;
                     };
 
+                    s32 result = 0x0000;
                     __m128 me = _mm_load_ps(&m00);
                     __m128 ot = _mm_load_ps(&other.m00);
 
                     m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                    s32 result = _mm_movemask_epi8(cmp.i);
+                    result |= _mm_movemask_epi8(cmp.i);
 
-                    return result != 0; 
+                    return result == 0; 
                 }
 
                 if constexpr(std::is_same<T, f64>::value)
                 {
-                    union m256
+                    union m128
                     {
-                        __m256d d;
-                        __m256i i;
+                        __m128d f;
+                        __m128i i;
                     };
 
+                    s32 result = 0xFFFF;
                     __m256d me = _mm256_load_pd(&m00);
                     __m256d ot = _mm256_load_pd(&other.m00);
+                    __m256d res = _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ);
 
-                    m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ) };
-                    s32 result = 1;//_mm256_movemask_epi8(cmp.i);
+                    __m128d high = _mm256_extractf128_pd(res, 1);
+                    __m128d low = _mm256_extractf128_pd(res, 0);
+
+                    m128 highCMP = { high };
+                    m128 lowCMP = { low };
+
+                    result &= _mm_movemask_epi8(highCMP.i);
+                    result &= _mm_movemask_epi8(lowCMP.i);
 
                     return result != 0;
                 }
@@ -298,7 +315,7 @@ namespace sml
 
                     if constexpr(std::is_same<T, f32>::value)
                     {
-                        __m128 me = _mm_set_ps(m11, -m01, -m10, m00);
+                        __m128 me = _mm_set_ps(m00, -m10, -m01, m11);
                         __m128 det = _mm_set_ps1(det_inv);
 
                         __m128 res = _mm_mul_ps(me, det);
@@ -310,16 +327,16 @@ namespace sml
 
                     if constexpr(std::is_same<T, f64>::value)
                     {
-                        __m128d me1 = _mm_set_pd(m11, -m01);
-                        __m128d me2 = _mm_set_pd(-m10, m00);
+                        __m128d me1 = _mm_set_pd(m00, -m10);
+                        __m128d me2 = _mm_set_pd(-m01, m11);
 
                         __m128d det = _mm_set1_pd(det_inv);
 
                         __m128d res1 = _mm_mul_pd(me1, det);
                         __m128d res2 = _mm_mul_pd(me2, det);
 
-                        _mm_store_pd(&m00 + 0, res1);
-                        _mm_store_pd(&m00 + 2, res2);
+                        _mm_store_pd(&m00 + 2, res1);
+                        _mm_store_pd(&m00 + 0, res2);
 
                         return *this;
                     }
@@ -345,7 +362,7 @@ namespace sml
 
             SML_NO_DISCARD inline constexpr mat2 inverted() const noexcept
             {
-                mat2 c; c.set(m00, m10, m01, m11);
+                mat2 c; c.set(m00, m01, m10, m11);
                 return c.invert();
             }
 

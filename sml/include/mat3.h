@@ -177,39 +177,47 @@ namespace sml
                         __m128i i;
                     };
 
-                    s32 result = 1;
+                    s32 result = 0x0000;
                     for (s32 i = 0; i < 3; i++)
                     {
-                        __m128 me = _mm_load_ps(&m00 + (4 * i));
-                        __m128 ot = _mm_load_ps(&other.m00 + (4 * i));
+                        __m128 me = _mm_load_ps(v + (4 * i));
+                        __m128 ot = _mm_load_ps(other.v + (4 * i));
+                        __m128 res = _mm_cmp_ps(me, ot, _CMP_NEQ_OQ);
 
-                        m128 cmp = { _mm_cmpeq_ps(me, ot) };
-                        result &= _mm_movemask_epi8(cmp.i);
+                        m128 cmp = { res };
+
+                        result |= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
                     }
 
-                    return result != 0;
+                    return (result & 0x0FFF) == 0;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
                 {
-                    union m256
+                    union m128
                     {
-                        __m256d d;
-                        __m256i i;
+                        __m128d f;
+                        __m128i i;
                     };
 
-                    s32 result = 1;
-                    for (s32 i = 0; i < 4; i++)
+                    s32 result = 0x0000;
+                    for (s32 i = 0; i < 3; i++)
                     {
-                        __m256d me = _mm256_load_pd(&m00 + (4 * i));
-                        __m256d ot = _mm256_load_pd(&other.m00 + (4 * i));
-                        
-                        m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_EQ_OQ) };
-                        
-                        result &= 1;//_mm256_movemask_epi8(cmp.i);
+                        __m256d me = _mm256_load_pd(v + (4 * i));
+                        __m256d ot = _mm256_load_pd(other.v + (4 * i));
+                        __m256d res = _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ);
+
+                        __m128d high = _mm256_extractf128_pd(res, 0);
+                        __m128d low = _mm256_extractf128_pd(res, 1);
+
+                        m128 highCMP = { high };
+                        m128 lowCMP = { low };
+
+                        result |= (_mm_movemask_epi8(highCMP.i) & 0xFFFF);
+                        result |= (_mm_movemask_epi8(lowCMP.i) & 0xF0FF);
                     }
 
-                    return result != 0;
+                    return (result & 0x0FFF) == 0;
                 }
 
                 return m00 == other.m00 && m10 == other.m10 && m20 == other.m20 
@@ -227,14 +235,14 @@ namespace sml
                         __m128i i;
                     };
 
-                    s32 result = 1;
+                    s32 result = 0xFFFF;
                     for (s32 i = 0; i < 3; i++)
                     {
-                        __m128 me = _mm_load_ps(&m00 + (2 * i + 0));
-                        __m128 ot = _mm_load_ps(&other.m00 + (2 * i + 0));
+                        __m128 me = _mm_load_ps(v + (4 * i + 0));
+                        __m128 ot = _mm_load_ps(other.v + (4 * i + 0));
 
                         m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                        result &= 1;//_mm_movemask_epi8(cmp.i);
+                        result &= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
                     }
 
                     return result != 0;
@@ -242,33 +250,35 @@ namespace sml
 
                 if constexpr (std::is_same<T, f64>::value)
                 {
-                    union m256
+                    union m128
                     {
-                        __m256d d;
-                        __m256i i;
+                        __m128d f;
+                        __m128i i;
                     };
 
-                    s32 result = 1;
+                    s32 result = 0xFFFF;
                     for (s32 i = 0; i < 4; i++)
                     {
-                        __m256d me = _mm256_load_pd(&m00 + (2 * i + 0));
-                        __m256d me1 = _mm256_load_pd(&m00 + (2 * i + 2));
-                        __m256d ot = _mm256_load_pd(&other.m00 + (2 * i + 0));
-                        __m256d ot1 = _mm256_load_pd(&other.m00 + (2 * i + 2));
-                        
-                        m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ) };
-                        m256 cmp1 = { _mm256_cmp_pd(me1, ot1, _CMP_NEQ_OQ) };
-                        
-                        result &= _mm256_movemask_epi8(cmp.i);
-                        result &= _mm256_movemask_epi8(cmp1.i);
+                        __m256d me = _mm256_load_pd(v + (4 * i));
+                        __m256d ot = _mm256_load_pd(other.v + (4 * i));
+                        __m256d res = _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ);
+
+                        __m128d high = _mm256_extractf128_pd(res, 1);
+                        __m128d low = _mm256_extractf128_pd(res, 0);
+
+                        m128 highCMP = { high };
+                        m128 lowCMP = { low };
+
+                        result &= (_mm_movemask_epi8(highCMP.i) & 0x0FFF);
+                        result &= (_mm_movemask_epi8(lowCMP.i) & 0x0FFF);
                     }
 
                     return result != 0;
                 }
 
-                return m00 == other.m00 || m10 == other.m10 || m20 == other.m20 
-                    || m01 == other.m01 || m11 == other.m11 || m21 == other.m21
-                    || m02 == other.m02 || m12 == other.m12 || m22 == other.m22;
+                return m00 != other.m00 || m10 != other.m10 || m20 != other.m20 
+                    || m01 != other.m01 || m11 != other.m11 || m21 != other.m21
+                    || m02 != other.m02 || m12 != other.m12 || m22 != other.m22;
             }
 
             mat3& operator *= (const mat3& other) noexcept

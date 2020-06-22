@@ -241,39 +241,46 @@ namespace sml
                         __m128i i;
                     };
 
-                    s32 result = 1;
+                    s32 result = 0x0000;
                     for (s32 i = 0; i < 4; i++)
                     {
-                        __m128 me = _mm_load_ps(&m00 + (4 * i));
-                        __m128 ot = _mm_load_ps(&other.m00 + (4 * i));
+                        __m128 me = _mm_load_ps(v + (4 * i));
+                        __m128 ot = _mm_load_ps(other.v + (4 * i));
+                        __m128 res = _mm_cmp_ps(me, ot, _CMP_NEQ_OQ);
 
-                        m128 cmp = { _mm_cmpeq_ps(me, ot) };
-                        result &= _mm_movemask_epi8(cmp.i);
+                        m128 cmp = { res };
+                        result |= _mm_movemask_epi8(cmp.i);
                     }
 
-                    return result != 0;
+                    return result == 0;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
                 {
-                    union m256
+                    union m128
                     {
-                        __m256d d;
-                        __m256i i;
+                        __m128d f;
+                        __m128i i;
                     };
 
-                    s32 result = 1;
+                    s32 result = 0x0000;
                     for (s32 i = 0; i < 4; i++)
                     {
-                        __m256d me = _mm256_load_pd(&m00 + (4 * i));
-                        __m256d ot = _mm256_load_pd(&other.m00 + (4 * i));
-                        
-                        m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_EQ_OQ) };
-                        
-                        result &= 1;//_mm256_movemask_epi8(cmp.i);
+                        __m256d me = _mm256_load_pd(v + (4 * i));
+                        __m256d ot = _mm256_load_pd(other.v + (4 * i));
+                        __m256d res = _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ);
+
+                        __m128d high = _mm256_extractf128_pd(res, 1);
+                        __m128d low = _mm256_extractf128_pd(res, 0);
+
+                        m128 highCMP = { high };
+                        m128 lowCMP = { low };
+
+                        result |= _mm_movemask_epi8(highCMP.i);
+                        result |= _mm_movemask_epi8(lowCMP.i);
                     }
 
-                    return result != 0;
+                    return result == 0;
                 }
 
                 return m00 == other.m00 && m10 == other.m10 && m20 == other.m20  && m30 == other.m30
@@ -292,11 +299,11 @@ namespace sml
                         __m128i i;
                     };
 
-                    s32 result = 1;
+                    s32 result = 0xFFFF;
                     for (s32 i = 0; i < 4; i++)
                     {
-                        __m128 me = _mm_load_ps(&m00 + (4 * i + 0));
-                        __m128 ot = _mm_load_ps(&other.m00 + (4 * i + 0));
+                        __m128 me = _mm_load_ps(v + (4 * i + 0));
+                        __m128 ot = _mm_load_ps(other.v + (4 * i + 0));
 
                         m128 cmp = { _mm_cmpneq_ps(me, ot) };
                         result &= _mm_movemask_epi8(cmp.i);
@@ -307,34 +314,36 @@ namespace sml
 
                 if constexpr (std::is_same<T, f64>::value)
                 {
-                    union m256
+                    union m128
                     {
-                        __m256d d;
-                        __m256i i;
+                        __m128d f;
+                        __m128i i;
                     };
 
-                    s32 result = 1;
+                    s32 result = 0xFFFF;
                     for (s32 i = 0; i < 4; i++)
                     {
-                        __m256d me = _mm256_load_pd(&m00 + (2 * i + 0));
-                        __m256d me1 = _mm256_load_pd(&m00 + (2 * i + 2));
-                        __m256d ot = _mm256_load_pd(&other.m00 + (2 * i + 0));
-                        __m256d ot1 = _mm256_load_pd(&other.m00 + (2 * i + 2));
-                        
-                        m256 cmp = { _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ) };
-                        m256 cmp1 = { _mm256_cmp_pd(me1, ot1, _CMP_NEQ_OQ) };
-                        
-                        result &= 1;//_mm256_movemask_epi8(cmp.i);
-                        result &= 1;//_mm256_movemask_epi8(cmp1.i);
+                        __m256d me = _mm256_load_pd(v + (4 * i));
+                        __m256d ot = _mm256_load_pd(other.v + (4 * i));
+                        __m256d res = _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ);
+
+                        __m128d high = _mm256_extractf128_pd(res, 1);
+                        __m128d low = _mm256_extractf128_pd(res, 0);
+
+                        m128 highCMP = { high };
+                        m128 lowCMP = { low };
+
+                        result &= _mm_movemask_epi8(highCMP.i);
+                        result &= _mm_movemask_epi8(lowCMP.i);
                     }
 
                     return result != 0;
                 }
 
-                return m00 == other.m00 || m10 == other.m10 || m20 == other.m20 || m30 == other.m30
-                    || m01 == other.m01 || m11 == other.m11 || m21 == other.m21 || m31 == other.m31
-                    || m02 == other.m02 || m12 == other.m12 || m22 == other.m22 || m32 == other.m32
-                    || m03 == other.m03 || m13 == other.m13 || m23 == other.m23 || m33 == other.m33;
+                return m00 != other.m00 || m10 != other.m10 || m20 != other.m20 || m30 != other.m30
+                    || m01 != other.m01 || m11 != other.m11 || m21 != other.m21 || m31 != other.m31
+                    || m02 != other.m02 || m12 != other.m12 || m22 != other.m22 || m32 != other.m32
+                    || m03 != other.m03 || m13 != other.m13 || m23 != other.m23 || m33 != other.m33;
             }
 
             mat4& operator *= (const mat4& other) noexcept
@@ -345,7 +354,7 @@ namespace sml
                     __m128 col1 = _mm_load_ps(v + 4);
                     __m128 col2 = _mm_load_ps(v + 8);
                     __m128 col3 = _mm_load_ps(v + 12);
-
+                    
                     for (s32 i = 0; i < 4; i++)
                     {
                         __m128 elem0 = _mm_broadcast_ss(other.v + (4 * i + 0));
@@ -422,9 +431,9 @@ namespace sml
                 std::swap(m01, m10);
                 std::swap(m02, m20);
                 std::swap(m03, m30);
-                std::swap(m21, m12);
-                std::swap(m22, m13);
-                std::swap(m32, m23);
+                std::swap(m12, m21);
+                std::swap(m13, m31);
+                std::swap(m23, m32);
 
                 return *this;
             }
@@ -437,34 +446,82 @@ namespace sml
 
             SML_NO_DISCARD inline constexpr mat4& invert() noexcept
             {
-                T det = determinant();
+                T c00 = v[2 * 4 + 2] * v[3 * 4 + 3] -
+                    v[3 * 4 + 2] * v[2 * 4 + 3];
+                T c02 = v[1 * 4 + 2] * v[3 * 4 + 3] -
+                    v[3 * 4 + 2] * v[1 * 4 + 3];
+                T c03 = v[1 * 4 + 2] * v[2 * 4 + 3] -
+                    v[2 * 4 + 2] * v[1 * 4 + 3];
 
-                if (det != static_cast<T>(0))
-                {
-                    T det_inv = static_cast<T>(1) / det;
+                T c04 = v[2 * 4 + 1] * v[3 * 4 + 3] -
+                    v[3 * 4 + 1] * v[2 * 4 + 3];
+                T c06 = v[1 * 4 + 1] * v[3 * 4 + 3] -
+                    v[3 * 4 + 1] * v[1 * 4 + 3];
+                T c07 = v[1 * 4 + 1] * v[2 * 4 + 3] -
+                    v[2 * 4 + 1] * v[1 * 4 + 3];
 
-                    T t00 = m11 * m22 - m12 * m21;
-                    T t01 = -m10 * m22 + m12 * m20;
-                    T t02 = m10 * m21 - m11 * m20;
-                    T t10 = -m01 * m22 + m02 * m21;
-                    T t11 = m00 * m22 - m02 * m20;
-                    T t12 = -m00 * m21 + m01 * m20;
-                    T t20 = m01 * m12 - m02 * m11;
-                    T t21 = -m00 * m12 + m02 * m10;
-                    T t22 = m00 * m11 - m01 * m10;
+                T c08 = v[2 * 4 + 1] * v[3 * 4 + 2] -
+                    v[3 * 4 + 1] * v[2 * 4 + 2];
+                T c10 = v[1 * 4 + 1] * v[3 * 4 + 2] -
+                    v[3 * 4 + 1] * v[1 * 4 + 2];
+                T c11 = v[1 * 4 + 1] * v[2 * 4 + 2] -
+                    v[2 * 4 + 1] * v[1 * 4 + 2];
 
-                    m00 = t00 * det_inv;
-                    m11 = t11 * det_inv;
-                    m22 = t22 * det_inv;
+                T c12 = v[2 * 4 + 0] * v[3 * 4 + 3] -
+                    v[3 * 4 + 0] * v[2 * 4 + 3];
+                T c14 = v[1 * 4 + 0] * v[3 * 4 + 3] -
+                    v[3 * 4 + 0] * v[1 * 4 + 3];
+                T c15 = v[1 * 4 + 0] * v[2 * 4 + 3] -
+                    v[2 * 4 + 0] * v[1 * 4 + 3];
 
-                    m01 = t10 * det_inv;
-                    m10 = t11 * det_inv;
-                    m20 = t12 * det_inv;
+                T c16 = v[2 * 4 + 0] * v[3 * 4 + 2] -
+                    v[3 * 4 + 0] * v[2 * 4 + 2];
+                T c18 = v[1 * 4 + 0] * v[3 * 4 + 2] -
+                    v[3 * 4 + 0] * v[1 * 4 + 2];
+                T c19 = v[1 * 4 + 0] * v[2 * 4 + 2] -
+                    v[2 * 4 + 0] * v[1 * 4 + 2];
 
-                    m02 = t20 * det_inv;
-                    m12 = t21 * det_inv;
-                    m21 = t12 * det_inv;
-                }
+                T c20 = v[2 * 4 + 0] * v[3 * 4 + 1] -
+                    v[3 * 4 + 0] * v[2 * 4 + 1];
+                T c22 = v[1 * 4 + 0] * v[3 * 4 + 1] -
+                    v[3 * 4 + 0] * v[1 * 4 + 1];
+                T c23 = v[1 * 4 + 0] * v[2 * 4 + 1] -
+                    v[2 * 4 + 0] * v[1 * 4 + 1];
+
+                vec4<T> fac0(c00, c00, c02, c03);
+                vec4<T> fac1(c04, c04, c06, c07);
+                vec4<T> fac2(c08, c08, c10, c11);
+                vec4<T> fac3(c12, c12, c14, c15);
+                vec4<T> fac4(c16, c16, c18, c19);
+                vec4<T> fac5(c20, c20, c22, c23);
+
+                vec4<T> vec0(v[1 * 4 + 0], v[0 * 4 + 0], v[0 * 4 + 0],
+                    v[0 * 4 + 0]);
+                vec4<T> vec1(v[1 * 4 + 1], v[0 * 4 + 1], v[0 * 4 + 1],
+                    v[0 * 4 + 1]);
+                vec4<T> vec2(v[1 * 4 + 2], v[0 * 4 + 2], v[0 * 4 + 2],
+                    v[0 * 4 + 2]);
+                vec4<T> vec3(v[1 * 4 + 3], v[0 * 4 + 3], v[0 * 4 + 3],
+                    v[0 * 4 + 3]);
+
+                vec4<T> inv0(vec1 * fac0 - vec2 * fac1 + vec3 * fac2);
+                vec4<T> inv1(vec0 * fac0 - vec2 * fac3 + vec3 * fac4);
+                vec4<T> inv2(vec0 * fac1 - vec1 * fac3 + vec3 * fac5);
+                vec4<T> inv3(vec0 * fac2 - vec1 * fac4 + vec2 * fac5);
+
+                vec4<T> sign1(1.0f, -1.0f, 1.0f, -1.0f);
+                vec4<T> sign2(-1.0f, 1.0f, -1.0f, 1.0f);
+
+                mat4<T> inverse(inv0 * sign1, inv1 * sign2, inv2 * sign1,
+                    inv3 * sign2);
+                vec4<T> row0 = { inverse.v[0], inverse.v[4], inverse.v[8],
+                                 inverse.v[12] };
+                vec4<T> dot0 = col0 * row0;
+                T dot1 = dot0.x + dot0.y + dot0.z + dot0.w;
+                T inv = 1.0f / dot1;
+                inverse *= inv;
+
+                set(inverse.v);
 
                 return *this;
             }
