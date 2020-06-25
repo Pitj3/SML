@@ -19,9 +19,10 @@
 */
 
 #include <string>
-#include <type_traits>
+#include <immintrin.h>
 
 #include "smltypes.h"
+#include "common.h"
 
 namespace sml
 {
@@ -47,7 +48,13 @@ namespace sml
             constexpr explicit vec3(T v) noexcept
             {
                 set(v, v, v);
-                v[3] = 0;
+                this->v[3] = 0;
+            }
+
+            constexpr explicit vec3(T* v) noexcept
+            {
+                set(v);
+                this->v[3] = 0;
             }
 
             constexpr vec3(const vec3& other) noexcept
@@ -79,7 +86,7 @@ namespace sml
                 this->z = z;
             }
 
-            constexpr void set(T v[3]) noexcept
+            constexpr void set(T* v) noexcept
             {
                 this->v[0] = v[0];
                 this->v[1] = v[1];
@@ -89,105 +96,17 @@ namespace sml
             // Operators
             inline constexpr bool operator == (const vec3& other) const noexcept
             {
-                if constexpr (std::is_same<T, f32>::value)
-                {
-                    union m128
-                    {
-                        __m128 f;
-                        __m128i i;
-                    };
-
-                    s32 result = 0x0000;
-
-                    __m128 me = _mm_load_ps(v);
-                    __m128 ot = _mm_load_ps(other.v);
-
-                    m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                    result |= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
-
-                    return (result & 0x0FFF) == 0;
-                }
-
-                if constexpr (std::is_same<T, f64>::value)
-                {
-                    union m128
-                    {
-                        __m128d f;
-                        __m128i i;
-                    };
-
-                    s32 result = 0x0000;
-
-                    __m128d me = _mm_load_pd(v);
-                    __m128d ot = _mm_load_pd(other.v);
-
-                    m128 cmp = { _mm_cmpneq_pd(me, ot) };
-                    result |= (_mm_movemask_epi8(cmp.i) & 0x00FF);
-
-                    me = _mm_load_pd(v + 2);
-                    ot = _mm_load_pd(other.v + 2);
-
-                    cmp = { _mm_cmpneq_pd(me, ot) };
-                    result |= (_mm_movemask_epi8(cmp.i) & 0x00FF);
-
-                    return (result & 0x00FF) == 0;
-                }
-
                 return x == other.x && y == other.y && z == other.z;
             }
 
             inline constexpr bool operator != (const vec3& other) const noexcept
             {
-                if constexpr (std::is_same<T, f32>::value)
-                {
-                    union m128
-                    {
-                        __m128 f;
-                        __m128i i;
-                    };
-
-                    s32 result = 0xFFFF;
-
-                    __m128 me = _mm_load_ps(v);
-                    __m128 ot = _mm_load_ps(other.v);
-
-                    m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                    result &= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
-
-                    return (result & 0x0FFF) != 0;
-                }
-
-                if constexpr (std::is_same<T, f64>::value)
-                {
-                    union m128
-                    {
-                        __m128d f;
-                        __m128i i;
-                    };
-
-                    s32 result = 0xFFFF;
-
-                    __m128d me = _mm_load_pd(v);
-                    __m128d ot = _mm_load_pd(other.v);
-
-                    m128 cmp = { _mm_cmpneq_pd(me, ot) };
-                    result &= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
-
-                    me = _mm_load_pd(v + 2);
-                    ot = _mm_load_pd(other.v + 2);
-
-                    cmp = { _mm_cmpneq_pd(me, ot) };
-                    result &= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
-
-                    return (result & 0x0FFF) != 0;
-                }
-
                 return x != other.x || y != other.y || z != other.z;
             }
 
             constexpr vec3& operator = (const vec3& other) noexcept
             {
-                set(other.v);
+                set(const_cast<T*>(other.v));
 
                 return *this;
             }
@@ -402,18 +321,6 @@ namespace sml
                     return *reinterpret_cast<f32*>(&(res));
                 }
 
-                if constexpr (std::is_same<T, f64>::value)
-                {
-                    __m256d me = _mm256_load_pd(v);
-                    __m256d ot = _mm256_load_pd(other.v);
-                    __m256d product = _mm256_mul_pd(me, ot);
-                    __m256d dp = _mm256_hadd_pd(product, product);
-
-                    s32 res = _mm256_extract_epi32(static_cast<__m256i>(_mm256_hadd_pd(dp, dp)), 0);
-
-                    return *reinterpret_cast<f64*>(&(res));
-                }
-
                 return (x * other.x) + (y * other.y) + (z * other.z);
             }
 
@@ -427,7 +334,7 @@ namespace sml
                 return (x * x) + (y * y) + (z * z);
             }
 
-            SML_NO_DISCARD inline constexpr vec3& normalize() noexcept
+            inline constexpr void normalize() noexcept
             {
                 float mag = length();
 
@@ -435,8 +342,6 @@ namespace sml
                     *this /= length();
                 else
                     set(0, 0, 0);
-
-                return *this;
             }
 
             SML_NO_DISCARD inline constexpr vec3 normalized() const noexcept
@@ -656,7 +561,7 @@ namespace sml
     constexpr vec3<T> operator / (vec3<T> left, T right) noexcept
     {
         vec3<T> temp = left;
-        temp += right;
+        temp /= right;
         
         return temp;
     }

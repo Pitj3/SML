@@ -232,7 +232,7 @@ namespace sml
                 T unit = sqx + sqy + sqz + sqw;
                 T singularityTest = (x * w) - (y * z);
 
-                vec3<T> res;
+                alignas(simdalign<T>::value) vec3<T> res;
 
                 if (singularityTest > static_cast<T>(0.4995 * unit))
                 {

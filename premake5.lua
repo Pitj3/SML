@@ -13,6 +13,9 @@ workspace "SML"
 
     IncludeDir = {}
     IncludeDir["SML"] = "sml/include"
+    IncludeDir["gtest"] = "%{sln.location}/dependencies/googletest/include"
+
+    include "dependencies/googletest"
 
 project "sml"
     kind "StaticLib"
@@ -69,7 +72,13 @@ project "SMLTest"
 
     includedirs {
         "%{IncludeDir.SML}",
+        "%{IncludeDir.gtest}",
+        "smltest/src",
         "smltest/include"
+    }
+
+    links {
+        "googletest"
     }
 
     filter "system:windows"
