@@ -87,6 +87,10 @@ project "SMLTest"
     filter "system:linux"
         toolset "clang"
 
+        links {
+            "pthread"
+        }
+
     filter {}
 
     filter "configurations:Debug"
