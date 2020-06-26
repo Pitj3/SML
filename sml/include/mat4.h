@@ -19,9 +19,8 @@
 */
 
 #include <immintrin.h>
-#include <mmintrin.h>
-#include <smmintrin.h>
 
+#include "vec3.h"
 #include "vec4.h"
 #include "smltypes.h"
 #include "common.h"
@@ -35,6 +34,29 @@ namespace sml
             constexpr mat4() noexcept
             {
                 identity();
+            }
+
+            constexpr mat4(T m00, T m01, T m02, T m03, T m10, T m11, T m12, T m13, T m20, T m21, T m22, T m23, T m30, T m31, T m32, T m33) noexcept
+            {
+                this->m00 = m00;
+                this->m10 = m10;
+                this->m20 = m20;
+                this->m30 = m30;
+
+                this->m01 = m01;
+                this->m11 = m11;
+                this->m21 = m21;
+                this->m31 = m31;
+
+                this->m02 = m02;
+                this->m12 = m12;
+                this->m22 = m22;
+                this->m32 = m32;
+
+                this->m03 = m03;
+                this->m13 = m13;
+                this->m23 = m23;
+                this->m33 = m33;
             }
 
             constexpr explicit mat4(T diagonal) noexcept
@@ -55,6 +77,11 @@ namespace sml
                 m13 = static_cast<T>(0);
                 m23 = static_cast<T>(0);
                 m33 = diagonal;
+            }
+
+            constexpr explicit mat4(T* v) noexcept
+            {
+                set(v);
             }
 
             constexpr mat4(T col1[4], T col2[4], T col3[4], T col4[4]) noexcept
@@ -78,29 +105,6 @@ namespace sml
                 m31 = col4[1];
                 m32 = col4[2];
                 m33 = col4[3];
-            }
-
-            constexpr mat4(T m00, T m01, T m02, T m03, T m10, T m11, T m12, T m13, T m20, T m21, T m22, T m23, T m30, T m31, T m32, T m33) noexcept
-            {
-                this->m00 = m00;
-                this->m10 = m10;
-                this->m20 = m20;
-                this->m30 = m30;
-
-                this->m01 = m01;
-                this->m11 = m11;
-                this->m21 = m21;
-                this->m31 = m31;
-                
-                this->m02 = m02;
-                this->m12 = m12;
-                this->m22 = m22;
-                this->m32 = m32;
-
-                this->m03 = m03;
-                this->m13 = m13;
-                this->m23 = m23;
-                this->m33 = m33;
             }
 
             constexpr mat4(const mat4& other) noexcept
@@ -149,7 +153,7 @@ namespace sml
                 m33 = std::move(other.m33);
             }
 
-            constexpr void set(T m00, T m01, T m02, T m10, T m11, T m12, T m20, T m21, T m22) noexcept
+            constexpr void set(T m00, T m01, T m02, T m03, T m10, T m11, T m12, T m13, T m20, T m21, T m22, T m23, T m30, T m31, T m32, T m33) noexcept
             {
                 this->m00 = m00;
                 this->m10 = m10;
@@ -172,7 +176,7 @@ namespace sml
                 this->m33 = m33;
             }
 
-            constexpr void set(T v[16]) noexcept
+            constexpr void set(T* v) noexcept
             {
                 for(int i = 0; i < 16; i++)
                 {
@@ -305,11 +309,11 @@ namespace sml
                         __m128 me = _mm_load_ps(v + (4 * i + 0));
                         __m128 ot = _mm_load_ps(other.v + (4 * i + 0));
 
-                        m128 cmp = { _mm_cmpneq_ps(me, ot) };
+                        m128 cmp = { _mm_cmpeq_ps(me, ot) };
                         result &= _mm_movemask_epi8(cmp.i);
                     }
 
-                    return result != 0;
+                    return result != 0xFFFF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -325,7 +329,7 @@ namespace sml
                     {
                         __m256d me = _mm256_load_pd(v + (4 * i));
                         __m256d ot = _mm256_load_pd(other.v + (4 * i));
-                        __m256d res = _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ);
+                        __m256d res = _mm256_cmp_pd(me, ot, _CMP_EQ_OQ);
 
                         __m128d high = _mm256_extractf128_pd(res, 1);
                         __m128d low = _mm256_extractf128_pd(res, 0);
@@ -337,7 +341,7 @@ namespace sml
                         result &= _mm_movemask_epi8(lowCMP.i);
                     }
 
-                    return result != 0;
+                    return result != 0xFFFF;
                 }
 
                 return m00 != other.m00 || m10 != other.m10 || m20 != other.m20 || m30 != other.m30
@@ -405,6 +409,61 @@ namespace sml
                 return *this;
             }
 
+            mat4& operator *= (const T other) noexcept
+            {
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    __m128 col0 = _mm_load_ps(v + 0);
+                    __m128 col1 = _mm_load_ps(v + 4);
+                    __m128 col2 = _mm_load_ps(v + 8);
+                    __m128 col3 = _mm_load_ps(v + 12);
+
+                    __m128 multi = _mm_broadcast_ss(&other);
+
+                    col0 = _mm_mul_ps(col0, multi);
+                    col1 = _mm_mul_ps(col1, multi);
+                    col2 = _mm_mul_ps(col2, multi);
+                    col3 = _mm_mul_ps(col3, multi);
+
+                    _mm_store_ps(v + 0, col0);
+                    _mm_store_ps(v + 4, col1);
+                    _mm_store_ps(v + 8, col2);
+                    _mm_store_ps(v + 12, col3);
+
+                    return *this;
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    __m256d col0 = _mm256_load_pd(v + 0);
+                    __m256d col1 = _mm256_load_pd(v + 4);
+                    __m256d col2 = _mm256_load_pd(v + 8);
+                    __m256d col3 = _mm256_load_pd(v + 12);
+
+                    __m256d multi = _mm256_set1_pd(other);
+
+                    col0 = _mm256_mul_pd(col0, multi);
+                    col1 = _mm256_mul_pd(col1, multi);
+                    col2 = _mm256_mul_pd(col2, multi);
+                    col3 = _mm256_mul_pd(col3, multi);
+
+                    _mm256_store_pd(v + 0, col0);
+                    _mm256_store_pd(v + 4, col1);
+                    _mm256_store_pd(v + 8, col2);
+                    _mm256_store_pd(v + 12, col3);
+
+                    return *this;
+                }
+
+                for (int i = 0; i < 16; i++)
+                {
+                    v[i] *= other;
+                }
+
+                return *this;
+            }
+
+
             // Operations
             inline constexpr void identity() noexcept
             {
@@ -426,7 +485,7 @@ namespace sml
                 m33 = static_cast<T>(1);
             }
 
-            SML_NO_DISCARD inline constexpr mat4& transpose() noexcept
+            inline constexpr void transpose() noexcept
             {
                 std::swap(m01, m10);
                 std::swap(m02, m20);
@@ -434,17 +493,17 @@ namespace sml
                 std::swap(m12, m21);
                 std::swap(m13, m31);
                 std::swap(m23, m32);
-
-                return *this;
             }
 
             SML_NO_DISCARD inline constexpr mat4 transposed() const noexcept
             {
-                mat4 c = mat4(*this);
-                return c.transpose();
+                mat4 copy(*this);
+                copy.transpose();
+
+                return copy;
             }
 
-            SML_NO_DISCARD inline constexpr mat4& invert() noexcept
+            inline constexpr void invert() noexcept
             {
                 T c00 = v[2 * 4 + 2] * v[3 * 4 + 3] -
                     v[3 * 4 + 2] * v[2 * 4 + 3];
@@ -512,21 +571,19 @@ namespace sml
                 vec4<T> sign1(1.0f, -1.0f, 1.0f, -1.0f);
                 vec4<T> sign2(-1.0f, 1.0f, -1.0f, 1.0f);
 
-                mat4<T> inverse(inv0 * sign1, inv1 * sign2, inv2 * sign1,
-                    inv3 * sign2);
-                vec4<T> row0 = { inverse.v[0], inverse.v[4], inverse.v[8],
-                                 inverse.v[12] };
+                mat4<T> inver((inv0 * sign1).v, (inv1 * sign2).v, (inv2 * sign1).v,
+                    (inv3 * sign2).v);
+                vec4<T> row0 = { inver.v[0], inver.v[4], inver.v[8],
+                                 inver.v[12] };
                 vec4<T> dot0 = col0 * row0;
                 T dot1 = dot0.x + dot0.y + dot0.z + dot0.w;
                 T inv = 1.0f / dot1;
-                inverse *= inv;
+                inver *= inv;
 
-                set(inverse.v);
-
-                return *this;
+                set(inver.v);
             }
 
-            SML_NO_DISCARD inline constexpr mat4& negate() noexcept
+            inline constexpr void negate() noexcept
             {
                 m00 = -m00;
                 m10 = -m10;
@@ -544,19 +601,49 @@ namespace sml
                 m13 = -m13;
                 m23 = -m23;
                 m33 = -m33;
+            }
 
-                return *this;
+            SML_NO_DISCARD inline constexpr mat4 negated() const noexcept
+            {
+                mat4 copy(*this);
+                copy.negate();
+
+                return copy;
             }
 
             SML_NO_DISCARD inline constexpr mat4 inverted() const noexcept
             {
-                mat4 c = mat(*this);
-                return c.invert();
+                mat4 copy(*this);
+                copy.invert();
+
+                return copy;
             }
 
             SML_NO_DISCARD inline constexpr T determinant() const noexcept
             {
-                return static_cast<T>(0);
+                T f =
+                    m00
+                    * ((m11 * m22 * m33 + m12 * m23 * m31 + m13 * m21 * m32)
+                        - m13 * m22 * m31
+                        - m11 * m23 * m32
+                        - m12 * m21 * m33);
+                f -= m01
+                    * ((m10 * m22 * m33 + m12 * m23 * m30 + m13 * m20 * m32)
+                        - m13 * m22 * m30
+                        - m10 * m23 * m32
+                        - m12 * m20 * m33);
+                f += m02
+                    * ((m10 * m21 * m33 + m11 * m23 * m30 + m13 * m20 * m31)
+                        - m13 * m21 * m30
+                        - m10 * m23 * m31
+                        - m11 * m20 * m33);
+                f -= m03
+                    * ((m10 * m21 * m32 + m11 * m22 * m30 + m12 * m20 * m31)
+                        - m12 * m21 * m30
+                        - m10 * m22 * m31
+                        - m11 * m20 * m32);
+
+                return f;
             }
 
             SML_NO_DISCARD inline std::string toString() const noexcept

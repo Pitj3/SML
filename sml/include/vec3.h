@@ -341,13 +341,15 @@ namespace sml
                 if(mag > constants::epsilon)
                     *this /= length();
                 else
-                    set(0, 0, 0);
+                    set(0);
             }
 
             SML_NO_DISCARD inline constexpr vec3 normalized() const noexcept
             {
-                vec3 copy(x, y, z);
-                return copy.normalize();
+                vec3 copy(v);
+                copy.normalize();
+
+                return copy;
             }
 
             SML_NO_DISCARD inline constexpr bool any() const noexcept
@@ -373,8 +375,9 @@ namespace sml
             // Statics
             SML_NO_DISCARD static inline constexpr vec3 normalize(const vec3& a) noexcept
             {
-                vec3 copy(a.x, a.y, a.z);
+                vec3 copy(a.v);
                 copy.normalize();
+
                 return copy;
             }
 
@@ -513,7 +516,7 @@ namespace sml
 
     // Operators
     template<typename T>
-    constexpr vec3<T> operator + (vec3<T> left, vec3<T> right) noexcept
+    constexpr vec3<T> operator + (const vec3<T>& left, const vec3<T>& right) noexcept
     {
         vec3<T> temp = left;
         temp += right;
@@ -522,7 +525,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec3<T> operator - (vec3<T> left, vec3<T> right) noexcept
+    constexpr vec3<T> operator - (const vec3<T>& left, const vec3<T>& right) noexcept
     {
         vec3<T> temp = left;
         temp -= right;
@@ -531,7 +534,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec3<T> operator * (vec3<T> left, vec3<T> right) noexcept
+    constexpr vec3<T> operator * (const vec3<T>& left, const vec3<T>& right) noexcept
     {
         vec3<T> temp = left;
         temp *= right;
@@ -540,7 +543,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec3<T> operator * (vec3<T> left, T right) noexcept
+    constexpr vec3<T> operator * (const vec3<T>& left, T right) noexcept
     {
         vec3<T> temp = left;
         temp *= right;
@@ -549,7 +552,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec3<T> operator / (vec3<T> left, vec3<T> right) noexcept
+    constexpr vec3<T> operator / (const vec3<T>& left, const vec3<T>& right) noexcept
     {
         vec3<T> temp = left;
 
@@ -558,7 +561,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec3<T> operator / (vec3<T> left, T right) noexcept
+    constexpr vec3<T> operator / (const vec3<T>& left, T right) noexcept
     {
         vec3<T> temp = left;
         temp /= right;
@@ -567,7 +570,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec3<T> operator - (vec3<T> left) noexcept
+    constexpr vec3<T> operator - (const vec3<T>& left) noexcept
     {
         vec3<T> temp = left;
         temp *= -1;

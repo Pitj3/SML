@@ -342,13 +342,15 @@ namespace sml
                 if(mag > constants::epsilon)
                     *this /= length();
                 else
-                    set(0, 0);
+                    set(0);
             }
 
             SML_NO_DISCARD inline constexpr vec2 normalized() const  noexcept
             {
-                vec2 copy(x, y);
-                return copy.normalize();
+                vec2 copy(v);
+                copy.normalize();
+
+                return copy;
             }
 
             SML_NO_DISCARD inline constexpr bool any() const noexcept
@@ -374,8 +376,9 @@ namespace sml
             // Statics
             SML_NO_DISCARD static inline constexpr vec2 normalize(const vec2& a) noexcept
             {
-                vec2 copy(a.x, a.y);
+                vec2 copy(a.v);
                 copy.normalize();
+
                 return copy;
             }
 
@@ -495,7 +498,7 @@ namespace sml
 
     // Operators
     template<typename T>
-    constexpr vec2<T> operator + (vec2<T> left, vec2<T> right) noexcept
+    constexpr vec2<T> operator + (const vec2<T>& left, const vec2<T>& right) noexcept
     {
         vec2<T> temp = left;
 
@@ -504,7 +507,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec2<T> operator - (vec2<T> left, vec2<T> right) noexcept
+    constexpr vec2<T> operator - (const vec2<T>& left, const vec2<T>& right) noexcept
     {
         vec2<T> temp = left;
 
@@ -513,7 +516,7 @@ namespace sml
     }
 
     template<typename T> 
-    constexpr vec2<T> operator * (vec2<T> left, vec2<T> right) noexcept
+    constexpr vec2<T> operator * (const vec2<T>& left, const vec2<T>& right) noexcept
     {
         vec2<T> temp = left;
 
@@ -522,7 +525,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec2<T> operator * (vec2<T> left, T right) noexcept
+    constexpr vec2<T> operator * (const vec2<T>& left, T right) noexcept
     {
         vec2<T> temp = left;
 
@@ -531,7 +534,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec2<T> operator / (vec2<T> left, vec2<T> right) noexcept
+    constexpr vec2<T> operator / (const vec2<T>& left, const vec2<T>& right) noexcept
     {
         vec2<T> temp = left;
 
@@ -540,7 +543,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec2<T> operator / (vec2<T> left, T right) noexcept
+    constexpr vec2<T> operator / (const vec2<T>& left, T right) noexcept
     {
         vec2<T> temp = left;
 
@@ -549,7 +552,7 @@ namespace sml
     }
 
     template<typename T>
-    constexpr vec2<T> operator - (vec2<T> left) noexcept
+    constexpr vec2<T> operator - (const vec2<T>& left) noexcept
     {
         vec2<T> temp = left;
         temp *= -1;

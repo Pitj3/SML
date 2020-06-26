@@ -34,6 +34,24 @@ namespace sml
             constexpr mat3() noexcept
             {
                 identity();
+                v[3] = v[7] = v[11] = static_cast<T>(0);
+            }
+
+            constexpr mat3(T m00, T m01, T m02, T m10, T m11, T m12, T m20, T m21, T m22) noexcept
+            {
+                this->m00 = m00;
+                this->m10 = m10;
+                this->m20 = m20;
+
+                this->m01 = m01;
+                this->m11 = m11;
+                this->m21 = m21;
+
+                this->m02 = m02;
+                this->m12 = m12;
+                this->m22 = m22;
+
+                v[3] = v[7] = v[11] = static_cast<T>(0);
             }
 
             constexpr explicit mat3(T diagonal) noexcept
@@ -47,6 +65,14 @@ namespace sml
                 m02 = static_cast<T>(0);
                 m12 = static_cast<T>(0);
                 m22 = diagonal;
+
+                v[3] = v[7] = v[11] = static_cast<T>(0);
+            }
+
+            constexpr explicit mat3(T* v) noexcept
+            {
+                set(v);
+                v[3] = v[7] = v[11] = static_cast<T>(0);
             }
 
             constexpr mat3(T col1[3], T col2[3], T col3[3]) noexcept
@@ -62,21 +88,7 @@ namespace sml
                 m20 = col3[0];
                 m21 = col3[1];
                 m22 = col3[2];
-            }
-
-            constexpr mat3(T m00, T m01, T m02, T m10, T m11, T m12, T m20, T m21, T m22) noexcept
-            {
-                this->m00 = m00;
-                this->m10 = m10;
-                this->m20 = m20;
-
-                this->m01 = m01;
-                this->m11 = m11;
-                this->m21 = m21;
-                
-                this->m02 = m02;
-                this->m12 = m12;
-                this->m22 = m22;
+                v[3] = v[7] = v[11] = static_cast<T>(0);
             }
 
             constexpr mat3(const mat3& other) noexcept
@@ -92,6 +104,7 @@ namespace sml
                 m02 = other.m02;
                 m12 = other.m12;
                 m22 = other.m22;
+                v[3] = v[7] = v[11] = static_cast<T>(0);
             }
 
             constexpr mat3(mat3&& other) noexcept
@@ -107,6 +120,7 @@ namespace sml
                 m02 = std::move(other.m02);
                 m12 = std::move(other.m12);
                 m22 = std::move(other.m22);
+                v[3] = v[7] = v[11] = static_cast<T>(0);
             }
 
             constexpr void set(T m00, T m01, T m02, T m10, T m11, T m12, T m20, T m21, T m22) noexcept
@@ -122,14 +136,21 @@ namespace sml
                 this->m02 = m02;
                 this->m12 = m12;
                 this->m22 = m22;
+                v[3] = v[7] = v[11] = static_cast<T>(0);
             }
 
-            constexpr void set(T v[9]) noexcept
+            constexpr void set(T* v) noexcept
             {
+                s32 index = 0;
                 for(int i = 0; i < 9; i++)
                 {
-                    this->v[i] = v[i];
+                    if (i % 3 == 0 && i != 0)
+                        index++;
+
+                    this->v[index++] = v[i];
                 }
+
+                v[3] = v[7] = v[11] = static_cast<T>(0);
             }
 
             constexpr mat3& operator = (const mat3& other) noexcept
@@ -182,14 +203,14 @@ namespace sml
                     {
                         __m128 me = _mm_load_ps(v + (4 * i));
                         __m128 ot = _mm_load_ps(other.v + (4 * i));
-                        __m128 res = _mm_cmp_ps(me, ot, _CMP_NEQ_OQ);
+                        __m128 res = _mm_cmpneq_ps(me, ot);
 
                         m128 cmp = { res };
 
-                        result |= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
+                        result |= (_mm_movemask_epi8(cmp.i));
                     }
 
-                    return (result & 0x0FFF) == 0;
+                    return result == 0;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -213,11 +234,11 @@ namespace sml
                         m128 highCMP = { high };
                         m128 lowCMP = { low };
 
-                        result |= (_mm_movemask_epi8(highCMP.i) & 0xFFFF);
-                        result |= (_mm_movemask_epi8(lowCMP.i) & 0xF0FF);
+                        result |= _mm_movemask_epi8(highCMP.i);
+                        result |= _mm_movemask_epi8(lowCMP.i);
                     }
 
-                    return (result & 0x0FFF) == 0;
+                    return result == 0;
                 }
 
                 return m00 == other.m00 && m10 == other.m10 && m20 == other.m20 
@@ -241,11 +262,12 @@ namespace sml
                         __m128 me = _mm_load_ps(v + (4 * i + 0));
                         __m128 ot = _mm_load_ps(other.v + (4 * i + 0));
 
-                        m128 cmp = { _mm_cmpneq_ps(me, ot) };
-                        result &= (_mm_movemask_epi8(cmp.i) & 0x0FFF);
+                        m128 cmp = { _mm_cmpeq_ps(me, ot) };
+
+                        result &= _mm_movemask_epi8(cmp.i);
                     }
 
-                    return result != 0;
+                    return result != 0xFFFF;
                 }
 
                 if constexpr (std::is_same<T, f64>::value)
@@ -257,11 +279,11 @@ namespace sml
                     };
 
                     s32 result = 0xFFFF;
-                    for (s32 i = 0; i < 4; i++)
+                    for (s32 i = 0; i < 3; i++)
                     {
                         __m256d me = _mm256_load_pd(v + (4 * i));
                         __m256d ot = _mm256_load_pd(other.v + (4 * i));
-                        __m256d res = _mm256_cmp_pd(me, ot, _CMP_NEQ_OQ);
+                        __m256d res = _mm256_cmp_pd(me, ot, _CMP_EQ_OQ);
 
                         __m128d high = _mm256_extractf128_pd(res, 1);
                         __m128d low = _mm256_extractf128_pd(res, 0);
@@ -269,11 +291,11 @@ namespace sml
                         m128 highCMP = { high };
                         m128 lowCMP = { low };
 
-                        result &= (_mm_movemask_epi8(highCMP.i) & 0x0FFF);
-                        result &= (_mm_movemask_epi8(lowCMP.i) & 0x0FFF);
+                        result &= _mm_movemask_epi8(highCMP.i);
+                        result &= _mm_movemask_epi8(lowCMP.i);
                     }
 
-                    return result != 0;
+                    return result != 0xFFFF;
                 }
 
                 return m00 != other.m00 || m10 != other.m10 || m20 != other.m20 
@@ -368,22 +390,22 @@ namespace sml
                 m22 = static_cast<T>(1);
             }
 
-            SML_NO_DISCARD inline constexpr mat3& transpose() noexcept
+            inline constexpr void transpose() noexcept
             {
                 std::swap(m01, m10);
                 std::swap(m02, m20);
                 std::swap(m21, m12);
-
-                return *this;
             }
 
             SML_NO_DISCARD inline constexpr mat3 transposed() const noexcept
             {
-                mat3 c = mat3(*this);
-                return c.transpose();
+                mat3 copy(*this);
+                copy.transpose();
+
+                return copy;
             }
 
-            SML_NO_DISCARD inline constexpr mat3& invert() noexcept
+            inline constexpr void invert() noexcept
             {
                 T det = determinant();
 
@@ -434,24 +456,33 @@ namespace sml
                         return *this;
                     }*/
 
+                    T t00 = m11 * m22 - m12 * m21;
+                    T t01 = -m10 * m22 + m12 * m20;
+                    T t02 = m10 * m21 - m11 * m20;
+                    T t10 = -m01 * m22 + m02 * m21;
+                    T t11 = m00 * m22 - m02 * m20;
+                    T t12 = -m00 * m21 + m01 * m20;
+                    T t20 = m01 * m12 - m02 * m11;
+                    T t21 = -m00 * m12 + m02 * m10;
+                    T t22 = m00 * m11 - m01 * m10;
+
                     mat3 res;
-                    res.m00 = (m11 * m22 - m12 * m21) * det_inv;
-                    res.m10 = (m12 * m20 - m10 * m22) * det_inv;
-                    res.m20 = (m10 * m21 - m11 * m20) * det_inv;
-                    res.m01 = (m02 * m21 - m11 * m22) * det_inv;
-                    res.m11 = (m00 * m22 - m02 * m20) * det_inv;
-                    res.m21 = (m01 * m20 - m00 * m21) * det_inv;
-                    res.m02 = (m01 * m12 - m02 * m11) * det_inv;
-                    res.m12 = (m02 * m10 - m00 * m12) * det_inv;
-                    res.m22 = (m00 * m11 - m01 * m10) * det_inv;
 
-                    set(res.v);
+                    res.m00 = t00 * det_inv;
+                    res.m11 = t11 * det_inv;
+                    res.m22 = t22 * det_inv;
+                    res.m01 = t10 * det_inv;
+                    res.m10 = t01 * det_inv;
+                    res.m20 = t02 * det_inv;
+                    res.m02 = t20 * det_inv;
+                    res.m12 = t21 * det_inv;
+                    res.m21 = t12 * det_inv;
+
+                    *this = res;
                 }
-
-                return *this;
             }
 
-            SML_NO_DISCARD inline constexpr mat3& negate() noexcept
+            inline constexpr void negate() noexcept
             {
                 m00 = -m00;
                 m10 = -m10;
@@ -462,15 +493,24 @@ namespace sml
                 m02 = -m02;
                 m12 = -m12;
                 m22 = -m22;
+            }
 
-                return *this;
+            SML_NO_DISCARD inline constexpr mat3 negated() const noexcept
+            {
+                mat3 copy(*this);
+                copy.negate();
+
+                return copy;
             }
 
             SML_NO_DISCARD inline constexpr mat3 inverted() const noexcept
             {
-                mat3 c; c.set(const_cast<T*>(v));
-                return c.invert();
+                mat3 copy(*this);
+                copy.invert();
+
+                return copy;
             }
+            
 
             SML_NO_DISCARD inline constexpr T determinant() const noexcept
             {
@@ -527,10 +567,12 @@ namespace sml
 
     // Operators
     template<typename T>
-    constexpr  mat3<T> operator * (mat3<T> left, mat3<T> right) noexcept
+    constexpr  mat3<T> operator * (const mat3<T>& left, const mat3<T>& right) noexcept
     {
-        left *= right;
-        return left;
+        mat3<T> temp = left;
+        temp *= right;
+
+        return temp;
     }
 
     template<typename T>
