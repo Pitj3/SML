@@ -313,25 +313,47 @@ namespace sml
                 {
                     __m128 me = _mm_load_ps(v);
                     __m128 ot = _mm_load_ps(other.v);
-                    __m128 product = _mm_mul_ps(me, ot);
-                    __m128 dp = _mm_hadd_ps(product, product);
+                    __m128 dp = _mm_dp_ps(me, ot, 0x7f);
 
-                    s32 res = _mm_extract_epi32(static_cast<__m128i>(_mm_hadd_ps(dp, dp)), 0);
-
-                    return *reinterpret_cast<f32*>(&(res));
+                    return _mm_cvtss_f32(dp);
                 }
 
                 return (x * other.x) + (y * other.y) + (z * other.z);
             }
 
+            SML_NO_DISCARD inline constexpr T sqrt() const noexcept
+            {
+                if constexpr (std::is_same<T, f32>::value)
+                {
+                    __m128 t = _mm_load_ps(v);
+                    __m128 res = _mm_sqrt_ps(t);
+
+                    _mm128_store_ps(v, res);
+                }
+
+                if constexpr (std::is_same<T, f64>::value)
+                {
+                    __m256 t = _mm_load_pd(v);
+                    __m256 res = _mm_sqrt_pd(t);
+
+                    _mm256_store_pd(v, res);
+                }
+
+                x = sml::sqrt(x);
+                y = sml::sqrt(y);
+                z = sml::sqrt(z);
+
+                return *this;
+            }
+
             SML_NO_DISCARD inline constexpr T length() const noexcept
             {
-                return sml::sqrt((x * x) + (y * y) + (z * z));
+                return sml::sqrt(lengthsquared());
             }
 
             SML_NO_DISCARD inline constexpr T lengthsquared() const noexcept
             {
-                return (x * x) + (y * y) + (z * z);
+                return dot(*this);
             }
 
             inline constexpr void normalize() noexcept
@@ -360,7 +382,7 @@ namespace sml
             SML_NO_DISCARD inline constexpr bool all() const noexcept
             {
                 return x && y && z;
-            } 
+            }
 
             SML_NO_DISCARD inline constexpr bool none() const noexcept
             {
@@ -471,20 +493,14 @@ namespace sml
 
             SML_NO_DISCARD static inline constexpr vec3 lerp(const vec3& a, const vec3& b, T t) noexcept
             {
-                T retX = sml::lerp(a.x, b.x, t);
-                T retY = sml::lerp(a.y, b.y, t);
-                T retZ = sml::lerp(a.z, b.z, t);
-
-                return vec3(retX, retY, retZ);
+                return a + (b - a) * t;
             }
 
             SML_NO_DISCARD static inline constexpr vec3 lerpclamped(const vec3& a, const vec3& b, T t) noexcept
             {
-                T retX = sml::lerpclamped(a.x, b.x, t);
-                T retY = sml::lerpclamped(a.y, b.y, t);
-                T retZ = sml::lerpclamped(a.z, b.z, t);
+                t = sml::clamp01(t);
 
-                return vec3(retX, retY, retZ);
+                return lerp(a, b, t);
             }
 
             SML_NO_DISCARD static inline constexpr vec3 cross(const vec3& left, const vec3& right) noexcept
