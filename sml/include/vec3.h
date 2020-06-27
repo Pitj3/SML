@@ -313,6 +313,7 @@ namespace sml
                 {
                     __m128 me = _mm_loadu_ps(v);
                     __m128 ot = _mm_loadu_ps(other.v);
+
                     __m128 dp = _mm_dp_ps(me, ot, 0x7f);
 
                     return _mm_cvtss_f32(dp);
