@@ -312,7 +312,7 @@ namespace sml
             }
 
             // Operations
-            SML_NO_DISCARD inline constexpr T dot(vec4 other) const noexcept
+            SML_NO_DISCARD inline constexpr T dot(const vec4& other) const noexcept
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
@@ -351,7 +351,7 @@ namespace sml
 
             SML_NO_DISCARD inline constexpr vec4 normalized() const noexcept
             {
-                vec4 copy(v);
+                vec4 copy(const_cast<T*>(v));
                 copy.normalize();
 
                 return copy;

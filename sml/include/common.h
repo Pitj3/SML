@@ -220,10 +220,10 @@ namespace sml
 	template<typename T>
 	static inline constexpr T normalizeAngle(T angle)
 	{
-		while (angle > static_cast<T>(360))
-			angle -= static_cast<T>(360);
 		while (angle < static_cast<T>(0))
 			angle += static_cast<T>(360);
+		while (angle >= static_cast<T>(360))
+			angle -= static_cast<T>(360);
 
 		return angle;
 	}

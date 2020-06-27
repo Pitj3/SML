@@ -43,6 +43,14 @@ namespace sml
                 this->w = w;
             }
 
+            constexpr quat(T* v) noexcept
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    this->v.v[i] = v[i];
+                }
+            }
+
             constexpr quat(const vec3<T>& xyz, T w) noexcept
             {
                 this->xyz = xyz;
@@ -67,7 +75,7 @@ namespace sml
 
             constexpr quat(const quat& other) noexcept
             {
-                set(other.v.v);
+                set(const_cast<T*>(other.v.v));
             }
 
             constexpr quat(quat&& other) noexcept
@@ -88,7 +96,7 @@ namespace sml
                 this->w = w;
             }
 
-            constexpr void set(T v[4]) noexcept
+            constexpr void set(T* v) noexcept
             {
                 this->x = v[0];
                 this->y = v[1];
@@ -107,25 +115,35 @@ namespace sml
                 w = scalar;
             }
 
+            constexpr void set(T scalar, const vec3<T>& xyz)
+            {
+                this->xyz = xyz;
+                w = scalar;
+            }
+
             // Operators
             inline constexpr bool operator == (const quat& other) const noexcept
             {
-                return v.dot(other.v) > static_cast<T>(0.999999);
+                return sml::abs(v.normalized().dot(other.v.normalized())) > static_cast<T>(0.999999);
             }
 
             inline constexpr bool operator != (const quat& other) const noexcept
             {
-                return v.dot(other.v) <= static_cast<T>(0.999999);
+                return sml::abs(v.normalized().dot(other.v.normalized())) <= static_cast<T>(0.999999);
             }
 
             constexpr quat& operator = (const quat& other) noexcept
             {
                 set(other.v);
+
+                return *this;
             }
 
             constexpr quat& operator = (quat&& other) noexcept
             {
                 set(std::move(other.v));
+
+                return *this; 
             }
 
             quat& operator += (const quat& other) noexcept
@@ -135,17 +153,19 @@ namespace sml
             }
 
             quat& operator -= (const quat& other) noexcept
-            {
+            { 
                 v -= other.v;
                 return *this;
             }
 
             quat& operator *= (const quat& other) noexcept
             {
-                alignas(simdalign<T>::value) vec3<T> res = (other.w * xyz) + (w * other.xyz) + vec3<T>::cross(xyz, other.xyz);
+                alignas(simdalign<T>::value) vec3<T> res = (xyz * other.w) + (other.xyz * other.w) + vec3<T>::cross(xyz, other.xyz);
                 T scalar = (w * other.w) - vec3<T>::dot(xyz, other.xyz);
 
                 set(res, scalar);
+
+                return *this;
             }
 
             quat& operator *= (const T other) noexcept
@@ -157,9 +177,9 @@ namespace sml
             // Operations 
             inline constexpr void normalize() noexcept
             {
-                T scale = static_cast<T>(1) / length();
+                T scale = length();
 
-                v *= scale;
+                v /= scale;
             }
 
             SML_NO_DISCARD inline constexpr quat normalized() const noexcept
@@ -193,9 +213,9 @@ namespace sml
                 T lengthSq = lengthsquared();
                 if (lengthSq != static_cast<T>(0))
                 {
-                    T i = static_cast<T>(1) / lengthSq;
-                    xyz *= -i;
-                    w *= i;
+                    T i = lengthSq;
+                    xyz /= -i;
+                    w /= i;
                 }
             }
 
@@ -236,28 +256,28 @@ namespace sml
 
                 if (singularityTest > static_cast<T>(0.4995 * unit))
                 {
-                    res.x = static_cast<T>(2) * sml::atan2(y, x);
-                    res.y = constants::pi / static_cast<T>(2);
-                    res.z = static_cast<T>(0);
+                    res.y = static_cast<T>(2) * sml::atan2(y, x);
+                    res.z = constants::pi / static_cast<T>(2);
+                    res.x = static_cast<T>(0);
 
-                    return normalizeAngles(res * constants::rad2deg);
+                    return normalizeAngles(res * static_cast<T>(constants::rad2deg));
                 }
 
                 if (singularityTest < static_cast<T>(-0.4995 * unit))
                 {
-                    res.x = static_cast<T>(-2) * sml::atan2(y, x);
-                    res.y = -constants::pi / static_cast<T>(2);
-                    res.z = static_cast<T>(0);
+                    res.y = static_cast<T>(-2) * sml::atan2(y, x);
+                    res.z = -constants::pi / static_cast<T>(2);
+                    res.x = static_cast<T>(0);
 
-                    return normalizeAngles(res * constants::rad2deg);
+                    return normalizeAngles(res * static_cast<T>(constants::rad2deg));
                 }
 
                 quat q(x, y, z, w);
-                res.x = sml::atan2(static_cast<T>(2) * q.x * q.w + static_cast<T>(2) * q.y * q.z, static_cast<T>(1) - static_cast<T>(2) * (q.z * q.z + q.w * q.w));
-                res.y = sml::asin(static_cast<T>(2) * (q.x * q.z - q.w * q.y));
-                res.z = sml::atan2(static_cast<T>(2) * q.x * q.y + static_cast<T>(2) * q.z * q.w, static_cast<T>(1) - static_cast<T>(2) * (q.y * q.y + q.z * q.z));
+                res.y = sml::atan2(static_cast<T>(2) * q.x * q.w + static_cast<T>(2) * q.y * q.z, static_cast<T>(1) - static_cast<T>(2) * (q.z * q.z + q.w * q.w));
+                res.z = sml::asin(static_cast<T>(2) * (q.x * q.z - q.w * q.y));
+                res.x = sml::atan2(static_cast<T>(2) * q.x * q.y + static_cast<T>(2) * q.z * q.w, static_cast<T>(1) - static_cast<T>(2) * (q.y * q.y + q.z * q.z));
 
-                return normalizeAngles(res * constants::rad2deg);
+                return normalizeAngles(res * static_cast<T>(constants::rad2deg));
             }
 
             // Statics
@@ -276,29 +296,30 @@ namespace sml
                 return value.inverse();
             }
 
-            SML_NO_DISCARD inline static constexpr quat euler(vec3<T> rotation) noexcept
+            SML_NO_DISCARD inline static constexpr quat euler(const vec3<T>& rotation) noexcept
             {
-                rotation *= constants::deg2rad;
+                vec3<T> copyRotation = rotation;
 
-                T yaw = rotation.x;
-                T pitch = rotation.y;
-                T roll = rotation.z;
-                T rollOver2 = roll * (T)0.5f;
-                T sinRollOver2 = (T)sml::sin((T)rollOver2);
-                T cosRollOver2 = (T)sml::cos((T)rollOver2);
-                T pitchOver2 = pitch * (T)0.5f;
-                T sinPitchOver2 = (T)sml::sin((T)pitchOver2);
-                T cosPitchOver2 = (T)sml::cos((T)pitchOver2);
-                T yawOver2 = yaw * (T)0.5f;
-                T sinYawOver2 = (T)sml::sin((T)yawOver2);
-                T cosYawOver2 = (T)sml::cos((T)yawOver2);
+                copyRotation *= constants::deg2rad;
+
+                T yaw = copyRotation.x;
+                T pitch = copyRotation.y;
+                T roll = copyRotation.z;
+
+                T c1 = sml::cos(yaw / static_cast<T>(2));
+                T c2 = sml::cos(pitch / static_cast<T>(2));
+                T c3 = sml::cos(roll / static_cast<T>(2));
+                
+                T s1 = sml::sin(yaw / static_cast<T>(2));
+                T s2 = sml::sin(pitch / static_cast<T>(2));
+                T s3 = sml::sin(roll / static_cast<T>(2));
 
                 quat result;
 
-                result.x = cosYawOver2 * cosPitchOver2 * cosRollOver2 + sinYawOver2 * sinPitchOver2 * sinRollOver2;
-                result.y = cosYawOver2 * cosPitchOver2 * sinRollOver2 - sinYawOver2 * sinPitchOver2 * cosRollOver2;
-                result.z = cosYawOver2 * sinPitchOver2 * cosRollOver2 + sinYawOver2 * cosPitchOver2 * sinRollOver2;
-                result.w = sinYawOver2 * cosPitchOver2 * cosRollOver2 - cosYawOver2 * sinPitchOver2 * sinRollOver2;
+                result.x = s1 * c2 * c3 + c1 * s2 * s3;
+                result.y = c1 * s2 * c3 - s1 * c2 * s3;
+                result.z = c1 * c2 * s3 + s1 * s2 * c3;
+                result.w = c1 * c2 * c3 - s1 * s2 * s3;
 
                 return result;
             }
