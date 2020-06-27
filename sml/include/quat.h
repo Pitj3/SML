@@ -252,7 +252,7 @@ namespace sml
                 T unit = sqx + sqy + sqz + sqw;
                 T singularityTest = (x * w) - (y * z);
 
-                alignas(simdalign<T>::value) vec3<T> res;
+                vec3<T> res;
 
                 if (singularityTest > static_cast<T>(0.4995 * unit))
                 {
@@ -260,7 +260,9 @@ namespace sml
                     res.z = constants::pi / static_cast<T>(2);
                     res.x = static_cast<T>(0);
 
-                    return normalizeAngles(res * static_cast<T>(constants::rad2deg));
+                    res *= static_cast<T>(constants::rad2deg);
+
+                    return normalizeAngles(res);
                 }
 
                 if (singularityTest < static_cast<T>(-0.4995 * unit))
@@ -269,7 +271,9 @@ namespace sml
                     res.z = -constants::pi / static_cast<T>(2);
                     res.x = static_cast<T>(0);
 
-                    return normalizeAngles(res * static_cast<T>(constants::rad2deg));
+                    res *= static_cast<T>(constants::rad2deg);
+
+                    return normalizeAngles(res);
                 }
 
                 quat q(x, y, z, w);
@@ -277,7 +281,9 @@ namespace sml
                 res.z = sml::asin(static_cast<T>(2) * (q.x * q.z - q.w * q.y));
                 res.x = sml::atan2(static_cast<T>(2) * q.x * q.y + static_cast<T>(2) * q.z * q.w, static_cast<T>(1) - static_cast<T>(2) * (q.y * q.y + q.z * q.z));
 
-                return normalizeAngles(res * static_cast<T>(constants::rad2deg));
+                res *= static_cast<T>(constants::rad2deg);
+
+                return normalizeAngles(res);
             }
 
             // Statics
