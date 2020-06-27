@@ -311,8 +311,8 @@ namespace sml
             {
                 if constexpr (std::is_same<T, f32>::value)
                 {
-                    __m128 me = _mm_load_ps(v);
-                    __m128 ot = _mm_load_ps(other.v);
+                    __m128 me = _mm_loadu_ps(v);
+                    __m128 ot = _mm_loadu_ps(other.v);
                     __m128 dp = _mm_dp_ps(me, ot, 0x7f);
 
                     return _mm_cvtss_f32(dp);
@@ -333,8 +333,8 @@ namespace sml
 
                 if constexpr (std::is_same<T, f64>::value)
                 {
-                    __m256 t = _mm_load_pd(v);
-                    __m256 res = _mm_sqrt_pd(t);
+                    __m256 t = _mm256_load_pd(v);
+                    __m256 res = _mm256_sqrt_pd(t);
 
                     _mm256_store_pd(v, res);
                 }
