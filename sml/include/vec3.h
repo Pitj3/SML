@@ -313,12 +313,9 @@ namespace sml
                 {
                     __m128 me = _mm_load_ps(v);
                     __m128 ot = _mm_load_ps(other.v);
-                    __m128 product = _mm_mul_ps(me, ot);
-                    __m128 dp = _mm_hadd_ps(product, product);
+                    __m128 dp = _mm_dp_ps(me, ot, 0x7f);
 
-                    s32 res = _mm_extract_epi32(static_cast<__m128i>(_mm_hadd_ps(dp, dp)), 0);
-
-                    return *reinterpret_cast<f32*>(&(res));
+                    return _mm_cvtss_f32(dp);
                 }
 
                 return (x * other.x) + (y * other.y) + (z * other.z);
